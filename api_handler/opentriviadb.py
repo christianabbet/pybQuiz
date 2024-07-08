@@ -12,7 +12,7 @@ class OpenTriviaDB(BaseAPIHandler):
     
     KEY_TRIVIA_CAT = "trivia_categories"
     KEY_NAME = "name"
-    KEY_ID = "ID"
+    KEY_ID = "id"
     KEY_CAT = "category"
     KEY_Q_COUNT = "category_question_count"
     KEY_Q_TOTAL_COUNT = "total_question_count"
@@ -57,7 +57,7 @@ class OpenTriviaDB(BaseAPIHandler):
         result = self.slow_request(self.URL_CATEGORY)
         result = result.get(self.KEY_TRIVIA_CAT, {})
         
-        N = len(result[self.KEY_TRIVIA_CAT])
+        N = len(result)
         categories_name = [item.get(self.KEY_NAME, "") for item in result]
         categories_id = [item.get(self.KEY_ID, -1) for item in result]
         categories_difficulty = np.zeros((N, 3))

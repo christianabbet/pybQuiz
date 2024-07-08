@@ -69,7 +69,7 @@ class BaseAPIHandler:
     ) -> None:
         self.verbose = verbose
         self.delay_api = delay_api
-        categories, categories_id, categories_difficulty, categories_type = self.initialize_db()
+        self.categories, self.categories_id, self.categories_type, self.categories_difficulty = self.initialize_db()
     
     def slow_request(self, url: str, params: dict = None):
         """
@@ -100,7 +100,12 @@ class BaseAPIHandler:
             Pretty print
         """
         
-        pprint = 0
+        N = len(self.categories)
+        str_cat = ["Catergory: {} ({})".format(self.categories[i], self.categories_id[i]) for i in range(N)]        
+        str_diff = ["\teasy: {:.0f}, medium: {:.0f}, hard: {:.0f}".format(e, m, h) for e, m, h in self.categories_difficulty]
+        str_type = ["\ttext: {:.0f}, image: {:.0f}".format(t, i) for t, i in self.categories_type]
+        pprint = "\n".join("\n".join([c, d, t]) for c, d, t in zip(str_cat, str_diff, str_type))
+        
         return pprint
 
     
