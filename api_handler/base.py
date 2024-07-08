@@ -4,29 +4,7 @@ from typing import Union, Tuple
 import time
 import requests
 import json
-
-
-def slow_request(url: str, delay: float = 0.5):
-    """
-    Send URL get request after a delay in seconds.
-
-    Parameters
-    ----------
-    url : str
-        URL get query to send.
-    delay: float, optional
-        Delay before sending request. Deafult value is 0.5 seconds.
-
-    Returns
-    -------
-    dict
-        Parsed result to URL query.
-    """
-    # Wait to not query too many times in a row
-    time.sleep(5.5) 
-    result = requests.get(url)
-    return json.loads(result.text)
-
+import numpy as np
 
 class Questions:
 
@@ -84,13 +62,66 @@ class Questions:
     
 class BaseAPIHandler:
    
-    def __init__(self) -> None:
-        pass
+    def __init__(
+        self,
+        verbose: bool = False,
+        delay_api: float = 5.0,
+    ) -> None:
+        self.verbose = verbose
+        self.delay_api = delay_api
+        categories, categories_id, categories_difficulty, categories_type = self.initialize_db()
+    
+    def slow_request(self, url: str, params: dict = None):
+        """
+        Send URL get request after a delay in seconds.
+
+        Parameters
+        ----------
+        url : str
+            URL get query to send.
+
+        Returns
+        -------
+        dict
+            Parsed result to URL query.
+        """
+        # Wait to not query too many times in a row
+        time.sleep(self.delay_api) 
+        result = requests.get(url=url, params=params)
+        return json.loads(result.text)
+    
+    def __repr__(self):
+        """
+        Create a pretty print for DB
+
+        Returns
+        -------
+        pprint: str
+            Pretty print
+        """
+        
+        pprint = 0
+        return pprint
+
     
     @abstractmethod 
-    def get_categories(self, return_ids: bool = False) -> Union[list, Tuple[list, list]]:
+    def initialize_db(self) -> Union[List[str], List[int], np.ndarray, np.ndarray]:
+        """
+        Initialize database infromation
+
+        Returns
+        -------
+        categories : List[int]
+            List of N categories as strings.
+        categories_id : List[int]
+            List of N categories as ints.
+        categories_difficulty : np.ndarray
+            Array of N categories and 3 difficulty level (easy, medium, hard)
+        categories_type : np.ndarray
+            Array of N categories types
+        """
         raise NotImplementedError
-    
+
     @abstractmethod 
     def get_question(self, category_id: int = None) -> Questions:
         raise NotImplementedError
