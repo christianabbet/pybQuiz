@@ -71,7 +71,7 @@ class BaseAPIHandler:
         self,
         verbose: bool = False,
         delay_api: float = 5.0,
-        force_reload: bool = False,
+        clear_cache: bool = False,
     ) -> None:
         # Laod variables
         self.force_reload = False
@@ -83,7 +83,7 @@ class BaseAPIHandler:
         os.makedirs(self.cache_dir, exist_ok=True)
         
         # Check if already exists:
-        if not os.path.exists(self.cache_file) or force_reload:
+        if not os.path.exists(self.cache_file) or clear_cache:
             # Reload from web (update)
             cats, cats_id, cats_type, cats_diff = self.initialize_db()
             with open(self.cache_file, 'wb') as f:

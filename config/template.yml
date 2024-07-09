@@ -4,7 +4,10 @@
 BaseInfo:
   # Delay to use in seconds between API queries
   delay_api: 5
+  # Extended verbose terminal output
   verbose: True
+  # If True, update stats about remote DB (slow)
+  clear_cache: False
 
 # List of rounds
 Rounds:

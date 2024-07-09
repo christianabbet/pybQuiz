@@ -23,6 +23,7 @@ class TheTriviaAPI(BaseAPIHandler):
         self,
         delay_api: int = 5,
         verbose: bool = False,
+        clear_cache: bool = False,
     ) -> None:
         """
         Create API handler to https://the-trivia-api.com
@@ -32,7 +33,7 @@ class TheTriviaAPI(BaseAPIHandler):
         delay_api : int, optional
             Default time between queries to API in seconds. By default 5 seconds.
         """
-        super().__init__(verbose=verbose, delay_api=delay_api)
+        super().__init__(verbose=verbose, delay_api=delay_api, clear_cache=clear_cache)
                 
     def initialize_db(self) -> Union[List[str], List[int], np.ndarray, np.ndarray]:
         """
