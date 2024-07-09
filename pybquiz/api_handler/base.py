@@ -64,7 +64,7 @@ class Questions:
         self.difficulty = difficulty
         self.type = type    
            
-    
+
 class BaseAPIHandler:
    
     def __init__(
@@ -169,3 +169,7 @@ class BaseAPIHandler:
     @abstractmethod 
     def get_question(self, category_id: int = None) -> Questions:
         raise NotImplementedError
+    
+    
+
+           

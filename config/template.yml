@@ -10,14 +10,25 @@ BaseInfo:
 Rounds:
 -
   # Title of the round
-  title: "Round 1"
+  title: "Round 1 - Video Games"
   # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
-  library: "opentriviadb"
+  api: "opentriviadb"
   # ID of the theme, see lookup table on top to know availability
-  theme: 13
+  theme_id: 15
   # Difficulty level questions
-  difficulty: [3, 5, 1]  # [num. of easy, num. of medium, num. of hard]
+  difficulty: [3, 3, 4]  # [num. of easy, num. of medium, num. of hard]
   # Type of questions. One of "text", or "image".
   type: "text"
-
+-
+  # Title of the round
+  title: "Round 2 - Geography"
+  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  api: "thetriviaapi"
+  # ID of the theme, see lookup table on top to know availability
+  theme_id: 4
+  # Difficulty level questions
+  difficulty: [2, 4, 4]  # [num. of easy, num. of medium, num. of hard]
+  # Type of questions. One of "text", or "image".
+  type: "image"
+  
 ...
