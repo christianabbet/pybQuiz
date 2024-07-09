@@ -10,8 +10,10 @@ conda activate pybquiz
 pip install numpy tqdm py-markdown-table
 ```
 
+Create you quiz
+
 ```
-# Run quoz creating beased on given config file
+# Run quiz creating based on given config file
 python run_create_quiz.py --cfg="config/template.yml"
 ```
 

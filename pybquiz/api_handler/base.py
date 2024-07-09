@@ -73,6 +73,7 @@ class BaseAPIHandler:
         delay_api: float = 5.0,
         clear_cache: bool = False,
     ) -> None:
+        
         # Laod variables
         self.force_reload = False
         self.verbose = verbose
