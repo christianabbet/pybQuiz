@@ -1,0 +1,25 @@
+---
+
+# Base information for the API
+BaseInfo:
+  # Delay to use in seconds between API queries
+  delay_api: 5
+  verbose: True
+
+# List of rounds
+Rounds:
+-
+  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  library: "opentriviadb"
+  # Title of the round
+  title: "Round 1"
+  # ID of the theme, see lookup table on top to know availability
+  theme: 13
+  # Number of question for the round
+  n_question: 10
+  # Diffivulty level. On of "easy", "medium", "hard", or "random"
+  difficulty: "medium"
+  # Type of questions. One of "text", or "image".
+  type: "text"
+
+...
