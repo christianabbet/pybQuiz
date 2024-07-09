@@ -9,6 +9,13 @@ conda create env -n pybquiz
 conda activate pybquiz
 pip install numpy tqdm py-markdown-table
 ```
+
+```
+# Run quoz creating beased on given config file
+python run_create_quiz.py --cfg="config/template.yml"
+```
+
+
 # APIs Stats
 
 [Open Trivia DB](https://opentdb.com/)
@@ -54,3 +61,8 @@ pip install numpy tqdm py-markdown-table
 | 7|      science      | 118|  601 | 555|1271|  3  |
 | 8|society_and_culture| 155|  604 | 495|1242|  12 |
 | 9| sport_and_leisure | 52 |  216 | 309| 557|  20 |
+
+
+# Custom config file
+
+TODO
