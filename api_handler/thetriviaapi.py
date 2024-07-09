@@ -57,7 +57,7 @@ class TheTriviaAPI(BaseAPIHandler):
         
         # Get all categories
         N = len(result)
-        categories_name = list(result.keys())
+        categories_name = sorted(result.keys())
         categories_id = np.arange(len(categories_name))
         categories_difficulty = np.zeros((N, 3))
         categories_type= np.zeros((N, 2))

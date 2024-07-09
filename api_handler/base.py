@@ -6,7 +6,10 @@ import requests
 import json
 import numpy as np
 from py_markdown_table.markdown_table import markdown_table
+import pickle
+import os
 
+CACHE_FOLDER = ".cache"
 
 class Questions:
 
@@ -68,11 +71,35 @@ class BaseAPIHandler:
         self,
         verbose: bool = False,
         delay_api: float = 5.0,
+        force_reload: bool = False,
     ) -> None:
+        # Laod variables
+        self.force_reload = False
         self.verbose = verbose
         self.delay_api = delay_api
-        self.categories, self.categories_id, self.categories_type, self.categories_difficulty = self.initialize_db()
+        # Define cache file
+        self.cache_dir = os.path.join(os.path.dirname(__file__), ".cache")
+        self.cache_file = os.path.join(self.cache_dir, self.__class__.__name__ + ".npy")
+        os.makedirs(self.cache_dir, exist_ok=True)
+        
+        # Check if already exists:
+        if not os.path.exists(self.cache_file) or force_reload:
+            # Reload from web (update)
+            cats, cats_id, cats_type, cats_diff = self.initialize_db()
+            with open(self.cache_file, 'wb') as f:
+                np.save(f, cats)
+                np.save(f, cats_id)
+                np.save(f, cats_type)
+                np.save(f, cats_diff)                
+
+        # Relaod from cache
+        with open(self.cache_file, 'rb') as f:
+            self.categories = np.load(f)
+            self.categories_id = np.load(f)
+            self.categories_type = np.load(f)
+            self.categories_difficulty = np.load(f)
     
+        
     def slow_request(self, url: str, params: dict = None):
         """
         Send URL get request after a delay in seconds.
@@ -117,7 +144,8 @@ class BaseAPIHandler:
             })
         
         markdown = markdown_table(data).set_params(row_sep = 'markdown').get_markdown()
-        return markdown
+        pprint = "{}\n\n{}".format(self.__class__.__name__, markdown)
+        return pprint
 
     
     @abstractmethod 
