@@ -5,6 +5,8 @@ import time
 import requests
 import json
 import numpy as np
+from py_markdown_table.markdown_table import markdown_table
+
 
 class Questions:
 
@@ -100,13 +102,22 @@ class BaseAPIHandler:
             Pretty print
         """
         
+        data = []
         N = len(self.categories)
-        str_cat = ["Catergory: {} ({})".format(self.categories[i], self.categories_id[i]) for i in range(N)]        
-        str_diff = ["\teasy: {:.0f}, medium: {:.0f}, hard: {:.0f}".format(e, m, h) for e, m, h in self.categories_difficulty]
-        str_type = ["\ttext: {:.0f}, image: {:.0f}".format(t, i) for t, i in self.categories_type]
-        pprint = "\n".join("\n".join([c, d, t]) for c, d, t in zip(str_cat, str_diff, str_type))
+        # Create table
+        for i in range(N):
+            data.append({
+                "ID": self.categories_id[i],
+                "Catgory": self.categories[i],
+                "Easy": int(self.categories_difficulty[i, 0]),
+                "Medium": int(self.categories_difficulty[i, 1]),
+                "Hard": int(self.categories_difficulty[i, 2]),
+                "Text": int(self.categories_type[i, 0]),
+                "Image": int(self.categories_type[i, 1]),
+            })
         
-        return pprint
+        markdown = markdown_table(data).set_params(row_sep = 'markdown').get_markdown()
+        return markdown
 
     
     @abstractmethod 
