@@ -9,16 +9,14 @@ BaseInfo:
 # List of rounds
 Rounds:
 -
-  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
-  library: "opentriviadb"
   # Title of the round
   title: "Round 1"
+  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  library: "opentriviadb"
   # ID of the theme, see lookup table on top to know availability
   theme: 13
-  # Number of question for the round
-  n_question: 10
-  # Diffivulty level. On of "easy", "medium", "hard", or "random"
-  difficulty: "medium"
+  # Difficulty level questions
+  difficulty: [3, 5, 1]  # [num. of easy, num. of medium, num. of hard]
   # Type of questions. One of "text", or "image".
   type: "text"
 
