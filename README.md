@@ -44,13 +44,13 @@ pip install numpy tqdm py-markdown-table
 
 |ID|      Catgory      |Easy|Medium|Hard|Text|Image|
 |--|-------------------|----|------|----|----|-----|
-| 0| general_knowledge | 51 |  200 | 240| 393|  98 |
-| 1|society_and_culture| 155|  604 | 495|1242|  12 |
-| 2|      science      | 118|  601 | 555|1271|  3  |
-| 3| sport_and_leisure | 52 |  216 | 309| 557|  20 |
-| 4|arts_and_literature| 84 |  375 | 708|1160|  7  |
-| 5|     geography     | 256|  764 |1019|1626| 413 |
-| 6|   food_and_drink  | 86 |  392 | 327| 759|  46 |
-| 7|      history      | 55 |  475 | 499| 964|  65 |
-| 8|       music       | 171|  495 | 741|1217| 190 |
-| 9|    film_and_tv    | 157|  709 | 892|1466| 292 |
+| 0|arts_and_literature| 84 |  375 | 708|1160|  7  |
+| 1|    film_and_tv    | 157|  709 | 892|1466| 292 |
+| 2|   food_and_drink  | 86 |  392 | 327| 759|  46 |
+| 3| general_knowledge | 51 |  200 | 240| 393|  98 |
+| 4|     geography     | 256|  764 |1019|1626| 413 |
+| 5|      history      | 55 |  475 | 499| 964|  65 |
+| 6|       music       | 171|  495 | 741|1217| 190 |
+| 7|      science      | 118|  601 | 555|1271|  3  |
+| 8|society_and_culture| 155|  604 | 495|1242|  12 |
+| 9| sport_and_leisure | 52 |  216 | 309| 557|  20 |
