@@ -11,8 +11,13 @@ def main(args):
         raise FileNotFoundError
         
     # Create quiz
-    PybQuiz.from_yaml(yaml_path=cfg_path)
+    quiz = PybQuiz.from_yaml(yaml_path=cfg_path)
+    # Create output directory
+    os.makedirs(args.dirout, exist_ok=True)
+    # Save to json
+    quiz.to_json(filename=os.path.join(args.dirout, "{}.json".format(args.name)))
     
+        
 
 if __name__ == '__main__':
     
@@ -21,6 +26,8 @@ if __name__ == '__main__':
         prog='pybQuiz Creator',
         description='Create a pub quiz',
     )
+    parser.add_argument('--name', default='myquiz')
+    parser.add_argument('--dirout', default='output')
     parser.add_argument('--cfg', default='config/template.yml')
     args = parser.parse_args()
     

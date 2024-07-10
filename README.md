@@ -51,7 +51,7 @@ python run_create_quiz.py --cfg="config/template.yml"
 
 [The Trivia API](https://the-trivia-api.com/)
 
-|ID|      Catgory      |Easy|Medium|Hard|Text|Image|
+|ID|      Catgory      |Easy|Medium|Hard|Text|Image*|
 |--|-------------------|----|------|----|----|-----|
 | 0|arts_and_literature| 84 |  375 | 708|1160|  7  |
 | 1|    film_and_tv    | 157|  709 | 892|1466| 292 |
@@ -64,6 +64,7 @@ python run_create_quiz.py --cfg="config/template.yml"
 | 8|society_and_culture| 155|  604 | 495|1242|  12 |
 | 9| sport_and_leisure | 52 |  216 | 309| 557|  20 |
 
+* Only available for premium users (not free)
 
 # Custom config file
 
