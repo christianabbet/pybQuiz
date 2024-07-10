@@ -62,5 +62,4 @@ class Questions:
         self.type = type    
 
     def to_json(self):
-             
-        return {}
+        return self.__dict__

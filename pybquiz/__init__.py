@@ -1,6 +1,7 @@
 from pybquiz.api_handler import create_handler
 from typing import List
 import yaml
+import json
 
     
 class Round():
@@ -87,14 +88,19 @@ class PybQuiz:
         # Return rounds
         return rounds
         
-    def to_json(self, filename: str):
+    def to_json(self, file: str):
         # Dump all questions to given file
-        json = {
+        json_data = {
             "title": self.title,
-            "rounds": [r for r in self.rounds]
+            "rounds": [r.to_json() for r in self.rounds]
         }
         # Save file
-        print("test")
+        with open(file, "w") as f:
+            json.dump(json_data, f, indent=4, sort_keys=True)
+
+        # Display result
+        if self.verbose:
+            print("Saved to {}".format(file))
         
     @staticmethod
     def from_yaml(yaml_path: dict):

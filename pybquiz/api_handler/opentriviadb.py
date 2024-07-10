@@ -132,7 +132,7 @@ class OpenTriviaDB(BaseAPIHandler):
                 library=self.__class__.__name__.lower(), 
                 category=self.categories[cat_id_lut],
                 category_id=category_id,
-                uuid=hashlib.sha256(q_text.encode('ascii')).hexdigest(),
+                uuid=hashlib.md5(q_text.encode('ascii')).hexdigest(),
                 difficulty=difficulty,
                 type="text",
             )

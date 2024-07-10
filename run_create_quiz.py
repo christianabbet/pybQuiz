@@ -15,8 +15,8 @@ def main(args):
     # Create output directory
     os.makedirs(args.dirout, exist_ok=True)
     # Save to json
-    quiz.to_json(filename=os.path.join(args.dirout, "{}.json".format(args.name)))
-    
+    outfile_json = os.path.join(args.dirout, "{}.json".format(args.name))
+    quiz.to_json(file=outfile_json)    
         
 
 if __name__ == '__main__':
