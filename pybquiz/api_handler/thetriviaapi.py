@@ -1,13 +1,14 @@
 from pybquiz.api_handler.base import BaseAPIHandler
+from pybquiz.elements import Questions
 from typing import Union, List
 import numpy as np
 from tqdm import tqdm
 
 
-
 class TheTriviaAPI(BaseAPIHandler):
 
     URL_CATEGORY = "https://the-trivia-api.com/v2/metadata"
+    URL_QUESTION = "https://the-trivia-api.com/v2/questions"
     
     KEY_BY_CAT = "byCategory"
     KEY_BY_DIFF = "byDifficulty"
@@ -18,6 +19,29 @@ class TheTriviaAPI(BaseAPIHandler):
     KEY_DIFF_EASY = "easy"
     KEY_DIFF_MEDIUM = "medium"
     KEY_DIFF_HARD = "hard"
+    
+    # Query for request
+    KEY_R_LIMIT = "limit"
+    KEY_R_CAT = "categories"
+    KEY_R_DIFF = "difficulties"  
+    KEY_R_TYPES = "types"
+    KEY_R_LANG = "language"
+    KEY_R_ENGLISH = "en"
+    KEY_R_ID = "id"
+    KEY_R_QUESTION = "question"
+    KEY_R_ERROR = "error"
+    KEY_R_CORRECT = "correctAnswer"
+    KEY_R_INCORRECT = "incorrectAnswers"
+    
+    LUT_DIFFICULTY = {
+        0: "easy",
+        1: "medium",
+        2: "hard",
+    }
+    LUT_TYPE = {
+        "text": "text_choice",
+        "image": "image_choice",
+    }
         
     def __init__(
         self,
@@ -82,4 +106,38 @@ class TheTriviaAPI(BaseAPIHandler):
             
         # Retreive categories
         return categories_name, categories_id, categories_type, categories_difficulty
- 
+    
+    def get_questions(self, n: int, category_id: int = None, difficulty: int = None, type: str = None) -> List[Questions]:
+
+        # Create query dict (if None then consider any)
+        params = {self.KEY_R_LIMIT: n}
+        # Check category
+        if category_id is not None:
+            params[self.KEY_R_CAT] = self.categories[category_id]
+        # Check category
+        if difficulty is not None:
+            params[self.KEY_R_DIFF] = self.LUT_DIFFICULTY[difficulty]
+        if type is not None:
+            params[self.KEY_R_TYPES] = self.LUT_TYPE[type]
+        # Send query
+        result = self.slow_request(url=self.URL_QUESTION, params=params)     
+
+        # Parse results as questions
+        questions = []
+        for raw_question in result:
+            # Parse question
+            q = Questions(
+                question=raw_question.get(self.KEY_R_QUESTION, self.KEY_R_ERROR),
+                correct_answer=raw_question.get(self.KEY_R_CORRECT, self.KEY_R_ERROR),
+                incorrect_answers=raw_question.get(self.KEY_R_INCORRECT, []),
+                library=self.__class__.__name__.lower(), 
+                category=self.categories[category_id],
+                category_id=category_id,
+                uuid=raw_question.get(self.KEY_R_ID, ""),
+                difficulty=difficulty,
+                type=type,
+            )
+            
+            questions.append(q)
+            
+        return questions

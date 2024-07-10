@@ -2,6 +2,8 @@ from pybquiz.api_handler.base import BaseAPIHandler
 from typing import Union, List
 import numpy as np
 from tqdm import tqdm
+from pybquiz.elements import Questions
+import hashlib
 
 
 class OpenTriviaDB(BaseAPIHandler):
@@ -9,17 +11,38 @@ class OpenTriviaDB(BaseAPIHandler):
     # URLS
     URL_CATEGORY = "https://opentdb.com/api_category.php"
     URL_CATEGORY_COUNT = "https://opentdb.com/api_count.php"
+    URL_QUESTION = "https://opentdb.com/api.php"
     
     KEY_TRIVIA_CAT = "trivia_categories"
     KEY_NAME = "name"
     KEY_ID = "id"
     KEY_CAT = "category"
+    KEY_RESULTS = "results"
+    KEY_DIFFICULTY = "difficulty"  
+    KEY_AMOUNT = "amount"      
+
+    # Keys for categories and counts
     KEY_Q_COUNT = "category_question_count"
     KEY_Q_TOTAL_COUNT = "total_question_count"
     KEY_Q_EASY_COUNT = "total_easy_question_count"
     KEY_Q_MEDIUM_COUNT = "total_medium_question_count"
     KEY_Q_HARD_COUNT = "total_hard_question_count"            
-            
+           
+    # Key for quesiton requests
+    KEY_R_TYPE = "type"
+    KEY_R_ERROR = "error"
+    KEY_R_DIFF = "difficulty"
+    KEY_R_CAT = "category"
+    KEY_R_QUESTION = "question"
+    KEY_R_CORRECT = "correct_answer"
+    KEY_R_INCORRECT = "incorrect_answers"
+                
+    LUT_DIFFICULTY = {
+        0: "easy",
+        1: "medium",
+        2: "hard",
+    }
+    
     def __init__(
         self,
         delay_api: int = 5,
@@ -81,3 +104,38 @@ class OpenTriviaDB(BaseAPIHandler):
 
         # Retreive categories
         return categories_name, categories_id, categories_type, categories_difficulty
+
+    def get_questions(self, n: int, category_id: int = None, difficulty: int = None, type: str = None) -> List[Questions]:
+
+        # Create query dict (if None then consider any)
+        params = {self.KEY_AMOUNT: n}
+        # Check category
+        if category_id is not None:
+            params[self.KEY_CAT] = category_id
+        # Check category
+        if difficulty is not None:
+            params[self.KEY_DIFFICULTY] = self.LUT_DIFFICULTY[difficulty]
+        
+        # Send query
+        result = self.slow_request(url=self.URL_QUESTION, params=params)
+        
+        # Parse results as questions
+        questions = []
+        cat_id_lut = np.argmax(self.categories_id == category_id)
+        for raw_question in result.get(self.KEY_RESULTS, []):
+            # Parse question
+            q_text = raw_question.get(self.KEY_R_QUESTION, self.KEY_R_ERROR)
+            q = Questions(
+                question=q_text,
+                correct_answer=raw_question.get(self.KEY_R_CORRECT, self.KEY_R_ERROR),
+                incorrect_answers=raw_question.get(self.KEY_R_INCORRECT, []),
+                library=self.__class__.__name__.lower(), 
+                category=self.categories[cat_id_lut],
+                category_id=category_id,
+                uuid=hashlib.sha256(q_text.encode('ascii')).hexdigest(),
+                difficulty=difficulty,
+                type="text",
+            )
+            questions.append(q)
+            
+        return questions

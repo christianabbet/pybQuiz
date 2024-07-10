@@ -2,6 +2,8 @@
 
 # Base information for the API
 BaseInfo:
+  # Quiz title
+  title: "Amazing Pyb Quiz"
   # Delay to use in seconds between API queries
   delay_api: 5
   # Extended verbose terminal output
@@ -24,14 +26,13 @@ Rounds:
   type: "text"
 -
   # Title of the round
-  title: "Round 2 - Geography"
+  title: "Round 2 - Science"
   # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
   api: "thetriviaapi"
   # ID of the theme, see lookup table on top to know availability
-  theme_id: 4
+  theme_id: 7
   # Difficulty level questions
-  difficulty: [2, 4, 4]  # [num. of easy, num. of medium, num. of hard]
+  difficulty: [2, 2, 6]  # [num. of easy, num. of medium, num. of hard]
   # Type of questions. One of "text", or "image".
-  type: "image"
-  
+  type: "text"
 ...
