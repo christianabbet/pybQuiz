@@ -2,6 +2,7 @@ from pybquiz.api_handler import create_handler
 from typing import List
 import yaml
 import json
+import os
 
     
 class Round():
@@ -13,6 +14,7 @@ class Round():
         theme_id: int,
         difficulty: List[int] = None,
         type: str = None,
+        token: str = None,
         verbose: bool = False,
         delay_api: float = 5.0,
         clear_cache: bool = False,    
@@ -23,10 +25,11 @@ class Round():
         self.theme_id = theme_id
         self.difficulty = difficulty
         self.type = type 
+        self.token = token
         self.api = api
         
         # Create pybquiz from config file
-        self.api = create_handler(name=api, delay_api=delay_api, verbose=verbose, clear_cache=clear_cache)
+        self.api = create_handler(name=api, delay_api=delay_api, token=token, verbose=verbose, clear_cache=clear_cache)
 
         self.questions = []
         for i, n in enumerate(self.difficulty):
@@ -53,11 +56,13 @@ class PybQuiz:
         delay_api: float,
         cfg_rounds: dict,
         clear_cache: bool = False,
+        tokens: dict = None,
         verbose: bool = False,
     ):
     
         self.title = title
-        self.verbose = verbose        
+        self.verbose = verbose  
+        self.tokens = tokens      
         self.rounds = self._create_rounds(cfg_rounds=cfg_rounds, delay_api=delay_api, clear_cache=clear_cache)
         
     def _create_rounds(self, cfg_rounds: dict, delay_api: float, clear_cache: float):
@@ -74,6 +79,9 @@ class PybQuiz:
             
             # Update dict
             cfg_round.update({"verbose": self.verbose, "delay_api": delay_api, "clear_cache": clear_cache})
+            
+            # Update API token
+            cfg_round["token"] = self.tokens.get(cfg_round["api"], None)
             
             # Display current info
             if self.verbose:
@@ -103,26 +111,35 @@ class PybQuiz:
             print("Saved to {}".format(file))
         
     @staticmethod
-    def from_yaml(yaml_path: dict):
+    def from_yaml(yaml_path: dict, yaml_token: dict = None):
+        
+        # Default tokens empty
+        data_token = {}
         
         # Parse input file
         with open(yaml_path) as stream:
-            data = yaml.safe_load(stream)
+            data_cfg = yaml.safe_load(stream)
+            
+        # Check if file exists
+        if os.path.exists(yaml_token):
+            with open(yaml_token) as stream:
+                data_token = yaml.safe_load(stream)
         
         # Base infos
-        cfg_base = data.get("BaseInfo", {})
+        cfg_base = data_cfg.get("BaseInfo", {})
         delay_api = cfg_base.get("delay_api", 5.)
         title = cfg_base.get("title", "")
         verbose = cfg_base.get("verbose", False) 
         clear_cache = cfg_base.get("clear_cache", False) 
-        cfg_rounds = data.get("Rounds", [])
-
+        cfg_rounds = data_cfg.get("Rounds", [])
+        
         # Create quiz
         quiz = PybQuiz(
             title = title,
             delay_api = delay_api,
             cfg_rounds=cfg_rounds, 
             clear_cache=clear_cache,
+            tokens=data_token,
             verbose=verbose
         )
         return quiz

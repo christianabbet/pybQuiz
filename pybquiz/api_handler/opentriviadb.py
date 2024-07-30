@@ -19,6 +19,7 @@ class OpenTriviaDB(BaseAPIHandler):
     KEY_CAT = "category"
     KEY_RESULTS = "results"
     KEY_DIFFICULTY = "difficulty"  
+    KEY_TOKEN = "token"  
     KEY_AMOUNT = "amount"      
 
     # Keys for categories and counts
@@ -48,6 +49,7 @@ class OpenTriviaDB(BaseAPIHandler):
         delay_api: int = 5,
         verbose: bool = False,
         clear_cache: bool = False,
+        token: str = None,
     ) -> None:
         """
         
@@ -59,7 +61,7 @@ class OpenTriviaDB(BaseAPIHandler):
             Default time between queries to API in seconds. By default 5 seconds.
         """
         super().__init__(verbose=verbose, delay_api=delay_api, clear_cache=clear_cache)
-        
+        self.token = token
                 
     def initialize_db(self) -> Union[List[str], List[int], np.ndarray, np.ndarray]:
         """
@@ -115,7 +117,10 @@ class OpenTriviaDB(BaseAPIHandler):
         # Check category
         if difficulty is not None:
             params[self.KEY_DIFFICULTY] = self.LUT_DIFFICULTY[difficulty]
-        
+        # Check session token
+        if self.token is not None:
+            params[self.KEY_TOKEN] = self.token
+            
         # Send query
         result = self.slow_request(url=self.URL_QUESTION, params=params)
         

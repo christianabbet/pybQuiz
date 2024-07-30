@@ -35,4 +35,15 @@ Rounds:
   difficulty: [2, 2, 6]  # [num. of easy, num. of medium, num. of hard]
   # Type of questions. One of "text", or "image".
   type: "text"
+-
+  # Title of the round
+  title: "Round 3 - Geography"
+  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  api: "thetriviaapi"
+  # ID of the theme, see lookup table on top to know availability
+  theme_id: 4
+  # Difficulty level questions
+  difficulty: [2, 2, 6]  # [num. of easy, num. of medium, num. of hard]
+  # Type of questions. One of "text", or "image".
+  type: "image"
 ...

@@ -4,6 +4,7 @@
 ### Others ###
 
 output/*
+config/apitoken.yml
 
 ### Linux ###
 *~

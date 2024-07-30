@@ -9,6 +9,7 @@ from py_markdown_table.markdown_table import markdown_table
 import pickle
 import os
 from pybquiz.elements import Questions
+import urllib3
 
 CACHE_FOLDER = ".cache"
 
@@ -48,7 +49,7 @@ class BaseAPIHandler:
             self.categories_difficulty = np.load(f)
     
         
-    def slow_request(self, url: str, params: dict = None):
+    def slow_request(self, url: str, header: dict = None, params: dict = None):
         """
         Send URL get request after a delay in seconds.
 
@@ -68,8 +69,18 @@ class BaseAPIHandler:
         if self.verbose:
             print("Send request url: {}, key: {}".format(url, params))
             
-        result = requests.get(url=url, params=params)
-        return json.loads(result.text)
+        # Build request
+        result = urllib3.request(
+            method="GET", 
+            url=url,
+            headers=header,
+            fields=params, #  Add custom form fields
+        )
+        
+        # Old method
+        # result = requests.get(url=url, params=params)
+        
+        return json.loads(result.data)
     
     def __repr__(self):
         """

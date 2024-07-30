@@ -19,6 +19,7 @@ class TheTriviaAPI(BaseAPIHandler):
     KEY_DIFF_EASY = "easy"
     KEY_DIFF_MEDIUM = "medium"
     KEY_DIFF_HARD = "hard"
+    KEY_TOKEN = "X-API-Key"
     
     # Query for request
     KEY_R_LIMIT = "limit"
@@ -46,6 +47,7 @@ class TheTriviaAPI(BaseAPIHandler):
     def __init__(
         self,
         delay_api: int = 5,
+        token: str = None,
         verbose: bool = False,
         clear_cache: bool = False,
     ) -> None:
@@ -58,6 +60,7 @@ class TheTriviaAPI(BaseAPIHandler):
             Default time between queries to API in seconds. By default 5 seconds.
         """
         super().__init__(verbose=verbose, delay_api=delay_api, clear_cache=clear_cache)
+        self.token = token
                 
     def initialize_db(self) -> Union[List[str], List[int], np.ndarray, np.ndarray]:
         """
@@ -111,16 +114,21 @@ class TheTriviaAPI(BaseAPIHandler):
 
         # Create query dict (if None then consider any)
         params = {self.KEY_R_LIMIT: n}
+        header = {}
+        
         # Check category
         if category_id is not None:
             params[self.KEY_R_CAT] = self.categories[category_id]
-        # Check category
         if difficulty is not None:
             params[self.KEY_R_DIFF] = self.LUT_DIFFICULTY[difficulty]
         if type is not None:
             params[self.KEY_R_TYPES] = self.LUT_TYPE[type]
+        # CHeck API token
+        if self.token is not None:
+            header[self.KEY_TOKEN] = self.token
+            
         # Send query
-        result = self.slow_request(url=self.URL_QUESTION, params=params)     
+        result = self.slow_request(url=self.URL_QUESTION, header=header, params=params)     
 
         # Parse results as questions
         questions = []
