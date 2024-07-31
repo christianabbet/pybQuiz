@@ -10,6 +10,9 @@ import pickle
 import os
 from pybquiz.elements import Questions
 import urllib3
+import http.client
+from urllib.parse import urlparse, urlencode
+
 
 CACHE_FOLDER = ".cache"
 
@@ -49,7 +52,7 @@ class BaseAPIHandler:
             self.categories_difficulty = np.load(f)
     
         
-    def slow_request(self, url: str, header: dict = None, params: dict = None):
+    def slow_request_urllib3(self, url: str, header: dict = None, params: dict = None, method="GET"):
         """
         Send URL get request after a delay in seconds.
 
@@ -71,16 +74,43 @@ class BaseAPIHandler:
             
         # Build request
         result = urllib3.request(
-            method="GET", 
+            method=method, 
             url=url,
             headers=header,
             fields=params, #  Add custom form fields
         )
         
-        # Old method
-        # result = requests.get(url=url, params=params)
-        
         return json.loads(result.data)
+        
+    def slow_request_httpclient(self, url: str, header: dict = None, params: dict = None, method="GET"):
+        """
+        Send URL get request after a delay in seconds.
+
+        Parameters
+        ----------
+        url : str
+            URL get query to send.
+
+        Returns
+        -------
+        dict
+            Parsed result to URL query.
+        """
+        # Wait to not query too many times in a row            
+        time.sleep(self.delay_api) 
+        
+        if self.verbose:
+            print("Send request url: {}, key: {}".format(url, params))
+            
+        # Parse url
+        urlsegments = urlparse(url)
+
+        conn = http.client.HTTPSConnection(urlsegments.netloc)
+        conn.request(method, "{}?{}".format(urlsegments.path, urlencode(params)), '', header)
+        res = conn.getresponse()
+        data = json.loads(res.read())
+        
+        return data
     
     def __repr__(self):
         """

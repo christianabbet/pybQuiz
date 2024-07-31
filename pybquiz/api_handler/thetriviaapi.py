@@ -20,6 +20,7 @@ class TheTriviaAPI(BaseAPIHandler):
     KEY_DIFF_MEDIUM = "medium"
     KEY_DIFF_HARD = "hard"
     KEY_TOKEN = "X-API-Key"
+    KEY_TEXT = "text"
     
     # Query for request
     KEY_R_LIMIT = "limit"
@@ -80,7 +81,7 @@ class TheTriviaAPI(BaseAPIHandler):
         """
         
         # Get main infos
-        result = self.slow_request(self.URL_CATEGORY)
+        result = self.slow_request_urllib3(self.URL_CATEGORY)
         result = result.get(self.KEY_BY_CAT, {})
         
         # Get all categories
@@ -92,7 +93,7 @@ class TheTriviaAPI(BaseAPIHandler):
         
         for i in tqdm(np.arange(N), disable=(not self.verbose)):
             # Get category specific stats
-            result_cat = self.slow_request(url=self.URL_CATEGORY, params={self.KEY_CAT: categories_name[i]})
+            result_cat = self.slow_request_urllib3(url=self.URL_CATEGORY, params={self.KEY_CAT: categories_name[i]})
             result_diff = result_cat.get(self.KEY_BY_DIFF, {})
             result_type = result_cat.get(self.KEY_BY_TYPE, {})
             # Extract counts            
@@ -128,15 +129,15 @@ class TheTriviaAPI(BaseAPIHandler):
             header[self.KEY_TOKEN] = self.token
             
         # Send query
-        result = self.slow_request(url=self.URL_QUESTION, header=header, params=params)     
+        result = self.slow_request_urllib3(url=self.URL_QUESTION, header=header, params=params)     
 
         # Parse results as questions
         questions = []
         for raw_question in result:
             # Parse question
             q = Questions(
-                question=raw_question.get(self.KEY_R_QUESTION, self.KEY_R_ERROR),
-                correct_answer=raw_question.get(self.KEY_R_CORRECT, self.KEY_R_ERROR),
+                question=raw_question.get(self.KEY_R_QUESTION, self.KEY_R_ERROR).get(self.KEY_TEXT, self.KEY_R_ERROR),
+                correct_answers=[raw_question.get(self.KEY_R_CORRECT, self.KEY_R_ERROR)],
                 incorrect_answers=raw_question.get(self.KEY_R_INCORRECT, []),
                 library=self.__class__.__name__.lower(), 
                 category=self.categories[category_id],

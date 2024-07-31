@@ -93,6 +93,21 @@ For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetrivia
 
 * Only available for premium users (not free). Not implemented.
 
+
+[QuizAPI](https://quizapi.io/)
+
+|ID|   Catgory   |Easy|Medium|Hard|Text|Image|
+|--|-------------|----|------|----|----|-----|
+| 1|    Linux    | -1 |  -1  | -1 | -1 |  0  |
+| 2|     bash    | -1 |  -1  | -1 | -1 |  0  |
+| 3|uncategorized| -1 |  -1  | -1 | -1 |  0  |
+| 4|    Docker   | -1 |  -1  | -1 | -1 |  0  |
+| 5|     SQL     | -1 |  -1  | -1 | -1 |  0  |
+| 6|     CMS     | -1 |  -1  | -1 | -1 |  0  |
+| 7|     Code    | -1 |  -1  | -1 | -1 |  0  |
+| 8|    DevOps   | -1 |  -1  | -1 | -1 |  0  |
+
+
 # Custom config file
 
 TODO

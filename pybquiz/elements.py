@@ -14,7 +14,7 @@ class Questions:
     def __init__(
         self, 
         question: str,
-        correct_answer: str,
+        correct_answers: List[str],
         incorrect_answers: List[str] = None,
         library: str = None, 
         category: str = None,        
@@ -30,9 +30,9 @@ class Questions:
         ----------
         question : str
             Text string containing the question.
-        correct_answer : str
-            Test string with correct answer.
-        incorrect_answers : List[str], optional
+        correct_answers : List[str]
+            List of correct propositions. 
+        incorrect_answers : List[str]
             List of additional propositions. If None, assume question need to be 
             answered without any propositions.
         library : str
@@ -52,7 +52,7 @@ class Questions:
         
         # Set variables
         self.question = question
-        self.correct_answer = correct_answer
+        self.correct_answers = correct_answers
         self.incorrect_answers = incorrect_answers
         self.library=library
         self.category = category

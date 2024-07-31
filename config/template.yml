@@ -15,7 +15,18 @@ BaseInfo:
 Rounds:
 -
   # Title of the round
-  title: "Round 1 - Video Games"
+  title: "Round 1 - Linux"
+  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  api: "quizapi"
+  # ID of the theme, see lookup table on top to know availability
+  theme_id: 1
+  # Difficulty level questions
+  difficulty: [5, 3, 2]  # [num. of easy, num. of medium, num. of hard]
+  # Type of questions. One of "text", or "image".
+  type: "text"
+-
+  # Title of the round
+  title: "Round 2 - Video Games"
   # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
   api: "opentriviadb"
   # ID of the theme, see lookup table on top to know availability
@@ -26,7 +37,7 @@ Rounds:
   type: "text"
 -
   # Title of the round
-  title: "Round 2 - Science"
+  title: "Round 3 - Science"
   # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
   api: "thetriviaapi"
   # ID of the theme, see lookup table on top to know availability
@@ -35,15 +46,4 @@ Rounds:
   difficulty: [2, 2, 6]  # [num. of easy, num. of medium, num. of hard]
   # Type of questions. One of "text", or "image".
   type: "text"
--
-  # Title of the round
-  title: "Round 3 - Geography"
-  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
-  api: "thetriviaapi"
-  # ID of the theme, see lookup table on top to know availability
-  theme_id: 4
-  # Difficulty level questions
-  difficulty: [2, 2, 6]  # [num. of easy, num. of medium, num. of hard]
-  # Type of questions. One of "text", or "image".
-  type: "image"
 ...

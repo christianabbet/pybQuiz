@@ -80,7 +80,7 @@ class OpenTriviaDB(BaseAPIHandler):
         """
         
         # Get main infos
-        result = self.slow_request(self.URL_CATEGORY)
+        result = self.slow_request_urllib3(self.URL_CATEGORY)
         result = result.get(self.KEY_TRIVIA_CAT, {})
         
         N = len(result)
@@ -91,7 +91,7 @@ class OpenTriviaDB(BaseAPIHandler):
         
         for i in tqdm(np.arange(N), disable=(not self.verbose)):
             # Get category specific stats            
-            result_cat = self.slow_request(url=self.URL_CATEGORY_COUNT, params={self.KEY_CAT: categories_id[i]})
+            result_cat = self.slow_request_urllib3(url=self.URL_CATEGORY_COUNT, params={self.KEY_CAT: categories_id[i]})
             result_cat = result_cat.get(self.KEY_Q_COUNT, {})
             # Extract counts
             n_tot = result_cat.get(self.KEY_Q_TOTAL_COUNT, 0)
@@ -122,7 +122,7 @@ class OpenTriviaDB(BaseAPIHandler):
             params[self.KEY_TOKEN] = self.token
             
         # Send query
-        result = self.slow_request(url=self.URL_QUESTION, params=params)
+        result = self.slow_request_urllib3(url=self.URL_QUESTION, params=params)
         
         # Parse results as questions
         questions = []
@@ -132,7 +132,7 @@ class OpenTriviaDB(BaseAPIHandler):
             q_text = raw_question.get(self.KEY_R_QUESTION, self.KEY_R_ERROR)
             q = Questions(
                 question=q_text,
-                correct_answer=raw_question.get(self.KEY_R_CORRECT, self.KEY_R_ERROR),
+                correct_answers=[raw_question.get(self.KEY_R_CORRECT, self.KEY_R_ERROR)],
                 incorrect_answers=raw_question.get(self.KEY_R_INCORRECT, []),
                 library=self.__class__.__name__.lower(), 
                 category=self.categories[cat_id_lut],
