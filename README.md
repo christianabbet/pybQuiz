@@ -17,35 +17,7 @@ Create your quiz
 python run_create_quiz.py
 ```
 
-# Coming Next
-
-[ ] Implement other libraries
-    [ ] https://quizapi.io/docs/1.0/difficulty
-    [ ] https://api-ninjas.com/api/trivia
-[ ] Add PPT / PDF generation
-[ ] Add api key in config file
-[ ] Add openai generation for templates
-
-
-# Add Token
-
-
-To access certain content, you need an API Token. Once obtained, create a file `apitoken.yml` under the `config` folder. Fill the file with your own API keys. 
-
-```yml
----
-
-# Optional API tokens
-opentriviadb: YOUR_API_KEY_1
-thetriviaapi: YOUR_API_KEY_2
-quizapi: YOUR_API_KEY_3
-...
-```
-
-For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token)) you can generate you token by folowing the instructions linked.
-
-
-# APIs Stats
+# Available APIs
 
 [Open Trivia DB](https://opentdb.com/)
 
@@ -108,6 +80,27 @@ For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetrivia
 | 8|    DevOps   | -1 |  -1  | -1 | -1 |  0  |
 
 
-# Custom config file
+# Add Token
 
-TODO
+To access certain content, you need an API Token. Once obtained, create a file `apitoken.yml` under the `config` folder. Fill the file with your own API keys. 
+
+```yml
+---
+
+# Optional API tokens
+opentriviadb: YOUR_API_KEY_1
+thetriviaapi: YOUR_API_KEY_2
+quizapi: YOUR_API_KEY_3
+...
+```
+
+For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token)) you can generate you token by folowing the instructions linked.
+
+
+# Coming Next
+
+* [ ] Implement other libraries
+    * [ ] https://api-ninjas.com/api/trivia
+* [ ] Add PPT / PDF generation
+* [ ] Add openai generation for templates
+* [ ] Custom files exaplain
