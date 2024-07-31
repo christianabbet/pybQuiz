@@ -12,14 +12,24 @@ pip install numpy tqdm py-markdown-table
 
 Create your quiz
 
-```
+```bash
 # Run quiz creating based on given config file
 python run_create_quiz.py
+
+# Extra available arguments
+--name YOURNAME                 # Name of the output file
+--dirout /path/to/dir           # Output directory
+--cfg /path/to/template.yml     # Link to config file (custom quiz)
+--token /path/to/apitoken.yml   # Link to APIs token file
 ```
 
 # Available APIs
 
-[Open Trivia DB](https://opentdb.com/)
+## 1. Open Trivia DB
+
+* **Tag**: opentriviadb
+* **Link**: https://opentdb.com/
+* **API-Token**: Not required
 
 |ID|               Catgory               |Easy|Medium|Hard|Text|Image|
 |--|-------------------------------------|----|------|----|----|-----|
@@ -48,7 +58,14 @@ python run_create_quiz.py
 |31|Entertainment: Japanese Anime & Manga| 59 |  80  | 45 | 184|  0  |
 |32| Entertainment: Cartoon & Animations | 31 |  41  | 17 | 89 |  0  |
 
-[The Trivia API](https://the-trivia-api.com/)
+
+## 2. The Trivia API
+
+* **Tag**: thetriviaapi
+* **Link**: https://the-trivia-api.com/
+* **API-Token**: Not required
+
+
 
 |ID|      Catgory      |Easy|Medium|Hard|Text|Image*|
 |--|-------------------|----|------|----|----|-----|
@@ -63,12 +80,15 @@ python run_create_quiz.py
 | 8|society_and_culture| 155|  604 | 495|1242|  12 |
 | 9| sport_and_leisure | 52 |  216 | 309| 557|  20 |
 
-* Only available for premium users (not free). Not implemented.
+${}^{*}$ Only available for premium users (not free). Not supported.
 
+## 3. QuizAPI
 
-[QuizAPI](https://quizapi.io/)
+* **Tag**: quizapi
+* **Link**: https://quizapi.io/
+* **API-Token**: Required
 
-|ID|   Catgory   |Easy|Medium|Hard|Text|Image|
+|ID|   Catgory   |Easy*|Medium*|Hard*|Text*|Image|
 |--|-------------|----|------|----|----|-----|
 | 1|    Linux    | -1 |  -1  | -1 | -1 |  0  |
 | 2|     bash    | -1 |  -1  | -1 | -1 |  0  |
@@ -78,6 +98,35 @@ python run_create_quiz.py
 | 6|     CMS     | -1 |  -1  | -1 | -1 |  0  |
 | 7|     Code    | -1 |  -1  | -1 | -1 |  0  |
 | 8|    DevOps   | -1 |  -1  | -1 | -1 |  0  |
+
+${}^{*}$ Distribution of question categories and difficulties unknown.
+
+## 4. API Ninjas - Trivia
+
+* **Tag**: apininjas
+* **Link**: https://api-ninjas.com/api/trivia
+* **API-Token**: Required
+
+
+|ID|     Catgory     |Easy**|Medium**|Hard**|Text*|Image|
+|--|-----------------|----|------|----|----|-----|
+| 0|  artliterature  | -1 |  -1  | -1 | -1 |  0  |
+| 1|     language    | -1 |  -1  | -1 | -1 |  0  |
+| 2|  sciencenature  | -1 |  -1  | -1 | -1 |  0  |
+| 3|     general     | -1 |  -1  | -1 | -1 |  0  |
+| 4|    fooddrink    | -1 |  -1  | -1 | -1 |  0  |
+| 5|   peopleplaces  | -1 |  -1  | -1 | -1 |  0  |
+| 6|    geography    | -1 |  -1  | -1 | -1 |  0  |
+| 7| historyholidays | -1 |  -1  | -1 | -1 |  0  |
+| 8|  entertainment  | -1 |  -1  | -1 | -1 |  0  |
+| 9|    toysgames    | -1 |  -1  | -1 | -1 |  0  |
+|10|      music      | -1 |  -1  | -1 | -1 |  0  |
+|11|   mathematics   | -1 |  -1  | -1 | -1 |  0  |
+|12|religionmythology| -1 |  -1  | -1 | -1 |  0  |
+|13|  sportsleisure  | -1 |  -1  | -1 | -1 |  0  |
+
+${}^{*}$ Distribution of question categories and difficulties unknown.
+${}^{**}$ No difficulty level
 
 
 # Add Token
@@ -91,16 +140,53 @@ To access certain content, you need an API Token. Once obtained, create a file `
 opentriviadb: YOUR_API_KEY_1
 thetriviaapi: YOUR_API_KEY_2
 quizapi: YOUR_API_KEY_3
+apininjas: YOUR_API_KEY_4
 ...
 ```
 
-For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token)) you can generate you token by folowing the instructions linked.
+For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token)) [apininjas](https://api-ninjas.com/profile), you can generate you token by folowing the instructions linked.
+
+# Custom config files
+
+You can create your own config file Here is an examples on how to create a new quiz. Create a new file `myquiz.yml`. Look above to know the suported libraries
+
+
+```
+touch config/myquiz.yml
+```
+
+Then structure the yaml file as described below
+```yml
+---
+
+BaseInfo:                       # Base information for the API
+  title: "Amazing Pyb Quiz"     # Quiz title
+  delay_api: 5                  # Delay to use in seconds between API queries
+  verbose: True                 # Extended verbose terminal output
+  clear_cache: False            # If True, update stats about remote DB (slow)
+
+Rounds:                         # List of rounds
+-
+  title: "Video Games"          # Title of the round
+  api: "opentriviadb"           # Name of the library. See tags above
+  theme_id: 12                  # ID of the theme, see lookup table
+  difficulty: [5, 3, 2]         # Difficulty level question [easy, medium, hard]
+-
+  title: "Science"              # Title of the round
+  api: "thetriviaapi"           # Name of the library. See tags above
+  theme_id: 7                   # ID of the theme, see lookup table
+  difficulty: [2, 2, 6]         # Difficulty level question [easy, medium, hard]
+
+...
+```
+
+Then run the creation of the quiz
+```
+python run_create_quiz.py --cfg config/myquiz.yml
+```
 
 
 # Coming Next
 
-* [ ] Implement other libraries
-    * [ ] https://api-ninjas.com/api/trivia
 * [ ] Add PPT / PDF generation
 * [ ] Add openai generation for templates
-* [ ] Custom files exaplain

@@ -15,35 +15,38 @@ BaseInfo:
 Rounds:
 -
   # Title of the round
-  title: "Round 1 - Linux"
+  title: "Round 1 - Religion & Mythology"
+  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  api: "apininjas"
+  # ID of the theme, see lookup table on top to know availability
+  theme_id: 12
+  # Difficulty level questions
+  difficulty: [5, 3, 2]  # [num. of easy, num. of medium, num. of hard]
+-
+  # Title of the round
+  title: "Round 2 - Linux"
   # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
   api: "quizapi"
   # ID of the theme, see lookup table on top to know availability
   theme_id: 1
   # Difficulty level questions
   difficulty: [5, 3, 2]  # [num. of easy, num. of medium, num. of hard]
-  # Type of questions. One of "text", or "image".
-  type: "text"
 -
   # Title of the round
-  title: "Round 2 - Video Games"
+  title: "Round 3 - Video Games"
   # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
   api: "opentriviadb"
   # ID of the theme, see lookup table on top to know availability
   theme_id: 15
   # Difficulty level questions
   difficulty: [3, 3, 4]  # [num. of easy, num. of medium, num. of hard]
-  # Type of questions. One of "text", or "image".
-  type: "text"
 -
   # Title of the round
-  title: "Round 3 - Science"
+  title: "Round 4 - Science"
   # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
   api: "thetriviaapi"
   # ID of the theme, see lookup table on top to know availability
   theme_id: 7
   # Difficulty level questions
   difficulty: [2, 2, 6]  # [num. of easy, num. of medium, num. of hard]
-  # Type of questions. One of "text", or "image".
-  type: "text"
 ...
