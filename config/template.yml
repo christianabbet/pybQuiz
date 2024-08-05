@@ -4,6 +4,8 @@
 BaseInfo:
   # Quiz title
   title: "Amazing Pyb Quiz"
+  # Author
+  author: "Your Quiz Master"
   # Delay to use in seconds between API queries
   delay_api: 5
   # Extended verbose terminal output
@@ -16,37 +18,45 @@ Rounds:
 -
   # Title of the round
   title: "Round 1 - Religion & Mythology"
-  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  # Name of the library
   api: "apininjas"
   # ID of the theme, see lookup table on top to know availability
   theme_id: 12
   # Difficulty level questions
   difficulty: [5, 3, 2]  # [num. of easy, num. of medium, num. of hard]
+  # Shuffle questions
+  shuffle: True
 -
   # Title of the round
   title: "Round 2 - Linux"
-  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  # Name of the library
   api: "quizapi"
   # ID of the theme, see lookup table on top to know availability
   theme_id: 1
   # Difficulty level questions
   difficulty: [5, 3, 2]  # [num. of easy, num. of medium, num. of hard]
+  # Shuffle questions
+  shuffle: False
 -
   # Title of the round
   title: "Round 3 - Video Games"
-  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  # Name of the library
   api: "opentriviadb"
   # ID of the theme, see lookup table on top to know availability
   theme_id: 15
   # Difficulty level questions
   difficulty: [3, 3, 4]  # [num. of easy, num. of medium, num. of hard]
+  # Shuffle questions
+  shuffle: False
 -
   # Title of the round
   title: "Round 4 - Science"
-  # Name of the library. Supported are : "opentriviadb", "thetriviaapi"
+  # Name of the library
   api: "thetriviaapi"
   # ID of the theme, see lookup table on top to know availability
   theme_id: 7
   # Difficulty level questions
   difficulty: [2, 2, 6]  # [num. of easy, num. of medium, num. of hard]
+  # Shuffle questions
+  shuffle: True
 ...

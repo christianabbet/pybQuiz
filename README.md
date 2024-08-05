@@ -171,12 +171,14 @@ Rounds:                         # List of rounds
   api: "opentriviadb"           # Name of the library. See tags above
   theme_id: 12                  # ID of the theme, see lookup table
   difficulty: [5, 3, 2]         # Difficulty level question [easy, medium, hard]
+  shuffle: True                 # If True, random difficult order
 -
   title: "Science"              # Title of the round
   api: "thetriviaapi"           # Name of the library. See tags above
   theme_id: 7                   # ID of the theme, see lookup table
   difficulty: [2, 2, 6]         # Difficulty level question [easy, medium, hard]
-
+  shuffle: True                 # If True, random difficult order
+  
 ...
 ```
 
@@ -185,8 +187,13 @@ Then run the creation of the quiz
 python run_create_quiz.py --cfg config/myquiz.yml
 ```
 
+# Export to Slides
+
 
 # Coming Next
 
 * [ ] Add PPT / PDF generation
+  * [ ] Remove propostion if only one answer [apininjas]
+  * [ ] Check if multiple time same question [apininjas]
+  * [ ] Check if mulitple correct answers [quizapi]
 * [ ] Add openai generation for templates

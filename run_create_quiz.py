@@ -18,7 +18,10 @@ def main(args):
     os.makedirs(args.dirout, exist_ok=True)
     # Save to json
     outfile_json = os.path.join(args.dirout, "{}.json".format(args.name))
+    outfile_pptx = os.path.join(args.dirout, "{}.pptx".format(args.name))
+    
     quiz.to_json(file=outfile_json)    
+    quiz.to_pptx(file=outfile_pptx)
         
 
 if __name__ == '__main__':

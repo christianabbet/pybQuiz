@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 from pybquiz.elements import Questions
 import hashlib
+import html
 
 
 class OpenTriviaDB(BaseAPIHandler):
@@ -129,15 +130,17 @@ class OpenTriviaDB(BaseAPIHandler):
         cat_id_lut = np.argmax(self.categories_id == category_id)
         for raw_question in result.get(self.KEY_RESULTS, []):
             # Parse question
-            q_text = raw_question.get(self.KEY_R_QUESTION, self.KEY_R_ERROR)
+            q_text = html.unescape(raw_question.get(self.KEY_R_QUESTION, self.KEY_R_ERROR))
+            c_answers = html.unescape(raw_question.get(self.KEY_R_CORRECT, self.KEY_R_ERROR))
+            i_answers = [html.unescape(a) for a in raw_question.get(self.KEY_R_INCORRECT, [])]
             q = Questions(
                 question=q_text,
-                correct_answers=[raw_question.get(self.KEY_R_CORRECT, self.KEY_R_ERROR)],
-                incorrect_answers=raw_question.get(self.KEY_R_INCORRECT, []),
+                correct_answers=[c_answers],
+                incorrect_answers=i_answers,
                 library=self.__class__.__name__.lower(), 
                 category=self.categories[cat_id_lut],
                 category_id=category_id,
-                uuid=hashlib.md5(q_text.encode('ascii')).hexdigest(),
+                uuid=hashlib.md5(q_text.encode('utf8')).hexdigest(),
                 difficulty=difficulty,
                 type="text",
             )

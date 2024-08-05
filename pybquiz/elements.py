@@ -1,4 +1,5 @@
 from typing import List
+import numpy as np
 
 
 class Questions:
@@ -52,14 +53,27 @@ class Questions:
         
         # Set variables
         self.question = question
+        
+        # Set random order for questions
         self.correct_answers = correct_answers
         self.incorrect_answers = incorrect_answers
+        self.order = np.random.permutation(len(self.correct_answers) + len(self.incorrect_answers)).tolist()
         self.library=library
         self.category = category
         self.category_id = category_id
         self.uuid = uuid
         self.difficulty = difficulty
         self.type = type    
+        
+    def get_shuffled_answers(self):
+        # Concat values
+        answer = self.correct_answers
+        answer.extend(self.incorrect_answers)
+        # Shuffle results
+        answer = np.array(answer)[self.order]
+        id_correct = np.argmax(np.array(self.order) == 0)
+        return answer, id_correct
+    
 
     def to_json(self):
         return self.__dict__
