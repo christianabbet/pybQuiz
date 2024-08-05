@@ -67,12 +67,14 @@ class Questions:
         
     def get_shuffled_answers(self):
         # Concat values
-        answer = self.correct_answers
-        answer.extend(self.incorrect_answers)
+        answer = self.correct_answers.copy()
+        answer.extend(self.incorrect_answers.copy())
+        # Get correct ids
+        cgt = [1] * len(self.correct_answers) + [0] * len(self.incorrect_answers)
         # Shuffle results
         answer = np.array(answer)[self.order]
-        id_correct = np.argmax(np.array(self.order) == 0)
-        return answer, id_correct
+        ids_correct = np.nonzero(np.array(cgt)[self.order])[0].tolist()
+        return answer, ids_correct
     
 
     def to_json(self):

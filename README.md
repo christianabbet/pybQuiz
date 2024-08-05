@@ -193,7 +193,6 @@ python run_create_quiz.py --cfg config/myquiz.yml
 # Coming Next
 
 * [ ] Add PPT / PDF generation
-  * [ ] Remove propostion if only one answer [apininjas]
   * [ ] Check if multiple time same question [apininjas]
-  * [ ] Check if mulitple correct answers [quizapi]
+  * [ ] Ensure first leter is a capital letter (question and answer)
 * [ ] Add openai generation for templates

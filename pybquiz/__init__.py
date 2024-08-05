@@ -81,6 +81,11 @@ class SlideFactory:
             nRows = np.ceil(nQ/2).astype(int)
             row_offset = (SlideFactory.S_ANSWERS_HEIGHT - (nRows * SlideFactory.S_ANSWER_ROW_HEIGHT_MAX + (nRows - 1) * SlideFactory.S_ANSWER_ROW_HEIGHT_MARGIN)) / 2
             
+            # Check if only one proposition and no answer
+            if nQ <= 1 and answers_id is None:
+                return
+            
+            # Add propositions
             for j in range(nQ):
                 # Define col
                 id_col = j % 2
@@ -100,7 +105,7 @@ class SlideFactory:
                 tf.text = "{}) {}".format(pos_to_char(j), answers[j])
                 tf.fit_text(max_size=SlideFactory.FONT_QUESTION, font_file=SlideFactory.get_system_fonts())
                 
-                if answers_id is not None and answers_id == j:
+                if answers_id is not None and j in answers_id:
                     tf.paragraphs[0].font.color.rgb = RGBColor.from_string("8fce00")
             
 class Round():
@@ -250,7 +255,7 @@ class PybQuiz:
             Nquestion = len(self.rounds[0].questions)
             for j in range(Nquestion):
                 # Add question slide
-                answers, answers_id = self.rounds[i].questions[j].get_shuffled_answers()
+                answers, _ = self.rounds[i].questions[j].get_shuffled_answers()
                 SlideFactory.add_question(
                     root=root, 
                     i=j+1, 
