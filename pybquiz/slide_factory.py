@@ -106,7 +106,7 @@ class SlideFactory:
                 # CHeck if one or more answers
                 a = answers[j]
                 if nQ > 1:
-                    a = "{}: {}".format(pos_to_char(j), a)
+                    a = "{}) {}".format(pos_to_char(j), a)
                 # Set text
                 tf.text = a
                 tf.fit_text(max_size=SlideFactory.FONT_QUESTION, font_file=SlideFactory.get_system_fonts())
