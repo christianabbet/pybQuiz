@@ -52,11 +52,11 @@ class Questions:
         """
         
         # Set variables
-        self.question = question
+        self.question = question.capitalize()
         
         # Set random order for questions
-        self.correct_answers = correct_answers
-        self.incorrect_answers = incorrect_answers
+        self.correct_answers = self.capitalize(correct_answers)
+        self.incorrect_answers = self.capitalize(incorrect_answers)
         self.order = np.random.permutation(len(self.correct_answers) + len(self.incorrect_answers)).tolist()
         self.library=library
         self.category = category
@@ -64,6 +64,10 @@ class Questions:
         self.uuid = uuid
         self.difficulty = difficulty
         self.type = type    
+        
+    @staticmethod
+    def capitalize(strings: list[str]):
+            return [s.capitalize() for s in strings]
         
     def get_shuffled_answers(self):
         # Concat values

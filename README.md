@@ -194,5 +194,11 @@ python run_create_quiz.py --cfg config/myquiz.yml
 
 * [ ] Add PPT / PDF generation
   * [ ] Check if multiple time same question [apininjas]
-  * [ ] Ensure first leter is a capital letter (question and answer)
+  * [ ] Add difficulty information on slides
 * [ ] Add openai generation for templates
+
+
+
+https://platform.openai.com/docs/quickstart
+https://platform.openai.com/docs/guides/images/introduction
+
