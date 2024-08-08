@@ -2,7 +2,7 @@ import argparse
 import os
 from pybquiz import PybQuiz
 from pybquiz.export.pptx import PptxFactory
-from pybquiz.api_handler.generation import BackgroundManager
+from pybquiz.background import BackgroundManager
 
 
 def main(args):

@@ -1,8 +1,8 @@
 import argparse
 import os
-from pybquiz.api_handler.generation import OpenAIAPI, standardize_text
+from pybquiz.background import standardize_text
+from pybquiz.api_handler.openai import OpenAIAPI
 import yaml
-import re
 
 def main(args):
 
