@@ -4,12 +4,16 @@ PybQuiz is a Python package designed to help you create and manage pub quizzes e
 
 ![plot](example.png)
 
+
+## Setup
+
+Create environement
+
 ```bash
 # Using conda
 conda create env -n pybquiz
 conda activate pybquiz
 pip install numpy tqdm py-markdown-table
-# If OpenAI support wanted 
 pip install --upgrade openai
 ```
 
@@ -20,15 +24,15 @@ Create your quiz
 python run_create_quiz.py
 
 # Extra available arguments
---name YOURNAME                 # Name of the output file
---dirout /path/to/dir           # Output directory
---cfg /path/to/template.yml     # Link to config file (custom quiz)
---token /path/to/apitoken.yml   # Link to APIs token file
+--name YOURQUIZNAME             # Name of the quiiz file
+--dirout /path/to/dir           # Path to output directory
+--cfg /path/to/template.yml     # Path to config file (custom quiz)
+--token /path/to/apitoken.yml   # Path to APIs token file
 ```
 
-# Available APIs
+## Available APIs
 
-## 1. Open Trivia DB
+### 1. Open Trivia DB
 
 * **Tag**: opentriviadb
 * **Link**: https://opentdb.com/
@@ -62,7 +66,7 @@ python run_create_quiz.py
 |32| Entertainment: Cartoon & Animations | 31 |  41  | 17 | 89 |  0  |
 
 
-## 2. The Trivia API
+### 2. The Trivia API
 
 * **Tag**: thetriviaapi
 * **Link**: https://the-trivia-api.com/
@@ -85,7 +89,7 @@ python run_create_quiz.py
 
 ${}^{*}$ Only available for premium users (not free). Not supported.
 
-## 3. QuizAPI
+### 3. QuizAPI
 
 * **Tag**: quizapi
 * **Link**: https://quizapi.io/
@@ -104,7 +108,7 @@ ${}^{*}$ Only available for premium users (not free). Not supported.
 
 ${}^{*}$ Distribution of question categories and difficulties unknown.
 
-## 4. API Ninjas - Trivia
+### 4. API Ninjas - Trivia
 
 * **Tag**: apininjas
 * **Link**: https://api-ninjas.com/api/trivia
@@ -132,7 +136,7 @@ ${}^{*}$ Distribution of question categories and difficulties unknown.
 ${}^{**}$ No difficulty level
 
 
-# Add Token
+## Add Tokens
 
 To access certain content, you need an API Token. Once obtained, create a file `apitoken.yml` under the `config` folder. Fill the file with your own API keys. 
 
@@ -149,7 +153,7 @@ apininjas: YOUR_API_KEY_4
 
 For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token)) [apininjas](https://api-ninjas.com/profile), you can generate you token by folowing the instructions linked.
 
-# Custom config files
+## Custom config files
 
 You can create your own config file Here is an examples on how to create a new quiz. Create a new file `myquiz.yml`. Look above to know the suported libraries
 
@@ -190,9 +194,10 @@ Then run the creation of the quiz
 python run_create_quiz.py --cfg config/myquiz.yml
 ```
 
-# Coming Next
+## Coming Next
 
 * [ ] Google slide export
+  * [ ] Table to handle scores
 * [ ] Add PPT generation
   * [ ] Check if multiple time same question [apininjas]
   * [ ] Add difficulty information on slides
@@ -203,8 +208,8 @@ python run_create_quiz.py --cfg config/myquiz.yml
   * [ ] Create uniform color palette for themes
 
 
-Thanks
-------
+## Thanks
+
 
 ```bash
 # Quiz Style (inspiration)
