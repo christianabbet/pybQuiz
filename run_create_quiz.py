@@ -23,7 +23,9 @@ def main(args):
     if not os.path.exists(outfile_json):
         print("Quiz {} does not exists, create it ...".format(args.name))
         quiz = PybQuiz.from_yaml(yaml_path=cfg_path, yaml_token=token_path)
-        quiz.dump(file=outfile_json)    
+        quiz.dump(file=outfile_json) 
+        
+    # Check access to openai   
 
     # Reload from json
     PptxFactory.export(dump_path=outfile_json, outfile=outfile_pptx)

@@ -33,7 +33,7 @@ python run_create_quiz.py
 * **Link**: https://opentdb.com/
 * **API-Token**: Not required
 
-|ID|               Catgory               |Easy|Medium|Hard|Text|Image|
+|ID|               Category               |Easy|Medium|Hard|Text|Image|
 |--|-------------------------------------|----|------|----|----|-----|
 | 9|          General Knowledge          | 128|  124 | 61 | 313|  0  |
 |10|         Entertainment: Books        | 31 |  41  | 27 | 99 |  0  |
@@ -69,7 +69,7 @@ python run_create_quiz.py
 
 
 
-|ID|      Catgory      |Easy|Medium|Hard|Text|Image*|
+|ID|      Category      |Easy|Medium|Hard|Text|Image*|
 |--|-------------------|----|------|----|----|-----|
 | 0|arts_and_literature| 84 |  375 | 708|1160|  7  |
 | 1|    film_and_tv    | 157|  709 | 892|1466| 292 |
@@ -90,7 +90,7 @@ ${}^{*}$ Only available for premium users (not free). Not supported.
 * **Link**: https://quizapi.io/
 * **API-Token**: Required
 
-|ID|   Catgory   |Easy*|Medium*|Hard*|Text*|Image|
+|ID|   Category   |Easy*|Medium*|Hard*|Text*|Image|
 |--|-------------|----|------|----|----|-----|
 | 1|    Linux    | -1 |  -1  | -1 | -1 |  0  |
 | 2|     bash    | -1 |  -1  | -1 | -1 |  0  |
@@ -110,7 +110,7 @@ ${}^{*}$ Distribution of question categories and difficulties unknown.
 * **API-Token**: Required
 
 
-|ID|     Catgory     |Easy**|Medium**|Hard**|Text*|Image|
+|ID|     Category     |Easy**|Medium**|Hard**|Text*|Image|
 |--|-----------------|----|------|----|----|-----|
 | 0|  artliterature  | -1 |  -1  | -1 | -1 |  0  |
 | 1|     language    | -1 |  -1  | -1 | -1 |  0  |

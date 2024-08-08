@@ -46,7 +46,3 @@ class OpenAIAPI:
         top_margin = max(img.size[1] - crop[1], 0) // 2
         # Save with blur
         img.crop(box=(left_margin, top_margin, left_margin + crop[0], top_margin + crop[1])).save(path)
-
-        # TODO
-        from PIL import Image, ImageFilter
-        img.filter(ImageFilter.GaussianBlur(radius=10)).save("tmp2.png")
