@@ -1,6 +1,6 @@
 import argparse
 import os
-from pybquiz.api_handler.openai import OpenAIAPI
+from pybquiz.api_handler.generation import OpenAIAPI, standardize_text
 import yaml
 import re
 
@@ -35,7 +35,7 @@ def main(args):
         
         # Define path
         print("[{}/{}]: {}".format(i+1, len(data_cat), cat))
-        filename = re.sub('[^A-Za-z0-9]+', '', cat).lower()
+        filename = standardize_text(cat)
         path_bg = os.path.join(args.dirout, filename + ".png")
         
         # Check if alread exists
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         prog='pybQuiz Background creations',
         description='Create background for quiz caegoires',
     )
-    parser.add_argument('--dirout', default='output/bgs')
+    parser.add_argument('--dirout', default='output/backgrounds')
     parser.add_argument('--list', default='config/categories.yml')
     parser.add_argument('--token', default='config/apitoken.yml')
     args = parser.parse_args()

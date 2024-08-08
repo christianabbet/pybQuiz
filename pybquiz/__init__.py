@@ -81,12 +81,6 @@ class PybQuiz:
         self.verbose = verbose  
         self.tokens = tokens      
         self.rounds = self._create_rounds(cfg_rounds=cfg_rounds, delay_api=delay_api, clear_cache=clear_cache)
-        self.openai_api = None
-        
-        # Check for openai key
-        if "openai" in tokens:
-            from pybquiz.api_handler.openai import OpenAIAPI
-            self.openai_api = OpenAIAPI(api_key=self.tokens['openai'])
         
     def _create_rounds(self, cfg_rounds: dict, delay_api: float, clear_cache: float):
         

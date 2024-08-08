@@ -61,7 +61,7 @@ class PptxFactory:
     
     
     @staticmethod
-    def export(dump_path: str, outfile: str):
+    def export(dump_path: str, outfile: str, background_gen = None):
         
         # Reload data
         with open(dump_path, "r") as f:
@@ -71,14 +71,18 @@ class PptxFactory:
         root = Presentation() 
 
         # Add splide to presetation
-        PptxFactory._add_title_subtitle(title=data[C.TITLE], subtitle=data[C.AUTHOR], root=root) 
+        img_bg = background_gen.get_background("Pub Quiz")
+        PptxFactory._add_title_subtitle(title=data[C.TITLE], subtitle=data[C.AUTHOR], root=root, img_bg=img_bg) 
                     
         # Create rounds
         Nround = len(data[C.ROUNDS])
         for i in range(Nround):
             # Create title slide
+            catname = data[C.ROUNDS][i][C.QUESTIONS][0][C.CATEGORY]
+            img_bg = background_gen.get_background(catname, blurred=False)
+            img_bg_blurred = background_gen.get_background(catname, blurred=True)
             str_round = "Round {}: {}".format(i+1, data[C.ROUNDS][i][C.TITLE])
-            PptxFactory._add_title_subtitle(root=root, title=str_round, img_bg=None)            
+            PptxFactory._add_title_subtitle(root=root, title=str_round, img_bg=img_bg)            
             
             Nquestion = len(data[C.ROUNDS][i][C.QUESTIONS])
             for j in range(Nquestion):
@@ -89,10 +93,10 @@ class PptxFactory:
                     i=j+1, 
                     question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
                     answers=answers,
-                    img_bg=None,
+                    img_bg=img_bg_blurred,
                 ) 
                 
-            PptxFactory._add_title_subtitle(root=root, title=str_round, subtitle="Answers", img_bg=None)            
+            PptxFactory._add_title_subtitle(root=root, title=str_round, subtitle="Answers", img_bg=img_bg)            
                
             # Iterate over questions (answers)
             for j in range(Nquestion):
@@ -105,7 +109,7 @@ class PptxFactory:
                     question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
                     answers=answers,
                     answers_id=correct_answers,
-                    img_bg=None,
+                    img_bg=img_bg_blurred,
                 )                 
 
                 

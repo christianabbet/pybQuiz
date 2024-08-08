@@ -17,4 +17,3 @@ class PYBConst:
     CATEGORY = "category"
     CATEGORY_ID = "category_id"
     
-    

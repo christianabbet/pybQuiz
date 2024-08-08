@@ -2,6 +2,7 @@ import argparse
 import os
 from pybquiz import PybQuiz
 from pybquiz.export.pptx import PptxFactory
+from pybquiz.api_handler.generation import BackgroundManager
 
 
 def main(args):
@@ -25,10 +26,11 @@ def main(args):
         quiz = PybQuiz.from_yaml(yaml_path=cfg_path, yaml_token=token_path)
         quiz.dump(file=outfile_json) 
         
-    # Check access to openai   
-
+    # Create background handler                
+    background_gen = BackgroundManager(yaml_token=token_path, dirout=args.dirout)
+    
     # Reload from json
-    PptxFactory.export(dump_path=outfile_json, outfile=outfile_pptx)
+    PptxFactory.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
         
 
 if __name__ == '__main__':

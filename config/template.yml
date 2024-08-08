@@ -17,46 +17,47 @@ BaseInfo:
 Rounds:
 -
   # Title of the round
-  title: "Religion & Mythology"
-  # Name of the library
-  api: "apininjas"
-  # ID of the theme, see lookup table on top to know availability
-  theme_id: 12
-  # Difficulty level questions
-  difficulty: [5, 3, 2]  # [num. of easy, num. of medium, num. of hard]
-  # Shuffle questions
-  shuffle: True
--
-  # Title of the round
-  title: "Linux"
-  # Name of the library
-  api: "quizapi"
-  # ID of the theme, see lookup table on top to know availability
-  theme_id: 1
-  # Difficulty level questions
-  difficulty: [5, 3, 2]  # [num. of easy, num. of medium, num. of hard]
-  # Shuffle questions
-  shuffle: False
--
-  # Title of the round
-  title: "Video Games"
+  title: Mythology"
   # Name of the library
   api: "opentriviadb"
   # ID of the theme, see lookup table on top to know availability
-  theme_id: 15
+  theme_id: 20
   # Difficulty level questions
   difficulty: [3, 3, 4]  # [num. of easy, num. of medium, num. of hard]
-  # Shuffle questions
-  shuffle: False
 -
   # Title of the round
-  title: "Science"
+  title: "Geography"
+  # Name of the library
+  api: "opentriviadb"
+  # ID of the theme, see lookup table on top to know availability
+  theme_id: 22
+  # Difficulty level questions
+  difficulty: [3, 3, 4]  # [num. of easy, num. of medium, num. of hard]
+-
+  # Title of the round
+  title: "Politics"
+  # Name of the library
+  api: "opentriviadb"
+  # ID of the theme, see lookup table on top to know availability
+  theme_id: 24
+  # Difficulty level questions
+  difficulty: [3, 3, 4]  # [num. of easy, num. of medium, num. of hard]
+-
+  # Title of the round
+  title: "Film and TV"
   # Name of the library
   api: "thetriviaapi"
   # ID of the theme, see lookup table on top to know availability
-  theme_id: 7
+  theme_id: 1
   # Difficulty level questions
-  difficulty: [2, 2, 6]  # [num. of easy, num. of medium, num. of hard]
-  # Shuffle questions
-  shuffle: True
+  difficulty: [3, 3, 4]  # [num. of easy, num. of medium, num. of hard]
+-
+  # Title of the round
+  title: "General Knowledge"
+  # Name of the library
+  api: "thetriviaapi"
+  # ID of the theme, see lookup table on top to know availability
+  theme_id: 3
+  # Difficulty level questions
+  difficulty: [3, 3, 4]  # [num. of easy, num. of medium, num. of hard]
 ...

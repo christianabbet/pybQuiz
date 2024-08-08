@@ -189,8 +189,9 @@ Then run the creation of the quiz
 python run_create_quiz.py --cfg config/myquiz.yml
 ```
 
-# Export to Slides
+# Example
 
+![exmaple](exmaple.png)
 
 # Coming Next
 
@@ -205,9 +206,6 @@ python run_create_quiz.py --cfg config/myquiz.yml
   * [ ] Add blur option
 * [ ] Add openai generation for templates
   * [ ] Add prompt in template
-  * [ ] Check image storage path
-  * [ ] Compute time spend for query and deduct from api time (for all ?)
-  * [ ] Create all ouputs for categories
 
 
 Thanks
