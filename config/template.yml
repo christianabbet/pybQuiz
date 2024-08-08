@@ -17,7 +17,7 @@ BaseInfo:
 Rounds:
 -
   # Title of the round
-  title: Mythology"
+  title: "Mythology"
   # Name of the library
   api: "opentriviadb"
   # ID of the theme, see lookup table on top to know availability
