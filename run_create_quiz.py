@@ -1,6 +1,7 @@
 import argparse
 import os
 from pybquiz import PybQuiz
+from pybquiz.export.pptx import PptxFactory
 
 
 def main(args):
@@ -8,20 +9,24 @@ def main(args):
     # Get input information
     cfg_path = args.cfg
     token_path = args.token
-    
+       
     if not os.path.exists(cfg_path):
         raise FileNotFoundError
-        
-    # Create quiz
-    quiz = PybQuiz.from_yaml(yaml_path=cfg_path, yaml_token=token_path)
+
     # Create output directory
     os.makedirs(args.dirout, exist_ok=True)
     # Save to json
     outfile_json = os.path.join(args.dirout, "{}.json".format(args.name))
     outfile_pptx = os.path.join(args.dirout, "{}.pptx".format(args.name))
-    
-    quiz.to_json(file=outfile_json)    
-    quiz.to_pptx(file=outfile_pptx)
+            
+    # Create quiz
+    if not os.path.exists(outfile_json):
+        print("Quiz {} does not exists, create it ...".format(args.name))
+        quiz = PybQuiz.from_yaml(yaml_path=cfg_path, yaml_token=token_path)
+        quiz.dump(file=outfile_json)    
+
+    # Reload from json
+    PptxFactory.export(dump_path=outfile_json, outfile=outfile_pptx)
         
 
 if __name__ == '__main__':

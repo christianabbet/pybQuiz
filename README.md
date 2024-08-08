@@ -8,6 +8,8 @@ PybQuiz is a Python package designed to help you create and manage pub quizzes e
 conda create env -n pybquiz
 conda activate pybquiz
 pip install numpy tqdm py-markdown-table
+# If OpenAI support wanted 
+pip install --upgrade openai
 ```
 
 Create your quiz
@@ -192,13 +194,25 @@ python run_create_quiz.py --cfg config/myquiz.yml
 
 # Coming Next
 
+* [ ] Google slide export
 * [ ] Add PPT / PDF generation
   * [ ] Check if multiple time same question [apininjas]
   * [ ] Add difficulty information on slides
+  * [ ] Remove need for typing font path (linux ?)
+  * [ ] Remove shadow in images
+  * [ ] Modify title slides with background image
+  * [ ] Add color customization for text and boxes
+  * [ ] Add blur option
 * [ ] Add openai generation for templates
+  * [ ] Add prompt in template
+  * [ ] Check image storage path
+  * [ ] Compute time spend for query and deduct from api time (for all ?)
+  * [ ] Create all ouputs for categories
 
 
+Thanks
+------
 
-https://platform.openai.com/docs/quickstart
-https://platform.openai.com/docs/guides/images/introduction
-
+"""
+https://github.com/devinardya/Quiz-Game?tab=readme-ov-file
+"""

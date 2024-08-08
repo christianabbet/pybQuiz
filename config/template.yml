@@ -17,7 +17,7 @@ BaseInfo:
 Rounds:
 -
   # Title of the round
-  title: "Round 1 - Religion & Mythology"
+  title: "Religion & Mythology"
   # Name of the library
   api: "apininjas"
   # ID of the theme, see lookup table on top to know availability
@@ -28,7 +28,7 @@ Rounds:
   shuffle: True
 -
   # Title of the round
-  title: "Round 2 - Linux"
+  title: "Linux"
   # Name of the library
   api: "quizapi"
   # ID of the theme, see lookup table on top to know availability
@@ -39,7 +39,7 @@ Rounds:
   shuffle: False
 -
   # Title of the round
-  title: "Round 3 - Video Games"
+  title: "Video Games"
   # Name of the library
   api: "opentriviadb"
   # ID of the theme, see lookup table on top to know availability
@@ -50,7 +50,7 @@ Rounds:
   shuffle: False
 -
   # Title of the round
-  title: "Round 4 - Science"
+  title: "Science"
   # Name of the library
   api: "thetriviaapi"
   # ID of the theme, see lookup table on top to know availability

@@ -1,5 +1,6 @@
 from typing import List
 import numpy as np
+from pybquiz.const import PYBConst as C
 
 
 class Questions:
@@ -78,8 +79,20 @@ class Questions:
         # Shuffle results
         answer = np.array(answer)[self.order]
         ids_correct = np.nonzero(np.array(cgt)[self.order])[0].tolist()
-        return answer, ids_correct
+        return answer.tolist(), ids_correct
     
-
-    def to_json(self):
-        return self.__dict__
+    def dump(self):
+        
+        answers, correct_answers = self.get_shuffled_answers()
+        data = {
+            C.QUESTIONS: self.question,
+            C.ANSWERS: answers,
+            C.CORRECT_ANSWERS: correct_answers,
+            C.CATEGORY: self.category,
+            C.CATEGORY_ID: self.category_id,
+            C.DIFFICULTY: self.difficulty,
+            C.TYPE: self.type,
+        }
+        return data
+    
+    

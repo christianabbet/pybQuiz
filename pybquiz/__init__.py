@@ -3,9 +3,9 @@ from typing import List
 import yaml
 import json
 import os
-from pptx import Presentation     
 import numpy as np
-from pybquiz.slide_factory import SlideFactory as SF
+from pybquiz.const import PYBConst as C
+
 
 class Round():
     
@@ -50,14 +50,17 @@ class Round():
             self.questions = np.array(self.questions)[id_shuffle].tolist()
             
             
-    def to_json(self):
+    def dump(self):
         # Create response
-        json = {
-            "title": self.title,
-            "questions": [q.to_json() for q in self.questions]
+        data = {
+            C.TITLE: self.title,
+            C.THEME_ID: self.theme_id,
+            C.DIFFICULTY: self.difficulty,
+            C.TYPE: self.type,
+            C.QUESTIONS: [q.dump() for q in self.questions]
         }
         
-        return json        
+        return data        
             
             
 class PybQuiz:
@@ -78,6 +81,12 @@ class PybQuiz:
         self.verbose = verbose  
         self.tokens = tokens      
         self.rounds = self._create_rounds(cfg_rounds=cfg_rounds, delay_api=delay_api, clear_cache=clear_cache)
+        self.openai_api = None
+        
+        # Check for openai key
+        if "openai" in tokens:
+            from pybquiz.api_handler.openai import OpenAIAPI
+            self.openai_api = OpenAIAPI(api_key=self.tokens['openai'])
         
     def _create_rounds(self, cfg_rounds: dict, delay_api: float, clear_cache: float):
         
@@ -110,12 +119,15 @@ class PybQuiz:
         # Return rounds
         return rounds
         
-    def to_json(self, file: str):
+    def dump(self, file: str):
+        
         # Dump all questions to given file
         json_data = {
-            "title": self.title,
-            "rounds": [r.to_json() for r in self.rounds]
+            C.TITLE: self.title,
+            C.AUTHOR: self.author,
+            C.ROUNDS: [r.dump() for r in self.rounds]
         }
+
         # Save file
         with open(file, "w") as f:
             json.dump(json_data, f, indent=4, sort_keys=True)
@@ -124,64 +136,8 @@ class PybQuiz:
         if self.verbose:
             print("Saved to {}".format(file))
             
-    def to_pptx(self, file: str):
-        """ 
-        Ref for slide types:  
-        0 ->  title and subtitle 
-        1 ->  title and content 
-        2 ->  section header 
-        3 ->  two content 
-        4 ->  Comparison 
-        5 ->  Title only  
-        6 ->  Blank 
-        7 ->  Content with caption 
-        8 ->  Pic with caption 
-        """
-        
-        # Creating presentation object 
-        root = Presentation() 
-
-        # Add splide to presetation
-        SF.add_title_subtitle(title=self.title, subtitle=self.author, root=root) 
-        
-        # Create rounds
-        Nround = len(self.rounds)
-        for i in range(Nround):
-            # Create title slide
-            SF.add_title_subtitle(root=root, title=self.rounds[i].title) 
-            
-            # Iterate over questions
-            Nquestion = len(self.rounds[0].questions)
-            for j in range(Nquestion):
-                # Add question slide
-                answers, _ = self.rounds[i].questions[j].get_shuffled_answers()
-                SF.add_question(
-                    root=root, 
-                    i=j+1, 
-                    question=self.rounds[i].questions[j].question, 
-                    answers=answers,
-                ) 
-                
-            # Create title slide
-            SF.add_title_subtitle(root=root, title=self.rounds[i].title, subtitle="Answers") 
-            
-            # Iterate over questions (answers)
-            for j in range(Nquestion):
-                # Add question slide
-                answers, answers_id = self.rounds[i].questions[j].get_shuffled_answers()
-                SF.add_question(
-                    root=root, 
-                    i=j+1, 
-                    question=self.rounds[i].questions[j].question, 
-                    answers=answers,
-                    answers_id=answers_id,
-                ) 
-            
-        # Saving file 
-        root.save(file) 
-            
     @staticmethod
-    def from_yaml(yaml_path: dict, yaml_token: dict = None):
+    def from_yaml(yaml_path: str, yaml_token: str = None):
         
         # Default tokens empty
         data_token = {}
