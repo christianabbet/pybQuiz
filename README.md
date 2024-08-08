@@ -193,21 +193,27 @@ python run_create_quiz.py --cfg config/myquiz.yml
 # Coming Next
 
 * [ ] Google slide export
-* [ ] Add PPT / PDF generation
+* [ ] Add PPT generation
   * [ ] Check if multiple time same question [apininjas]
   * [ ] Add difficulty information on slides
   * [ ] Remove need for typing font path (linux ?)
-  * [ ] Remove shadow in images
-  * [ ] Modify title slides with background image
   * [ ] Add color customization for text and boxes
-  * [ ] Add blur option
 * [ ] Add openai generation for templates
   * [ ] Add prompt in template
+  * [ ] Create uniform color palette for themes
 
 
 Thanks
 ------
 
-"""
+```bash
+# Quiz Style (inspiration)
 https://github.com/devinardya/Quiz-Game?tab=readme-ov-file
-"""
+
+# Trivia APIs
+https://opentdb.com
+https://the-trivia-api.com
+https://quizapi.io
+https://api-ninjas.com/profile
+
+```
