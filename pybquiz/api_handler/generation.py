@@ -45,10 +45,15 @@ class BackgroundManager():
         #     # Get key
         #     self.openai = OpenAIAPI(api_key=data_token.get("openai", ""), delay_api=delay_api)
                 
-    def get_background(self, name: str, blurred: bool = False):
+    def get_background(self, name: str, blurred: bool = False, default: str = "random"):
         # Get image
         name_standard = standardize_text(name)
         path_img = self.bgs.get(name_standard, None)
+        
+        # Backup if not found
+        if path_img is None:
+            path_img = self.bgs.get(default, None)
+            
         # Check if blurred needed
         if blurred and path_img is not None:
             filename, ext = os.path.splitext(os.path.basename(path_img))
