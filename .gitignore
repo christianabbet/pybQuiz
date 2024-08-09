@@ -5,7 +5,9 @@
 
 output/*
 config/apitoken.yml
-config/client_secret.json
+config/credentials.json
+config/token.json
+
 
 ### Linux ###
 *~
