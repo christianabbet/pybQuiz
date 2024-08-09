@@ -45,7 +45,7 @@ def main(args):
         # Get image
         openai_api.generate_image(
             path=path_bg,
-            prompt="A {} simple and flat illustration".format(cat)
+            prompt="Flat peaceful illustration of {} in light tones".format(cat)
         )        
 
 if __name__ == '__main__':
