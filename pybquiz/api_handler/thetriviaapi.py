@@ -131,6 +131,12 @@ class TheTriviaAPI(BaseAPIHandler):
         # Send query
         result = self.slow_request_urllib3(url=self.URL_QUESTION, header=header, params=params)     
 
+        # Check return message
+        if result is None:
+            if self.verbose:
+                print("Error in API: {}".format(result))
+            return []
+
         # Parse results as questions
         questions = []
         for raw_question in result:

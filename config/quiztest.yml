@@ -1,0 +1,302 @@
+---
+
+# Base information for the API
+BaseInfo:
+  # Quiz title
+  title: "Test Pyb Quiz"
+  # Author
+  author: "Your Quiz Master"
+  # Delay to use in seconds between API queries
+  delay_api: 5
+  # Extended verbose terminal output
+  verbose: True
+  # If True, update stats about remote DB (slow)
+  clear_cache: False
+
+# List of rounds
+Rounds:
+#  Open Trivia DB
+-
+  title: "General Knowledge"    # Title of the round
+  api: "opentriviadb"           # Name of the library. See tags above
+  theme_id: 9                   # ID of the theme, see lookup table
+  difficulty: [1, 1, 1]         # Difficulty level question [easy, medium, hard]
+-
+  title: "Books"  
+  api: "opentriviadb"            
+  theme_id: 10                   
+  difficulty: [1, 1, 1]         
+-
+  title: "Film"  
+  api: "opentriviadb"            
+  theme_id: 11                   
+  difficulty: [1, 1, 1]         
+-
+  title: "Music "  
+  api: "opentriviadb"            
+  theme_id: 12                   
+  difficulty: [1, 1, 1]         
+-
+  title: "Musicals & Theatres"  
+  api: "opentriviadb"            
+  theme_id: 13                   
+  difficulty: [1, 1, 1]         
+-
+  title: "Television"  
+  api: "opentriviadb"            
+  theme_id: 14                   
+  difficulty: [1, 1, 1]         
+-
+  title: "Video Games"  
+  api: "opentriviadb"            
+  theme_id: 15                   
+  difficulty: [1, 1, 1]         
+-
+  title: "Board Games"  
+  api: "opentriviadb"            
+  theme_id: 16                   
+  difficulty: [1, 1, 1]         
+-
+  title: "Science & Nature"  
+  api: "opentriviadb"            
+  theme_id: 17                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Computers"  
+  api: "opentriviadb"            
+  theme_id: 18                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Mathematics"  
+  api: "opentriviadb"            
+  theme_id: 19                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Mythology"  
+  api: "opentriviadb"            
+  theme_id: 20                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Sports"  
+  api: "opentriviadb"            
+  theme_id: 21                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Geography"  
+  api: "opentriviadb"            
+  theme_id: 22                   
+  difficulty: [1, 1, 1]      
+-
+  title: "History"  
+  api: "opentriviadb"            
+  theme_id: 23                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Politics"  
+  api: "opentriviadb"            
+  theme_id: 24                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Art"  
+  api: "opentriviadb"            
+  theme_id: 25                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Celebrities"  
+  api: "opentriviadb"            
+  theme_id: 26                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Animals"  
+  api: "opentriviadb"            
+  theme_id: 27                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Vehicles"  
+  api: "opentriviadb"            
+  theme_id: 28                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Comics"  
+  api: "opentriviadb"            
+  theme_id: 29                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Gadgets"  
+  api: "opentriviadb"            
+  theme_id: 30                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Japanese Anime & Manga"  
+  api: "opentriviadb"            
+  theme_id: 31                   
+  difficulty: [1, 1, 1]      
+-
+  title: "Cartoon & Animations"  
+  api: "opentriviadb"            
+  theme_id: 32                   
+  difficulty: [1, 1, 1]      
+#  The Trivia API
+-
+  title: "Arts & Literature"
+  api: "thetriviaapi"
+  theme_id: 0                   
+  difficulty: [1, 1, 1]     
+-
+  title: "Film & TV"  
+  api: "thetriviaapi"
+  theme_id: 1       
+  difficulty: [1, 1, 1] 
+-
+  title: "Food & Drink"
+  api: "thetriviaapi"
+  theme_id: 2
+  difficulty: [1, 1, 1]
+-
+  title: "General Knowledge"
+  api: "thetriviaapi"
+  theme_id: 3
+  difficulty: [1, 1, 1]
+-
+  title: "Geography"
+  api: "thetriviaapi"
+  theme_id: 4
+  difficulty: [1, 1, 1]
+-
+  title: "History"
+  api: "thetriviaapi"
+  theme_id: 5
+  difficulty: [1, 1, 1]
+-
+  title: "Music"
+  api: "thetriviaapi"
+  theme_id: 6
+  difficulty: [1, 1, 1]
+-
+  title: "Science"
+  api: "thetriviaapi"
+  theme_id: 7
+  difficulty: [1, 1, 1]
+-
+  title: "Society & Culture"
+  api: "thetriviaapi"
+  theme_id: 8
+  difficulty: [1, 1, 1]
+-
+  title: "Sport & Leisure"
+  api: "thetriviaapi"
+  theme_id: 9
+  difficulty: [1, 1, 1]
+# Quiz API
+-
+  title: "Linux"  
+  api: "quizapi"
+  theme_id: 1       
+  difficulty: [1, 1, 1] 
+-
+  title: "Bash"
+  api: "quizapi"
+  theme_id: 2
+  difficulty: [1, 1, 1]
+-
+  title: "Uncategorized"
+  api: "quizapi"
+  theme_id: 3
+  difficulty: [1, 1, 1]
+-
+  title: "Docker"
+  api: "quizapi"
+  theme_id: 4
+  difficulty: [1, 1, 1]
+-
+  title: "SQL"
+  api: "quizapi"
+  theme_id: 5
+  difficulty: [1, 1, 1]
+-
+  title: "CMS"
+  api: "quizapi"
+  theme_id: 6
+  difficulty: [1, 1, 1]
+-
+  title: "Code"
+  api: "quizapi"
+  theme_id: 7
+  difficulty: [1, 1, 1]
+-
+  title: "DevOps"
+  api: "quizapi"
+  theme_id: 8
+  difficulty: [1, 1, 1]
+# API Ninjas Trivia
+-
+  title: "Arts & Literature"
+  api: "apininjas"
+  theme_id: 0                   
+  difficulty: [1, 0, 0]     
+-
+  title: "Language"  
+  api: "apininjas"
+  theme_id: 1       
+  difficulty: [1, 0, 0] 
+-
+  title: "Science & Nature"
+  api: "apininjas"
+  theme_id: 2
+  difficulty: [1, 0, 0]
+-
+  title: "General"
+  api: "apininjas"
+  theme_id: 3
+  difficulty: [1, 0, 0]
+-
+  title: "Food & Drink"
+  api: "apininjas"
+  theme_id: 4
+  difficulty: [1, 0, 0]
+-
+  title: "People & Places"
+  api: "apininjas"
+  theme_id: 5
+  difficulty: [1, 0, 0]
+-
+  title: "Geography"
+  api: "apininjas"
+  theme_id: 6
+  difficulty: [1, 0, 0]
+-
+  title: "History & Holidays"
+  api: "apininjas"
+  theme_id: 7
+  difficulty: [1, 0, 0]
+-
+  title: "Entertainment"
+  api: "apininjas"
+  theme_id: 8
+  difficulty: [1, 0, 0]
+-
+  title: "Toys & Games"
+  api: "apininjas"
+  theme_id: 9
+  difficulty: [1, 0, 0]
+-
+  title: "Music"
+  api: "apininjas"
+  theme_id: 10
+  difficulty: [1, 0, 0]
+-
+  title: "Mathematics"
+  api: "apininjas"
+  theme_id: 11
+  difficulty: [1, 0, 0]
+-
+  title: "Religion & Mythology"
+  api: "apininjas"
+  theme_id: 12
+  difficulty: [1, 0, 0]
+-
+  title: "Sports & Leisure"
+  api: "apininjas"
+  theme_id: 13
+  difficulty: [1, 0, 0]
+...

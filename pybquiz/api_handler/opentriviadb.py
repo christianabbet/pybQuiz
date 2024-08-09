@@ -125,6 +125,12 @@ class OpenTriviaDB(BaseAPIHandler):
         # Send query
         result = self.slow_request_urllib3(url=self.URL_QUESTION, params=params)
         
+        # Check if answer is correct
+        if self.KEY_R_ERROR in result:
+            if self.verbose:
+                print("Error in API: {}".format(result))
+            return []
+                
         # Parse results as questions
         questions = []
         cat_id_lut = np.argmax(self.categories_id == category_id)

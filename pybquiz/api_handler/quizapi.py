@@ -96,6 +96,12 @@ class QuiAPI(BaseAPIHandler):
         # Get question
         result = self.slow_request_httpclient(url=self.URL_QUESTIONS, header=header, params=params)
         
+        # Check if answer is correct
+        if self.KEY_R_ERROR in result:
+            if self.verbose:
+                print("Error in API: {}".format(result))
+            return []
+        
         # Parse results as questions
         questions = []
         for raw_question in result:

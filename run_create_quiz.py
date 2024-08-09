@@ -40,9 +40,9 @@ if __name__ == '__main__':
         prog='pybQuiz Creator',
         description='Create a pub quiz',
     )
-    parser.add_argument('--name', default='myquiz')
+    parser.add_argument('--name', default='quiztest')
     parser.add_argument('--dirout', default='output')
-    parser.add_argument('--cfg', default='config/template.yml')
+    parser.add_argument('--cfg', default='config/quiztest.yml')
     parser.add_argument('--token', default='config/apitoken.yml')
     args = parser.parse_args()
     

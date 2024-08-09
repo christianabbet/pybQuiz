@@ -19,7 +19,7 @@ class OpenAIAPI:
             api_key=os.environ.get(OpenAIAPI.ENV_KEY),
         )
 
-    def generate_image(self, path: str, prompt: str, size: str = "1792x1024", quality: str = "standard", crop: list[int] = [1365, 1024]):
+    def generate_image(self, path: str, prompt: str, size: str = "1024x1024", quality: str = "standard", crop: list[int] = [1024, 768]):
         
         # Sending prompt to openAI
         start = time.time()

@@ -178,13 +178,11 @@ Rounds:                         # List of rounds
   api: "opentriviadb"           # Name of the library. See tags above
   theme_id: 12                  # ID of the theme, see lookup table
   difficulty: [5, 3, 2]         # Difficulty level question [easy, medium, hard]
-  shuffle: True                 # If True, random difficult order
 -
   title: "Science"              # Title of the round
   api: "thetriviaapi"           # Name of the library. See tags above
   theme_id: 7                   # ID of the theme, see lookup table
   difficulty: [2, 2, 6]         # Difficulty level question [easy, medium, hard]
-  shuffle: True                 # If True, random difficult order
   
 ...
 ```
@@ -205,7 +203,6 @@ python run_create_quiz.py --cfg config/myquiz.yml
   * [ ] Add color customization for text and boxes
 * [ ] Add openai generation for templates
   * [ ] Add prompt in template
-  * [ ] Create uniform color palette for themes
 
 
 ## Thanks
