@@ -14,7 +14,10 @@ Create environement
 conda create env -n pybquiz
 conda activate pybquiz
 pip install numpy tqdm py-markdown-table
+# To generate new backgorunds
 pip install --upgrade openai
+# To export to Google Slides
+pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 ```
 
 Create your quiz
@@ -151,7 +154,7 @@ apininjas: YOUR_API_KEY_4
 ...
 ```
 
-For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token)) [apininjas](https://api-ninjas.com/profile), you can generate you token by folowing the instructions linked.
+For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token)) [apininjas](https://api-ninjas.com/profile), you can generate you token by folowing the instructions linked. The Google Slide API is not mandatory if only the pptx are wanted. To setup Google slides API please take a look at the [doc](https://developers.google.com/slides/api/quickstart/python).
 
 ## Custom config files
 
@@ -187,7 +190,7 @@ Rounds:                         # List of rounds
 ...
 ```
 
-Then run the creation of the quiz
+Then run the creation of the quiz. By default the quiz is exported as a pptx presentation.
 ```
 python run_create_quiz.py --cfg config/myquiz.yml
 ```
@@ -199,11 +202,7 @@ python run_create_quiz.py --cfg config/myquiz.yml
 * [ ] Add PPT generation
   * [ ] Check if multiple time same question [apininjas]
   * [ ] Add difficulty information on slides
-  * [ ] Remove need for typing font path (linux ?)
   * [ ] Add color customization for text and boxes
-* [ ] Add openai generation for templates
-  * [ ] Add prompt in template
-
 
 ## Thanks
 

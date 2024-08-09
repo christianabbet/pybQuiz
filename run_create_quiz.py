@@ -31,7 +31,12 @@ def main(args):
     
     # Reload from json
     PptxFactory.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
-        
+    
+    # # Check if google slide available
+    if os.path.exists(args.googleslide):
+        print("todo")
+
+
 
 if __name__ == '__main__':
     
@@ -44,6 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('--dirout', default='output')
     parser.add_argument('--cfg', default='config/quiztest.yml')
     parser.add_argument('--token', default='config/apitoken.yml')
+    parser.add_argument('--googleslide', default='config/client_secret.json')
     args = parser.parse_args()
     
     main(args=args)

@@ -53,7 +53,7 @@ class Questions:
         """
         
         # Set variables
-        self.question = question.capitalize()
+        self.question =  self.capitalize([question])[0]
         
         # Set random order for questions
         self.correct_answers = self.capitalize(correct_answers)
@@ -68,7 +68,7 @@ class Questions:
         
     @staticmethod
     def capitalize(strings: list[str]):
-            return [s.capitalize() for s in strings]
+            return [s[0].capitalize() + s[1:] for s in strings]
         
     def get_shuffled_answers(self):
         # Concat values

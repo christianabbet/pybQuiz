@@ -8,6 +8,9 @@ from pptx import Presentation
 import numpy as np
 import json
 from pybquiz.const import PYBConst as C
+from sys import platform
+import os
+from pathlib import Path
 
 
 def pos_to_char(pos):
@@ -59,6 +62,8 @@ class PptxFactory:
     COLOR_BBOX_LINE = RGBColor.from_string("2881a1")
     COLOR_TEXT = RGBColor.from_string("ffffff")
     
+    # Font location linux
+    FONT_PATH = "/usr/share/fonts"
     
     @staticmethod
     def export(dump_path: str, outfile: str, background_gen = None):
@@ -69,10 +74,13 @@ class PptxFactory:
             
         # Save results
         root = Presentation() 
+        
+        # Get font reference
+        pfont = PptxFactory.get_system_fonts()
 
         # Add splide to presetation
         img_bg = background_gen.get_background("Pub Quiz")
-        PptxFactory._add_title_subtitle(title=data[C.TITLE], subtitle=data[C.AUTHOR], root=root, img_bg=img_bg) 
+        PptxFactory._add_title_subtitle(title=data[C.TITLE], subtitle=data[C.AUTHOR], root=root, img_bg=img_bg, pfont=pfont) 
                     
         # Create rounds
         Nround = len(data[C.ROUNDS])
@@ -82,7 +90,7 @@ class PptxFactory:
             img_bg = background_gen.get_background(catname, blurred=False)
             img_bg_blurred = background_gen.get_background(catname, blurred=True)
             str_round = "Round {}: {}".format(i+1, data[C.ROUNDS][i][C.TITLE])
-            PptxFactory._add_title_subtitle(root=root, title=str_round, img_bg=img_bg)            
+            PptxFactory._add_title_subtitle(root=root, title=str_round, img_bg=img_bg, pfont=pfont)            
             
             Nquestion = len(data[C.ROUNDS][i][C.QUESTIONS])
             for j in range(Nquestion):
@@ -94,9 +102,10 @@ class PptxFactory:
                     question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
                     answers=answers,
                     img_bg=img_bg_blurred,
+                    pfont=pfont,
                 ) 
                 
-            PptxFactory._add_title_subtitle(root=root, title=str_round, subtitle="Answers", img_bg=img_bg)            
+            PptxFactory._add_title_subtitle(root=root, title=str_round, subtitle="Answers", img_bg=img_bg, pfont=pfont)            
                
             # Iterate over questions (answers)
             for j in range(Nquestion):
@@ -110,6 +119,7 @@ class PptxFactory:
                     answers=answers,
                     answers_id=correct_answers,
                     img_bg=img_bg_blurred,
+                    pfont=pfont,
                 )                 
 
                 
@@ -117,9 +127,24 @@ class PptxFactory:
         root.save(outfile)             
         
     @staticmethod
-    def get_system_fonts():
-        return "/usr/share/fonts/opentype/fonts-hosny-amiri/Amiri-Regular.ttf"
-    
+    def get_system_fonts(template: str = "Amiri-Regular"):
+        # On linux need to look for font
+        if "linux" in platform:
+            # Find fonts
+            fonts = [str(r) for r in Path(PptxFactory.FONT_PATH).rglob("*.ttf")]
+            tfonts = [f for f in fonts if "{}.ttf".format(template) in f]
+            if len(tfonts) == 0:
+                # Not font, take random
+                pfont = fonts[0]
+            else:
+                # Take tmeplate font
+                pfont = tfonts[0]
+            # Look for template
+            return pfont
+        else:
+            return None
+
+
     @staticmethod
     def _add_frame(
         shapes: pptx.shapes.shapetree.SlideShapes, 
@@ -130,7 +155,9 @@ class PptxFactory:
         color_bg: pptx.dml.color.RGBColor = COLOR_BBOX_BACKGROUND, 
         color_text: pptx.dml.color.RGBColor = COLOR_TEXT, 
         color_line: pptx.dml.color.RGBColor =  COLOR_BBOX_LINE, 
-        alignement: int = PP_ALIGN.CENTER):
+        alignement: int = PP_ALIGN.CENTER,
+        font_file: str = None,
+    ):
         
         shape = shapes.add_shape(
             shapeid, 
@@ -153,14 +180,14 @@ class PptxFactory:
 
         if text is not None:
             tf.text = text
-            tf.fit_text(max_size=font, font_file=PptxFactory.get_system_fonts()) 
+            tf.fit_text(max_size=font, font_file=font_file) 
             tf.paragraphs[0].alignment = alignement
         
         if color_text is not None:
             tf.paragraphs[0].font.color.rgb = color_text
         
     @staticmethod
-    def _add_title_subtitle(root: PObject, title: str = "", subtitle: str = None, img_bg: str = None):
+    def _add_title_subtitle(root: PObject, title: str = "", subtitle: str = None, img_bg: str = None, pfont: str = None):
         
             # Add slide
             title_slide = root.slides.add_slide(root.slide_layouts[PptxFactory.BLANK]) 
@@ -178,8 +205,9 @@ class PptxFactory:
                     Mm(PptxFactory.S_FRAME_WITDH-2*PptxFactory.S_FRAME_MARGIN), 
                     Mm(2*PptxFactory.S_FRAME_MARGIN),
                 ],
-                text = title,
-                font= PptxFactory.FONT_TITLE
+                text=title,
+                font=PptxFactory.FONT_TITLE,
+                font_file=pfont,
             )
             
             if subtitle is not None:
@@ -191,13 +219,14 @@ class PptxFactory:
                         Mm(PptxFactory.S_FRAME_WITDH-4*PptxFactory.S_FRAME_MARGIN), 
                         Mm(PptxFactory.S_FRAME_MARGIN),
                     ],
-                    text = subtitle,
-                    font= PptxFactory.FONT_SUBTITLE
+                    text=subtitle,
+                    font= PptxFactory.FONT_SUBTITLE,
+                    font_file=pfont,
                 )
                         
             
     @staticmethod
-    def _add_question(root: PObject, i: int = 1, question: str = "", answers: list[str] = [], answers_id: list[int] = None, img_bg: str = None):
+    def _add_question(root: PObject, i: int = 1, question: str = "", answers: list[str] = [], answers_id: list[int] = None, img_bg: str = None, pfont: str = None):
         
             # Add slide and question            
             question_slide = root.slides.add_slide(root.slide_layouts[PptxFactory.BLANK]) 
@@ -217,7 +246,8 @@ class PptxFactory:
                     Mm(PptxFactory.S_QUEST_BBOX_W), 
                     Mm(PptxFactory.S_QUEST_BBOX_H),
                 ],
-                text = None,
+                text=None,
+                font_file=pfont,
             )
             
             PptxFactory._add_frame(
@@ -233,13 +263,14 @@ class PptxFactory:
                 color_line=None,                    
                 font=PptxFactory.FONT_QUESTION,
                 alignement=PP_ALIGN.LEFT,
+                font_file=pfont,
             )
 
-            PptxFactory._add_answers(question_slide, answers, answers_id)
+            PptxFactory._add_answers(question_slide, answers, answers_id, pfont=pfont)
 
             
     @staticmethod
-    def _add_answers(slide, answers: list[str], answers_id: list[int] = None):
+    def _add_answers(slide, answers: list[str], answers_id: list[int] = None, pfont: str = None):
                            
             nQ = len(answers)
             nRows = np.ceil(nQ/2).astype(int)
@@ -287,6 +318,7 @@ class PptxFactory:
                     text = None,
                     color_bg=color_bg,
                     color_line=color_bg,
+                    font_file=pfont,
                 )
                             
                 PptxFactory._add_frame(
@@ -302,6 +334,7 @@ class PptxFactory:
                     color_line=None,
                     font=PptxFactory.FONT_ANSWER,
                     alignement=PP_ALIGN.LEFT,
+                    font_file=pfont,
                 )
                                 
             
