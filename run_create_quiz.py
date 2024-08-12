@@ -3,6 +3,7 @@ import os
 from pybquiz import PybQuiz
 from pybquiz.export.pptx import PptxFactory
 from pybquiz.background import BackgroundManager
+from pybquiz.export.googleslide import GoogleSlideFactory
 
 
 def main(args):
@@ -33,8 +34,8 @@ def main(args):
     PptxFactory.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
     
     # # Check if google slide available
-    if os.path.exists(args.googleslide):
-        print("todo")
+    # if os.path.exists(args.googleslide):
+    #     GoogleSlideFactory.export(title=args.name, crendential_file=args.googleslide)
 
 
 
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     parser.add_argument('--dirout', default='output')
     parser.add_argument('--cfg', default='config/quiztest.yml')
     parser.add_argument('--token', default='config/apitoken.yml')
-    parser.add_argument('--googleslide', default='config/client_secret.json')
+    parser.add_argument('--googleslide', default='config/credentials.json')
     args = parser.parse_args()
     
     main(args=args)

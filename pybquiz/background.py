@@ -56,7 +56,7 @@ class BackgroundManager():
             filename, ext = os.path.splitext(os.path.basename(path_img))
             path_blur = os.path.join(os.path.dirname(path_img), "{}_blurred{}".format(filename, ext))
             img = Image.open(path_img)
-            img.filter(ImageFilter.BoxBlur(radius=10)).save(path_blur)
+            img.filter(ImageFilter.GaussianBlur(radius=10)).save(path_blur)
             return path_blur
         else:
             return path_img

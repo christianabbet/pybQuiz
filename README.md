@@ -197,12 +197,12 @@ python run_create_quiz.py --cfg config/myquiz.yml
 
 ## Coming Next
 
+* [ ] Create Quiz trough terminal
 * [ ] Google slide export
   * [ ] Table to handle scores
 * [ ] Add PPT generation
   * [ ] Check if multiple time same question [apininjas]
   * [ ] Add difficulty information on slides
-  * [ ] Add color customization for text and boxes
 
 ## Thanks
 
