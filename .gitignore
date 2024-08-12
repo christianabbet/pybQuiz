@@ -4,10 +4,9 @@
 ### Others ###
 
 output/*
-config/apitoken.yml
-config/credentials.json
-config/token.json
-
+config/*
+config/categories
+config/quiztest.yml
 
 ### Linux ###
 *~

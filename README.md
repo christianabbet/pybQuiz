@@ -13,7 +13,7 @@ Create environement
 # Using conda
 conda create env -n pybquiz
 conda activate pybquiz
-pip install numpy tqdm py-markdown-table
+pip install numpy tqdm py-markdown-table pandas
 # To generate new backgorunds
 pip install --upgrade openai
 # To export to Google Slides
@@ -23,15 +23,17 @@ pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-
 Create your quiz
 
 ```bash
-# Run quiz creating based on given config file
+# Run quiz creating 
 python run_create_quiz.py
 
-# Extra available arguments
---name YOURQUIZNAME             # Name of the quiiz file
+# (Extra available arguments)
 --dirout /path/to/dir           # Path to output directory
---cfg /path/to/template.yml     # Path to config file (custom quiz)
---token /path/to/apitoken.yml   # Path to APIs token file
+--cfg /path/to/template.yml     # Path to already existing config file
+--token /path/to/apitoken.yml   # Path to APIs token file 
 ```
+
+![plot](creator.png)
+
 
 ## Available APIs
 
@@ -156,48 +158,12 @@ apininjas: YOUR_API_KEY_4
 
 For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token)) [apininjas](https://api-ninjas.com/profile), you can generate you token by folowing the instructions linked. The Google Slide API is not mandatory if only the pptx are wanted. To setup Google slides API please take a look at the [doc](https://developers.google.com/slides/api/quickstart/python).
 
-## Custom config files
 
-You can create your own config file Here is an examples on how to create a new quiz. Create a new file `myquiz.yml`. Look above to know the suported libraries
-
-
-```
-touch config/myquiz.yml
-```
-
-Then structure the yaml file as described below
-```yml
----
-
-BaseInfo:                       # Base information for the API
-  title: "Amazing Pyb Quiz"     # Quiz title
-  delay_api: 5                  # Delay to use in seconds between API queries
-  verbose: True                 # Extended verbose terminal output
-  clear_cache: False            # If True, update stats about remote DB (slow)
-
-Rounds:                         # List of rounds
--
-  title: "Video Games"          # Title of the round
-  api: "opentriviadb"           # Name of the library. See tags above
-  theme_id: 12                  # ID of the theme, see lookup table
-  difficulty: [5, 3, 2]         # Difficulty level question [easy, medium, hard]
--
-  title: "Science"              # Title of the round
-  api: "thetriviaapi"           # Name of the library. See tags above
-  theme_id: 7                   # ID of the theme, see lookup table
-  difficulty: [2, 2, 6]         # Difficulty level question [easy, medium, hard]
-  
-...
-```
-
-Then run the creation of the quiz. By default the quiz is exported as a pptx presentation.
-```
-python run_create_quiz.py --cfg config/myquiz.yml
-```
 
 ## Coming Next
 
 * [ ] Create Quiz trough terminal
+  * [ ] Fix api token generation
 * [ ] Google slide export
   * [ ] Table to handle scores
 * [ ] Add PPT generation

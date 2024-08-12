@@ -73,7 +73,7 @@ class PybQuiz:
         cfg_rounds: dict,
         clear_cache: bool = False,
         tokens: dict = None,
-        verbose: bool = False,
+        verbose: bool = True,
     ):
     
         self.title = title
@@ -150,7 +150,7 @@ class PybQuiz:
         delay_api = cfg_base.get("delay_api", 5.)
         author = cfg_base.get("author", "")
         title = cfg_base.get("title", "")
-        verbose = cfg_base.get("verbose", False) 
+        verbose = cfg_base.get("verbose", True) 
         clear_cache = cfg_base.get("clear_cache", False) 
         cfg_rounds = data_cfg.get("Rounds", [])
         
