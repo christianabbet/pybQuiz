@@ -32,6 +32,8 @@ python run_create_quiz.py
 --token /path/to/apitoken.yml   # Path to APIs token file 
 ```
 
+Note that some APIs need a token to be accessed. Pleaserefer to the API section to know how to setup tokens.
+
 ![plot](creator.png)
 
 
