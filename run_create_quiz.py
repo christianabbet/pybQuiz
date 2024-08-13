@@ -11,7 +11,7 @@ def main(args):
 
     # Get input information
     cfg_path = args.cfg
-    token_path = args.token
+    token_path = args.apitoken
        
     # Assist quiz creation
     if cfg_path is None or not os.path.exists(cfg_path):
@@ -39,8 +39,8 @@ def main(args):
     PptxFactory.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
     
     # # Check if google slide available
-    # if os.path.exists(args.googleslide):
-    #     GoogleSlideFactory.export(title=args.name, crendential_file=args.googleslide)
+    # if os.path.exists(args.googlecreds):
+    #     GoogleSlideFactory.export(title=args.name, crendential_file=args.googlecreds)
 
 
 
@@ -51,10 +51,10 @@ if __name__ == '__main__':
         prog='pybQuiz Creator',
         description='Create a pub quiz',
     )
+    parser.add_argument('--cfg', default=None)
     parser.add_argument('--dirout', default='output')
-    parser.add_argument('--cfg', default="config/myquiz.yml")
-    parser.add_argument('--token', default='config/apitoken.yml')
-    parser.add_argument('--googleslide', default='config/credentials.json')
+    parser.add_argument('--apitoken', default='config/apitoken.yml')
+    parser.add_argument('--googlecreds', default='config/credentials.json')
     args = parser.parse_args()
     
     main(args=args)

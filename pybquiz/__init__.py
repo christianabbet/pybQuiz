@@ -42,6 +42,9 @@ class Round():
             # Append to list
             self.questions.extend(qs)
         
+        if verbose:
+            print("Question generated: {}".format(len(self.questions)))
+        
         # Check if shuffle is needed
         if self.shuffle:
             # Reorder
