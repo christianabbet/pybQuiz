@@ -14,10 +14,10 @@ Create environement
 conda create env -n pybquiz
 conda activate pybquiz
 pip install numpy tqdm py-markdown-table pandas
-# To generate new backgorunds
-pip install --upgrade openai
 # To export to Google Slides
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+# To generate new backgorunds
+pip install --upgrade openai
 ```
 
 Create your quiz
@@ -27,12 +27,13 @@ Create your quiz
 python run_create_quiz.py
 
 # (Extra available arguments)
---dirout /path/to/dir           # Path to output directory
---cfg /path/to/template.yml     # Path to already existing config file
---token /path/to/apitoken.yml   # Path to APIs token file 
+--dirout /path/to/dir               # Path to output directory
+--cfg /path/to/template.yml         # Path to already existing config file
+--apitoken /path/to/apitoken.yml    # Path to APIs token file 
+--googlecreds /path/to/creds.json   # Path to Google slide credentials
 ```
 
-Note that some APIs need a token to be accessed. Pleaserefer to the API section to know how to setup tokens.
+Note that some APIs need a token to be accessed. Please refer to the API section to know how to setup tokens.
 
 ![plot](creator.png)
 
@@ -158,7 +159,7 @@ apininjas: YOUR_API_KEY_4
 ...
 ```
 
-For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token)) [apininjas](https://api-ninjas.com/profile), you can generate you token by folowing the instructions linked. The Google Slide API is not mandatory if only the pptx are wanted. To setup Google slides API please take a look at the [doc](https://developers.google.com/slides/api/quickstart/python).
+For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token) [apininjas](https://api-ninjas.com/profile)), you can generate you token by folowing the instructions linked. The Google Slide API is not mandatory if only the pptx are wanted. To setup Google slides API please take a look at the [doc](https://developers.google.com/slides/api/quickstart/python).
 
 
 

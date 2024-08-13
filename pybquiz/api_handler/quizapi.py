@@ -6,7 +6,7 @@ from pybquiz.elements import Questions
 import hashlib
 
 
-class QuiAPI(BaseAPIHandler):
+class QuizAPI(BaseAPIHandler):
 
     
     URL_CATEGORIES = "https://quizapi.io/api/v1/categories"
@@ -45,7 +45,11 @@ class QuiAPI(BaseAPIHandler):
         delay_api : int, optional
             Default time between queries to API in seconds. By default 5 seconds.
         """
-        self.token = token
+        # Key is needed for this api
+        if token is None:
+            raise NotImplementedError()
+        
+        self.token = token        
         super().__init__(verbose=verbose, delay_api=delay_api, clear_cache=clear_cache)
                 
     def initialize_db(self) -> Union[List[str], List[int], np.ndarray, np.ndarray]:
