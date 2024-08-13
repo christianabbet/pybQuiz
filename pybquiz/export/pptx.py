@@ -11,6 +11,7 @@ from pybquiz.const import PYBConst as C
 from sys import platform
 import os
 from pathlib import Path
+from pybquiz.export.slidetemplate import SlideTemplate
 
 
 def pos_to_char(pos):
@@ -28,59 +29,35 @@ class PptxFactory:
     BLANK = 6
     CONTENT_CAPTION = 7
     IMAGE_CAPTION = 8
-        
-    # Base slide frame in mm
-    S_FRAME_WITDH = 254  # 10 Inches
-    S_FRAME_HEIGH = 190.5  # 7.5 Inches
-    S_FRAME_MARGIN = 20
-    S_FRAME_MARGIN_TINY = 5
-    S_FRAME_MARGIN_TTINY = 2
-    # Question frame
-    S_QUEST_BBOX_W = S_FRAME_WITDH - (2 * S_FRAME_MARGIN)
-    S_QUEST_BBOX_H = 30
-    # Answer frames
-    S_ANSWERS_WIDTH = S_QUEST_BBOX_W
-    S_ANSWERS_TOP = S_QUEST_BBOX_H + 2*S_FRAME_MARGIN
-    S_ANSWERS_HEIGHT = S_FRAME_HEIGH - S_ANSWERS_TOP - S_FRAME_MARGIN
-    
-    S_ANSWER_COL_MARGIN = S_FRAME_MARGIN / 2
-    S_ANSWER_SPACE = 5
-    S_ANSWER_COL_WIDTH = (S_ANSWERS_WIDTH - S_ANSWER_SPACE) / 2
-    S_ANSWER_COL1_LEFT = S_FRAME_MARGIN
-    S_ANSWER_COL2_LEFT = S_FRAME_MARGIN + S_ANSWER_COL_WIDTH + S_ANSWER_SPACE
-    S_ANSWER_ROW_HEIGHT_MAX = 20
 
     # Font
     FONT_TITLE = 40
     FONT_SUBTITLE = 28
     FONT_QUESTION = 28
     FONT_ANSWER = 20
-    
-    # COLORS
-    COLOR_BBOX_BACKGROUND = RGBColor.from_string("2881a1")
-    COLOR_BBOX_BACKGROUND_CORRECT = RGBColor.from_string("f3a600")
-    COLOR_BBOX_LINE = RGBColor.from_string("2881a1")
-    COLOR_TEXT = RGBColor.from_string("ffffff")
-    
+
     # Font location linux
     FONT_PATH = "/usr/share/fonts"
     
-    @staticmethod
-    def export(dump_path: str, outfile: str, background_gen = None):
+    def __init__(self, width: float = 254, height: float = 190.5) -> None:
+        # Save results
+        self.width = width
+        self.height = height
+        self.root = Presentation() 
+        self.st = SlideTemplate(width=width, height=height)
+        
+    def export(self, dump_path: str, outfile: str, background_gen = None):
         
         # Reload data
         with open(dump_path, "r") as f:
             data = json.load(f)
-            
-        # Save results
-        root = Presentation() 
-        
+
         # Get font reference
         pfont = PptxFactory.get_system_fonts()
 
         # Add splide to presetation
         img_bg = background_gen.get_background("Pub Quiz")
-        PptxFactory._add_title_subtitle(title=data[C.TITLE], subtitle=data[C.AUTHOR], root=root, img_bg=img_bg, pfont=pfont) 
+        self._add_title_subtitle(title=data[C.TITLE], subtitle=data[C.AUTHOR], img_bg=img_bg, pfont=pfont) 
                     
         # Create rounds
         Nround = len(data[C.ROUNDS])
@@ -90,14 +67,13 @@ class PptxFactory:
             img_bg = background_gen.get_background(catname, blurred=False)
             img_bg_blurred = background_gen.get_background(catname, blurred=True)
             str_round = "Round {}: {}".format(i+1, data[C.ROUNDS][i][C.TITLE])
-            PptxFactory._add_title_subtitle(root=root, title=str_round, img_bg=img_bg, pfont=pfont)            
+            self._add_title_subtitle(title=str_round, img_bg=img_bg, pfont=pfont)            
             
             Nquestion = len(data[C.ROUNDS][i][C.QUESTIONS])
             for j in range(Nquestion):
                 # Add question slide
                 answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.ANSWERS]
-                PptxFactory._add_question(
-                    root=root, 
+                self._add_question(
                     i=j+1, 
                     question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
                     answers=answers,
@@ -105,15 +81,14 @@ class PptxFactory:
                     pfont=pfont,
                 ) 
                 
-            PptxFactory._add_title_subtitle(root=root, title=str_round, subtitle="Answers", img_bg=img_bg, pfont=pfont)            
+            self._add_title_subtitle(title=str_round, subtitle="Answers", img_bg=img_bg, pfont=pfont)            
                
             # Iterate over questions (answers)
             for j in range(Nquestion):
                 # Add question slide
                 answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.ANSWERS]
                 correct_answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.CORRECT_ANSWERS]
-                PptxFactory._add_question(
-                    root=root, 
+                self._add_question(
                     i=j+1, 
                     question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
                     answers=answers,
@@ -124,7 +99,7 @@ class PptxFactory:
 
                 
         # Saving file 
-        root.save(outfile)             
+        self.root.save(outfile)             
         
     @staticmethod
     def get_system_fonts(template: str = "Amiri-Regular"):
@@ -150,11 +125,11 @@ class PptxFactory:
         shapes: pptx.shapes.shapetree.SlideShapes, 
         bbox: list[int], 
         text: str, 
-        font: int = FONT_TITLE, 
-        shapeid: int = MSO_SHAPE.ROUNDED_RECTANGLE, 
-        color_bg: pptx.dml.color.RGBColor = COLOR_BBOX_BACKGROUND, 
-        color_text: pptx.dml.color.RGBColor = COLOR_TEXT, 
-        color_line: pptx.dml.color.RGBColor =  COLOR_BBOX_LINE, 
+        font: int = 0, 
+        color_bg: str = None, 
+        color_text: str = None, 
+        color_line: str = None, 
+        shapeid: int = MSO_SHAPE.ROUNDED_RECTANGLE,         
         alignement: int = PP_ALIGN.CENTER,
         font_file: str = None,
     ):
@@ -186,78 +161,69 @@ class PptxFactory:
         if color_text is not None:
             tf.paragraphs[0].font.color.rgb = color_text
         
-    @staticmethod
-    def _add_title_subtitle(root: PObject, title: str = "", subtitle: str = None, img_bg: str = None, pfont: str = None):
+    def _add_title_subtitle(self, title: str = "", subtitle: str = None, img_bg: str = None, pfont: str = None):
         
             # Add slide
-            title_slide = root.slides.add_slide(root.slide_layouts[PptxFactory.BLANK]) 
+            title_slide = self.root.slides.add_slide(self.root.slide_layouts[PptxFactory.BLANK]) 
             shapes =  title_slide.shapes            
                         
             # Add background
             if img_bg is not None:
-                shapes.add_picture(img_bg, Mm(0), Mm(0), height=Mm(PptxFactory.S_FRAME_HEIGH))
+                shapes.add_picture(img_bg, Mm(0), Mm(0), height=Mm(self.height))
             
+            (x, y, w, h) = self.st.get_title_bbox()
             PptxFactory._add_frame(
                 shapes=shapes,
-                bbox=[                
-                    Mm(PptxFactory.S_FRAME_MARGIN), 
-                    Mm(3*PptxFactory.S_FRAME_MARGIN), 
-                    Mm(PptxFactory.S_FRAME_WITDH-2*PptxFactory.S_FRAME_MARGIN), 
-                    Mm(2*PptxFactory.S_FRAME_MARGIN),
-                ],
+                bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
                 text=title,
                 font=PptxFactory.FONT_TITLE,
                 font_file=pfont,
+                color_bg=RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND), 
+                color_text=RGBColor.from_string(self.st.COLOR_TEXT), 
+                color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
             )
             
             if subtitle is not None:
+                (x, y, w, h) = self.st.get_subtitle_bbox()
                 PptxFactory._add_frame(
                     shapes=shapes,
-                    bbox=[                
-                        Mm(2*PptxFactory.S_FRAME_MARGIN), 
-                        Mm(6*PptxFactory.S_FRAME_MARGIN), 
-                        Mm(PptxFactory.S_FRAME_WITDH-4*PptxFactory.S_FRAME_MARGIN), 
-                        Mm(PptxFactory.S_FRAME_MARGIN),
-                    ],
+                    bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
                     text=subtitle,
                     font= PptxFactory.FONT_SUBTITLE,
                     font_file=pfont,
+                    color_bg=RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND), 
+                    color_text=RGBColor.from_string(self.st.COLOR_TEXT), 
+                    color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
                 )
-                        
             
-    @staticmethod
-    def _add_question(root: PObject, i: int = 1, question: str = "", answers: list[str] = [], answers_id: list[int] = None, img_bg: str = None, pfont: str = None):
+    def _add_question(self, i: int = 1, question: str = "", answers: list[str] = [], answers_id: list[int] = None, img_bg: str = None, pfont: str = None):
         
             # Add slide and question            
-            question_slide = root.slides.add_slide(root.slide_layouts[PptxFactory.BLANK]) 
+            question_slide = self.root.slides.add_slide(self.root.slide_layouts[PptxFactory.BLANK]) 
             
             # Add text shape
             shapes =  question_slide.shapes
 
             if img_bg is not None:
-                shapes.add_picture(img_bg, Mm(0), Mm(0), height=Mm(PptxFactory.S_FRAME_HEIGH))
+                shapes.add_picture(img_bg, Mm(0), Mm(0), height=Mm(self.height))
                 
             # Add question
+            (x, y, w, h) = self.st.get_question_bbox()
             PptxFactory._add_frame(
                 shapes=shapes,
-                bbox=[                
-                    Mm(PptxFactory.S_FRAME_MARGIN), 
-                    Mm(PptxFactory.S_FRAME_MARGIN), 
-                    Mm(PptxFactory.S_QUEST_BBOX_W), 
-                    Mm(PptxFactory.S_QUEST_BBOX_H),
-                ],
+                bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
                 text=None,
                 font_file=pfont,
+                color_bg=RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND), 
+                color_text=RGBColor.from_string(self.st.COLOR_TEXT), 
+                color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
             )
             
+            (x, y, w, h) = self.st.get_question_bbox()
+            m_in = self.st.get_inner_margin()
             PptxFactory._add_frame(
                 shapes=shapes,
-                bbox=[                
-                    Mm(PptxFactory.S_FRAME_MARGIN + PptxFactory.S_FRAME_MARGIN_TINY), 
-                    Mm(PptxFactory.S_FRAME_MARGIN + PptxFactory.S_FRAME_MARGIN_TINY), 
-                    Mm(PptxFactory.S_QUEST_BBOX_W - 2*PptxFactory.S_FRAME_MARGIN_TINY), 
-                    Mm(PptxFactory.S_QUEST_BBOX_H - 2*PptxFactory.S_FRAME_MARGIN_TINY),
-                ],
+                bbox=[Mm(x + m_in), Mm(y + m_in), Mm(w - 2*m_in), Mm(h - 2*m_in)],
                 text = "Q{}: {}".format(i, question),
                 color_bg=None,
                 color_line=None,                    
@@ -266,11 +232,10 @@ class PptxFactory:
                 font_file=pfont,
             )
 
-            PptxFactory._add_answers(question_slide, answers, answers_id, pfont=pfont)
+            self._add_answers(question_slide, answers, answers_id, pfont=pfont)
 
             
-    @staticmethod
-    def _add_answers(slide, answers: list[str], answers_id: list[int] = None, pfont: str = None):
+    def _add_answers(self, slide, answers: list[str], answers_id: list[int] = None, pfont: str = None):
                            
             nQ = len(answers)
             nRows = np.ceil(nQ/2).astype(int)
@@ -280,8 +245,12 @@ class PptxFactory:
                 return
             
             # Get total heigh based on the number of entries
-            htot = nRows * PptxFactory.S_ANSWER_ROW_HEIGHT_MAX + (nRows-1) * PptxFactory.S_ANSWER_SPACE
-            hoffset = (PptxFactory.S_ANSWERS_HEIGHT - htot) / 2
+            answer_height, answer_inter_height = self.st.get_answer_heights()
+            im = self.st.get_iinner_margin()
+            col, col1, col2 = self.st.get_answer_cols()
+            htot = nRows * answer_height + (nRows-1) * answer_inter_height
+            (_, ay, _, ah) = self.st.get_answer_bbox()
+            hoffset = (ah - htot) / 2
             
             # Add propositions
             for j in range(nQ):
@@ -291,29 +260,29 @@ class PptxFactory:
                 
                 # Fix width
                 if id_col == 0:
-                    left = PptxFactory.S_ANSWER_COL1_LEFT
+                    left = col1
                 else:
-                    left = PptxFactory.S_ANSWER_COL2_LEFT
+                    left = col2
             
                 # Add background
-                local_offset = id_row * (PptxFactory.S_ANSWER_ROW_HEIGHT_MAX + PptxFactory.S_ANSWER_SPACE)
+                local_offset = id_row * (answer_height + answer_inter_height)
                 shapes =  slide.shapes
                 
                 # Check if one or more answers
                 a = answers[j]
     
                 if answers_id is not None and j in answers_id:
-                    color_bg = PptxFactory.COLOR_BBOX_BACKGROUND_CORRECT
+                    color_bg = RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND_CORRECT)
                 else:
-                    color_bg = PptxFactory.COLOR_BBOX_BACKGROUND
+                    color_bg = RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND)
                     
-                PptxFactory._add_frame(
+                self._add_frame(
                     shapes=shapes,
                     bbox=[                
                         Mm(left), 
-                        Mm(PptxFactory.S_ANSWERS_TOP + local_offset + hoffset), 
-                        Mm(PptxFactory.S_ANSWER_COL_WIDTH), 
-                        Mm(PptxFactory.S_ANSWER_ROW_HEIGHT_MAX)
+                        Mm(local_offset + ay + hoffset), 
+                        Mm(col), 
+                        Mm(answer_height)
                     ],
                     text = None,
                     color_bg=color_bg,
@@ -321,13 +290,13 @@ class PptxFactory:
                     font_file=pfont,
                 )
                             
-                PptxFactory._add_frame(
+                self._add_frame(
                     shapes=shapes,
                     bbox=[                
-                        Mm(left + PptxFactory.S_FRAME_MARGIN_TTINY), 
-                        Mm(PptxFactory.S_ANSWERS_TOP + local_offset + hoffset + PptxFactory.S_FRAME_MARGIN_TTINY), 
-                        Mm(PptxFactory.S_ANSWER_COL_WIDTH - 2*PptxFactory.S_FRAME_MARGIN_TTINY), 
-                        Mm(PptxFactory.S_ANSWER_ROW_HEIGHT_MAX - 2*PptxFactory.S_FRAME_MARGIN_TTINY)
+                        Mm(left + im), 
+                        Mm(local_offset + ay + hoffset + im), 
+                        Mm(col - 2*im), 
+                        Mm(answer_height - 2*im)                        
                     ],
                     text=a,
                     color_bg=None,
