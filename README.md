@@ -37,11 +37,12 @@ python run_create_quiz.py -h
 
 ```bash
 options:
-  -h, --help     show this help message and exit
-  --cfg          path to config file (default if None)
-  --dirout       path to output directory for data generation (default is "output")
-  --apitoken     path to stored API tokens (default is "config/apitoken.yml")
-  --googlecreds  path to stored Google credentials (default is "config/credentials.json")
+  -h, --help            show this help message and exit
+  --cfg CFG             path to config file (default if None)
+  --dirout DIROUT       path to output directory for data generation (default is "output")
+  --apitoken APITOKEN   path to stored API tokens (default is "config/apitoken.yml")
+  --googlecreds GOOGLECREDS
+                        path to stored Google credentials (default is "config/credentials.json")
 ```
 
 Note that some APIs need a token to be accessed. Please refer to the API section to know how to setup tokens.
@@ -157,27 +158,32 @@ ${}^{**}$ No difficulty level
 
 ## Add Tokens
 
-To access certain content, you need an API Token. Once obtained, create a file `apitoken.yml` under the `config` folder. Fill the file with your own API keys. 
+To access certain content, you need an API Token. Once obtained, create a file `apitoken.yml` under the `config` folder. 
+
+```bash
+# Folder structure
+└── pybQuiz
+    └── config
+        └── apitoken.yml
+```
+
+Fill the file with your own API keys. 
 
 ```yml
 ---
-
 # Optional API tokens
-opentriviadb: YOUR_API_KEY_1
-thetriviaapi: YOUR_API_KEY_2
-quizapi: YOUR_API_KEY_3
-apininjas: YOUR_API_KEY_4
+OpenTriviaDB: YOUR_API_KEY_1
+TheTriviaAPI: YOUR_API_KEY_2
+QuizAPI: YOUR_API_KEY_3
+APINinjas: YOUR_API_KEY_4
 ...
 ```
 
-For each library ([opentriviadb](https://opentdb.com/api_config.php), [thetriviaapi](https://the-trivia-api.com/license/), [quizapi](https://quizapi.io/clientarea/settings/token) [apininjas](https://api-ninjas.com/profile)), you can generate you token by folowing the instructions linked. The Google Slide API is not mandatory if only the pptx are wanted. To setup Google slides API please take a look at the [doc](https://developers.google.com/slides/api/quickstart/python).
-
+For each library ([OpenTriviaDB](https://opentdb.com/api_config.php), [TheTriviaAPI](https://the-trivia-api.com/license/), [QuizAPI](https://quizapi.io/clientarea/settings/token) [APINinjas](https://api-ninjas.com/profile)), you can generate you token by folowing the instructions linked. The Google Slide API is not mandatory if only the pptx are wanted. To setup Google slides API please take a look at the [doc](https://developers.google.com/slides/api/quickstart/python).
 
 
 ## Coming Next
 
-* [ ] Create Quiz trough terminal
-  * [ ] Fix api token generation
 * [ ] Google slide export
   * [ ] Table to handle scores
 * [ ] Add PPT generation
