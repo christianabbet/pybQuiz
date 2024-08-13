@@ -3,7 +3,7 @@ import os
 from pybquiz import PybQuiz
 from pybquiz.export.pptx import PptxFactory
 from pybquiz.background import BackgroundManager
-from pybquiz.export.googleslide import GoogleSlideFactory
+# from pybquiz.export.googleslide import GoogleSlideFactory
 from pybquiz.config_generator import ConfigGenerator
 
 

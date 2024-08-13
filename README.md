@@ -7,13 +7,18 @@ PybQuiz is a Python package designed to help you create and manage pub quizzes e
 
 ## Setup
 
-Create environement
+Clone repo and create environement
 
 ```bash
+# Clone repo
+git clone https://github.com/christianabbet/pybQuiz.git
+cd pybQuiz
+
 # Using conda
-conda create env -n pybquiz
+conda create -n pybquiz python=3.9
 conda activate pybquiz
-pip install numpy tqdm py-markdown-table pandas
+# Base packages
+pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich
 # To export to Google Slides
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 # To generate new backgorunds

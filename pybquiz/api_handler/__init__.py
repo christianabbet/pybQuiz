@@ -24,6 +24,7 @@ def from_yaml(yaml_file: str):
     
     
     # Check if file exists
+    data_token = None
     if os.path.exists(yaml_file):
         with open(yaml_file) as stream:
             data_token = yaml.safe_load(stream)
@@ -32,9 +33,13 @@ def from_yaml(yaml_file: str):
     apis = {}
     
     for api_name in __all__:
-        # Check if attributes exists
-        api_token = data_token.get(api_name, None)
         try:
+            # No token
+            api_token = None
+            # Check if attributes exists
+            if data_token is not None:
+                api_token = data_token.get(api_name, None)
+            # Get API
             apis[api_name] = create_handler(name=api_name, token=api_token)
         except NotImplementedError:
             continue
