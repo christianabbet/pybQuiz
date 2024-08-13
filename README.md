@@ -156,18 +156,22 @@ ${}^{*}$ Distribution of question categories and difficulties unknown.
 ${}^{**}$ No difficulty level
 
 
-## Add Tokens
+## API Tokens and Google support
 
-To access certain content, you need an API Token. Once obtained, create a file `apitoken.yml` under the `config` folder. 
+To access certain content, you **need** an API Token. Once obtained, create a file `apitoken.yml` under the `config` folder. For each library ([OpenTriviaDB](https://opentdb.com/api_config.php), [TheTriviaAPI](https://the-trivia-api.com/license/), [QuizAPI](https://quizapi.io/clientarea/settings/token) [APINinjas](https://api-ninjas.com/profile)), you can generate you token by folowing the instructions linked. 
+
+The Google Slide API is not mandatory if only the pptx are wanted. To setup the Google slides API and to generate your credential file `credentials.json`, please take a look at the [doc](https://developers.google.com/slides/api/quickstart/python).
+
 
 ```bash
 # Folder structure
 └── pybQuiz
     └── config
+        ├── credentials.json
         └── apitoken.yml
 ```
 
-Fill the file with your own API keys. 
+Fill the `apitoken.yml` file with your own API keys. 
 
 ```yml
 ---
@@ -178,9 +182,6 @@ QuizAPI: YOUR_API_KEY_3
 APINinjas: YOUR_API_KEY_4
 ...
 ```
-
-For each library ([OpenTriviaDB](https://opentdb.com/api_config.php), [TheTriviaAPI](https://the-trivia-api.com/license/), [QuizAPI](https://quizapi.io/clientarea/settings/token) [APINinjas](https://api-ninjas.com/profile)), you can generate you token by folowing the instructions linked. The Google Slide API is not mandatory if only the pptx are wanted. To setup Google slides API please take a look at the [doc](https://developers.google.com/slides/api/quickstart/python).
-
 
 ## Coming Next
 
