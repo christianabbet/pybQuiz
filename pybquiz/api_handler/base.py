@@ -37,6 +37,10 @@ class BaseAPIHandler:
         # Check if already exists:
         if not os.path.exists(self.cache_file) or clear_cache:
             # Reload from web (update)
+                    
+            if self.verbose:
+                print("Initialize {} (first time only)".format(self.__class__.__name__.lower()))
+            
             cats, cats_id, cats_type, cats_diff = self.initialize_db()
             with open(self.cache_file, 'wb') as f:
                 np.save(f, cats)
