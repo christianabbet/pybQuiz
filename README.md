@@ -31,11 +31,17 @@ Create your quiz
 # Run quiz creating 
 python run_create_quiz.py
 
-# (Extra available arguments)
---dirout /path/to/dir               # Path to output directory
---cfg /path/to/template.yml         # Path to already existing config file
---apitoken /path/to/apitoken.yml    # Path to APIs token file 
---googlecreds /path/to/creds.json   # Path to Google slide credentials
+# To get additonal parameters infromation
+python run_create_quiz.py -h
+```
+
+```bash
+options:
+  -h, --help     show this help message and exit
+  --cfg          path to config file (default if None)
+  --dirout       path to output directory for data generation (default is "output")
+  --apitoken     path to stored API tokens (default is "config/apitoken.yml")
+  --googlecreds  path to stored Google credentials (default is "config/credentials.json")
 ```
 
 Note that some APIs need a token to be accessed. Please refer to the API section to know how to setup tokens.

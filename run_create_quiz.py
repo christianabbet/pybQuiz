@@ -49,12 +49,16 @@ if __name__ == '__main__':
     # Create parser
     parser = argparse.ArgumentParser(
         prog='pybQuiz Creator',
-        description='Create a pub quiz',
+        description='PybQuiz is a Python package designed to help you create and manage pub quizzes effortlessly',
     )
-    parser.add_argument('--cfg', default=None)
-    parser.add_argument('--dirout', default='output')
-    parser.add_argument('--apitoken', default='config/apitoken.yml')
-    parser.add_argument('--googlecreds', default='config/credentials.json')
+    parser.add_argument('--cfg', default=None, action='store_const',
+                        help='path to config file (default if None)')
+    parser.add_argument('--dirout', default="output", action='store_const',
+                        help='path to output directory for data generation (default is "output")')
+    parser.add_argument('--apitoken', default='config/apitoken.yml', action='store_const',
+                        help='path to stored API tokens (default is "config/apitoken.yml")')
+    parser.add_argument('--googlecreds', default='config/credentials.json', action='store_const',
+                        help='path to stored Google credentials (default is "config/credentials.json")')
     args = parser.parse_args()
     
     main(args=args)
