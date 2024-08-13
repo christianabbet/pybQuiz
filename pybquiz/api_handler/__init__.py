@@ -11,7 +11,7 @@ import pybquiz.api_handler as API
 __all__ = ['OpenTriviaDB', "TheTriviaAPI", "QuizAPI", "APINinjas"]
 
 
-def create_handler(name: str, delay_api: float = 5., token: str = None, verbose: bool = False, clear_cache: bool = False) -> BaseAPIHandler:
+def create_handler(name: str, delay_api: float = 5., token: str = None, verbose: bool = True, clear_cache: bool = False) -> BaseAPIHandler:
     
     if not hasattr(API, name):
         return NotImplementedError()

@@ -33,7 +33,7 @@ class QuizAPI(BaseAPIHandler):
         self,
         token: str,
         delay_api: int = 5,
-        verbose: bool = False,
+        verbose: bool = True,
         clear_cache: bool = False,
     ) -> None:
         """

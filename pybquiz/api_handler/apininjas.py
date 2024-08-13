@@ -39,7 +39,7 @@ class APINinjas(BaseAPIHandler):
     def __init__(
         self,
         delay_api: int = 5,
-        verbose: bool = False,
+        verbose: bool = True,
         clear_cache: bool = False,
         token: str = None,
     ) -> None:

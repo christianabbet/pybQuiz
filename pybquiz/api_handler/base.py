@@ -20,7 +20,7 @@ class BaseAPIHandler:
    
     def __init__(
         self,
-        verbose: bool = False,
+        verbose: bool = True,
         delay_api: float = 5.0,
         clear_cache: bool = False,
     ) -> None:

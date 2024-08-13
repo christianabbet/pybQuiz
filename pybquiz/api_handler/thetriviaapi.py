@@ -49,7 +49,7 @@ class TheTriviaAPI(BaseAPIHandler):
         self,
         delay_api: int = 5,
         token: str = None,
-        verbose: bool = False,
+        verbose: bool = True,
         clear_cache: bool = False,
     ) -> None:
         """
