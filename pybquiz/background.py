@@ -55,8 +55,10 @@ class BackgroundManager():
         if blurred and path_img is not None:
             filename, ext = os.path.splitext(os.path.basename(path_img))
             path_blur = os.path.join(os.path.dirname(path_img), "{}_blurred{}".format(filename, ext))
-            img = Image.open(path_img)
-            img.filter(ImageFilter.GaussianBlur(radius=10)).save(path_blur)
+            # Check if blured image exists
+            if not os.path.exists(path_blur):
+                img = Image.open(path_img)
+                img.filter(ImageFilter.GaussianBlur(radius=10)).save(path_blur)
             return path_blur
         else:
             return path_img

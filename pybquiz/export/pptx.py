@@ -3,7 +3,6 @@ from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import PP_ALIGN
 import pptx
-from pptx.presentation import Presentation as PObject
 from pptx import Presentation     
 import numpy as np
 import json

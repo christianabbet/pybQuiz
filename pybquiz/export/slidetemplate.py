@@ -24,19 +24,19 @@ class SlideTemplate:
         
     def get_frame_margin(self):
         # Define frame margin w.r.t height
-        return np.ceil(self._FRAME_MARGIN * self.height).astype(int)
+        return int(np.ceil(self._FRAME_MARGIN * self.height))
 
     def get_inner_margin(self):
         # Define frame margin w.r.t height
-        return np.ceil(self._FRAME_MMARGIN * self.height).astype(int)
+        return int(np.ceil(self._FRAME_MMARGIN * self.height))
     
     def get_iinner_margin(self):
         # Define frame margin w.r.t height
-        return np.ceil(self._FRAME_MMMARGIN * self.height).astype(int)
+        return int(np.ceil(self._FRAME_MMMARGIN * self.height))
     
     def get_answer_heights(self):
-        ah = np.ceil(self._ANSWER_HEIGHT * self.height).astype(int)
-        ahs = np.ceil(self._ANSWER_INTER_HEIGHT * self.height).astype(int)
+        ah = int(np.ceil(self._ANSWER_HEIGHT * self.height))
+        ahs = int(np.ceil(self._ANSWER_INTER_HEIGHT * self.height))
         return ah, ahs
             
     def get_question_bbox(self):
