@@ -55,8 +55,9 @@ class PptxFactory:
         pfont = PptxFactory.get_system_fonts()
 
         # Add splide to presetation
-        img_bg = background_gen.get_background("Pub Quiz")
-        self._add_title_subtitle(title=data[C.TITLE], subtitle=data[C.AUTHOR], img_bg=img_bg, pfont=pfont) 
+        img_bg_quiz = background_gen.get_background("Pub Quiz")
+        img_bg_paper = background_gen.get_background("Quiz paper sheets")
+        self._add_title_subtitle(title=data[C.TITLE], subtitle=data[C.AUTHOR], img_bg=img_bg_quiz, pfont=pfont) 
                     
         # Create rounds
         Nround = len(data[C.ROUNDS])
@@ -80,6 +81,8 @@ class PptxFactory:
                     pfont=pfont,
                 ) 
                 
+
+            self._add_title_subtitle(title="Exchange paper sheets", subtitle=None, img_bg=img_bg_paper, pfont=pfont)          
             self._add_title_subtitle(title=str_round, subtitle="Answers", img_bg=img_bg, pfont=pfont)            
                
             # Iterate over questions (answers)
@@ -96,7 +99,9 @@ class PptxFactory:
                     pfont=pfont,
                 )                 
 
-                
+            # Add splide to presetation
+            self._add_title_subtitle(title="Bring back paper sheets", subtitle=None, img_bg=img_bg_paper, pfont=pfont) 
+            
         # Saving file 
         self.root.save(outfile)             
         

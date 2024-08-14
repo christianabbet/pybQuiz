@@ -185,11 +185,13 @@ APINinjas: YOUR_API_KEY_4
 
 ## Coming Next
 
+* [ ] Add difficulty marker
+* [ ] Check if multiple time same question [apininjas]
 * [ ] Google slide export
+  * [ ] Check text auto adapt to size ?
   * [ ] Table to handle scores
 * [ ] Add PPT generation
-  * [ ] Check if multiple time same question [apininjas]
-  * [ ] Add difficulty information on slides
+  
 
 ## Thanks
 

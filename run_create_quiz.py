@@ -3,7 +3,7 @@ import os
 from pybquiz import PybQuiz
 from pybquiz.export.pptx import PptxFactory
 from pybquiz.background import BackgroundManager
-# from pybquiz.export.googleslide import GoogleSlideFactory
+from pybquiz.export.googleslide import GoogleSlideFactory
 from pybquiz.config_generator import ConfigGenerator
 
 
@@ -36,11 +36,13 @@ def main(args):
     background_gen = BackgroundManager(yaml_token=token_path, dirout=args.dirout)
     
     # Reload from json
-    PptxFactory.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
+    # pptx = PptxFactory()
+    # pptx.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
     
-    # # Check if google slide available
-    # if os.path.exists(args.googlecreds):
-    #     GoogleSlideFactory.export(title=args.name, crendential_file=args.googlecreds)
+    # Check if google slide available
+    if os.path.exists(args.googlecreds):
+        gpptx = GoogleSlideFactory(name=name, crendential_file=args.googlecreds)
+        gpptx.export(dump_path=outfile_json, background_gen=background_gen)
 
 
 
@@ -51,7 +53,7 @@ if __name__ == '__main__':
         prog='pybQuiz Creator',
         description='PybQuiz is a Python package designed to help you create and manage pub quizzes effortlessly',
     )
-    parser.add_argument('--cfg', default=None,
+    parser.add_argument('--cfg', default="output/myamazingquiz.json",
                         help='path to config file (default if None)')
     parser.add_argument('--dirout', default="output", 
                         help='path to output directory for data generation (default is "output")')
