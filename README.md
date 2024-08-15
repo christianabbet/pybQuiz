@@ -1,6 +1,6 @@
 # PybQuiz
 
-PybQuiz is a Python package designed to help you create and manage pub quizzes effortlessly. Whether you're hosting a small quiz night at a local pub or a large trivia event, PybQuiz has the tools you need to make your quiz a success.
+PybQuiz is a Python package designed to help you create and manage pub quizzes effortlessly. Whether you're hosting a small quiz night at a local pub or a large trivia event, PybQuiz has the tools you need to make your quiz a success. An example generated using the is available under the official [RELEASE](https://github.com/christianabbet/pybQuiz/releases) folder.
 
 ![plot](example.png)
 
@@ -45,7 +45,7 @@ options:
                         path to stored Google credentials (default is "config/credentials.json")
 ```
 
-Note that some APIs need a token to be accessed. Please refer to the API section to know how to setup tokens.
+Note that some APIs need a token to be accessed. Please refer to the API section to know how to setup tokens. 
 
 ![plot](creator.png)
 
