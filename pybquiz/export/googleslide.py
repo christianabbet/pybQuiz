@@ -5,6 +5,7 @@ import random
 import numpy as np
 from tqdm import tqdm
 import time
+import string
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -16,22 +17,305 @@ from pybquiz.export.slidetemplate import SlideTemplate
 from pybquiz.const import PYBConst as C
 
 
+SCOPES = ["https://www.googleapis.com/auth/presentations","https://www.googleapis.com/auth/spreadsheets"]
+
+def connectGoogleAPI(crendential_file: str):
+    # Get creads
+    creds_folder = os.path.dirname(crendential_file)
+    token_file = os.path.join(creds_folder, "token.json")
+    creds = None
+
+    # Token alread exists
+    if os.path.exists(token_file):
+        creds = Credentials.from_authorized_user_file(token_file, SCOPES)
+        
+    # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                crendential_file, SCOPES
+            )
+            creds = flow.run_local_server(port=0)
+        # Save the credentials for the next run
+        with open(token_file, "w") as token:
+            token.write(creds.to_json())
+            
+    return creds
+    
 def color_from_string(color: str):
     red = int(color[0:2], 16) / 255
     green = int(color[2:4], 16) / 255
     blue = int(color[4:6], 16) / 255
     return {"red": red, "green": green, "blue": blue}
 
+
+class GoogleSheetFactory:
+
+    # Values
+    TXT_TEAMS = "Teams"
+    TXT_TEAM = "Team"    
+    TXT_TOTAL = "Total"
+    
+    # Table margin
+    MARGIN_TOP = 2
+    MARGIN_LEFT = 1
+    NTEAMS = 20
+    
+    def __init__(self, name: str, crendential_file: str) -> None:
+
+        # Connect to API
+        self.name = name
+        self.creds = connectGoogleAPI(crendential_file=crendential_file)
+        # # Create presentation
+        self.service = build("sheets", "v4", credentials=self.creds)
+        self.spreadsheet = GoogleSheetFactory._create_spreadsheet(title=name, service=self.service)
+        self.spreadsheet_id = self.spreadsheet.get("spreadsheetId", None)
+
+        
+    @staticmethod
+    def _create_spreadsheet(title: str, service: googleapiclient.discovery.Resource):
+        
+        try:
+            # Call the Sheets API
+            spreadsheet = {"properties": {"title": title}}
+            spreadsheet = (
+                service.spreadsheets()
+                .create(body=spreadsheet, fields="spreadsheetId")
+                .execute()
+            )
+            return spreadsheet
+
+        except HttpError as err:
+            print(err)
+
+        
+    @staticmethod
+    def toColumn(val: int):
+        letters = string.ascii_uppercase
+        valb = GoogleSheetFactory.toBase(val, base=len(letters))
+        return "".join([letters[b] for b in valb])
+        
+    @staticmethod        
+    def toBase(val: int, base: int):
+        valb = []
+        rest = val
+        while rest > 0:
+            # Get rest
+            modulo = rest % base
+            rest = int((rest-modulo) / base)
+            valb.append(modulo)
+        
+        return valb[::-1]
+    
+    def export(self, dump_path: str):
+        
+        # Reload data
+        with open(dump_path, "r") as f:
+            data = json.load(f)
+    
+        # Get info
+        Nr = len(data.get(C.ROUNDS, {})) 
+        ROUNDS = ["R{}".format(i+1) for i in range(Nr)]
+        HEADERS = np.concat(([self.TXT_TEAMS], ROUNDS, [self.TXT_TOTAL])).tolist()
+        TEAMS = [["{}{}".format(self.TXT_TEAM.upper(), i+1)] for i in range(self.NTEAMS)]
+        
+        # Create first tabel
+        TABLE_TOP = self.MARGIN_TOP + 1
+        TABLE_LEFT = self.MARGIN_LEFT 
+        TABLE_BOTTOM = TABLE_TOP + self.NTEAMS - 1 
+        TABLE_RIGHT = TABLE_LEFT + len(HEADERS) - 1
+
+        # ---------- Unsorted
+        # Add legend on top
+        self.add_values(
+            values=[["Unsorted"]], 
+            range_name="{}{}:{}{}".format(self.toColumn(TABLE_LEFT), TABLE_TOP-1, self.toColumn(TABLE_LEFT), TABLE_TOP-1)
+        )    
+        self.add_values(
+            values=[HEADERS], 
+            range_name="{}{}:{}{}".format(self.toColumn(TABLE_LEFT), TABLE_TOP, self.toColumn(TABLE_RIGHT), TABLE_TOP)
+        )
+        self.add_values(
+            values=TEAMS, 
+            range_name="{}{}:{}{}".format(self.toColumn(TABLE_LEFT), TABLE_TOP+1, self.toColumn(TABLE_LEFT), TABLE_TOP + self.NTEAMS)
+        )        
+    
+        # Add average over rounds
+        sums = []
+        for r in range(TABLE_TOP+1, TABLE_TOP + self.NTEAMS + 1):
+            sums.append(["=sum({}{}:{}{})".format(self.toColumn(TABLE_LEFT + 1), r, self.toColumn(TABLE_RIGHT - 1), r)])
+        
+        self.add_values(
+            values=sums, 
+            range_name="{}{}:{}{}".format(self.toColumn(TABLE_RIGHT), TABLE_TOP+1, self.toColumn(TABLE_RIGHT), TABLE_TOP + self.NTEAMS)
+        )       
+        
+        # ---------- Sorted
+        TABLE_TOP2 = self.MARGIN_TOP + 1
+        TABLE_LEFT2 = self.MARGIN_LEFT + len(HEADERS) + self.MARGIN_LEFT 
+        TABLE_BOTTOM2 = TABLE_TOP2 + self.NTEAMS - 1 
+        TABLE_RIGHT2 = TABLE_LEFT2 + len(HEADERS) - 1
+        
+        self.add_values(
+            values=[["Sorted"]], 
+            range_name="{}{}:{}{}".format(self.toColumn(TABLE_LEFT2), TABLE_TOP2-1, self.toColumn(TABLE_LEFT2), TABLE_TOP2-1)
+        )    
+        self.add_values(
+            values=[HEADERS], 
+            range_name="{}{}:{}{}".format(self.toColumn(TABLE_LEFT2), TABLE_TOP2, self.toColumn(TABLE_RIGHT2), TABLE_TOP2)
+        )
+        
+        sort_op = "=sort({}{}:{}{}, {}, False)".format(
+            self.toColumn(TABLE_LEFT), TABLE_TOP + 1,
+            self.toColumn(TABLE_RIGHT), TABLE_BOTTOM + 1,
+            TABLE_RIGHT,
+        )        
+        self.add_values(
+            values=[[sort_op]], 
+            range_name="{}{}:{}{}".format(self.toColumn(TABLE_LEFT2), TABLE_TOP2 + 1, self.toColumn(TABLE_LEFT2), TABLE_TOP2 + 1)
+        )   
+
+        # https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/charts#BasicChartSpec
+        request_body = {
+            "requests": [
+                {
+                "addChart": {
+                    "chart": {
+                    "spec": {
+                        "basicChart": {
+                        "chartType": "COLUMN",
+                        "stackedType": "STACKED",
+                        "legendPosition": "TOP_LEGEND",
+                        "domains": [
+                            {
+                            "domain": {
+                                "sourceRange": {
+                                "sources": [
+                                    {
+                                    "sheetId": 0,
+                                    "startRowIndex": TABLE_TOP2-1, 
+                                    "endRowIndex": TABLE_BOTTOM2+1,
+                                    "startColumnIndex": TABLE_LEFT2,
+                                    "endColumnIndex": TABLE_LEFT2+1
+                                    }
+                                ]
+                                }
+                            }
+                            }
+                        ],
+                        "series": [
+                            {
+                            "series": {
+                                "sourceRange": {
+                                "sources": [
+                                    {
+                                    "sheetId": 0,
+                                    "startRowIndex": TABLE_TOP2-1,
+                                    "endRowIndex": TABLE_BOTTOM2+1,
+                                    "startColumnIndex": TABLE_LEFT2+1,
+                                    "endColumnIndex": TABLE_LEFT2+2
+                                    }
+                                ]
+                                }
+                            },
+                            "targetAxis": "LEFT_AXIS"
+                            },
+                            # {
+                            # "series": {
+                            #     "sourceRange": {
+                            #     "sources": [
+                            #         {
+                            #         "sheetId": 0,
+                            #         "startRowIndex": 0,
+                            #         "endRowIndex": 7,
+                            #         "startColumnIndex": 2,
+                            #         "endColumnIndex": 3
+                            #         }
+                            #     ]
+                            #     }
+                            # },
+                            # "targetAxis": "LEFT_AXIS"
+                            # },
+                            # {
+                            # "series": {
+                            #     "sourceRange": {
+                            #     "sources": [
+                            #         {
+                            #         "sheetId": 0,
+                            #         "startRowIndex": 0,
+                            #         "endRowIndex": 7,
+                            #         "startColumnIndex": 3,
+                            #         "endColumnIndex": 4
+                            #         }
+                            #     ]
+                            #     }
+                            # },
+                            # "targetAxis": "LEFT_AXIS"
+                            # }
+                        ],
+                        "headerCount": 1
+                        }
+                    },
+                    "position": {
+                        "overlayPosition": {
+                        "anchorCell": {
+                            "sheetId": 0,
+                            "rowIndex": TABLE_BOTTOM,
+                            "columnIndex": TABLE_LEFT
+                        },
+                        "offsetXPixels": 50,
+                        "offsetYPixels": 50
+                        }
+                    }
+                }
+                }
+                }
+            ]
+            }
+        
+        response = self.service.spreadsheets().batchUpdate(
+            spreadsheetId=self.spreadsheet_id,
+            body=request_body
+        ).execute()
+
+
+    def add_values(self, values, range_name: str, wait: float = 1.0):
+
+        try:
+            # Wait time
+            start_time = time.time()
+            # Execute the request.
+            body = {"values": values}
+            result = (
+                self.service.spreadsheets()
+                .values()
+                .update(
+                    spreadsheetId=self.spreadsheet_id,
+                    range=range_name,
+                    valueInputOption="USER_ENTERED",
+                    body=body,
+                )
+                .execute()
+            )
+            end_time = time.time()
+            time.sleep(max(wait - (end_time - start_time), 0)) 
+            # print(response)
+        except HttpError as error:
+            print(error)
+            return error
+
+        return result
+            
+            
 class GoogleSlideFactory:
     
     # Requests https://developers.google.com/slides/api/reference/rest/v1/presentations/request
     
     # If modifying these scopes, delete the file token.json.
-    SCOPES = ["https://www.googleapis.com/auth/presentations"]
     GITHUB_RELEASE = "https://github.com/christianabbet/pybQuiz/releases/download/googleslide/"
-    
-    # The ID of a sample presentation.
-    PRESENTATION_ID = "1EAYk18WDjIG-zp_0vLm3CsfQh_i8eXc67Jo2O9C6Vuc"
+    GOOGLE_SLIDE = "https://docs.google.com/presentation/d/"
     
     FONT_TITLE = 32
     FONT_SUBTITLE = 24
@@ -42,7 +326,7 @@ class GoogleSlideFactory:
 
         # Connect to API
         self.name = name
-        self.creds = GoogleSlideFactory._connect(crendential_file=crendential_file)
+        self.creds = connectGoogleAPI(crendential_file=crendential_file)
         # Create presentation
         self.service = build("slides", "v1", credentials=self.creds)
         self.presentation = GoogleSlideFactory._create_presentation(title=name, service=self.service)
@@ -115,37 +399,15 @@ class GoogleSlideFactory:
             # Final slide
             self._add_title_subtitle(title="Bring back paper sheets", url_bg=url_bg_paper)        
 
+        # Display link
+        print("Presentation availble: {}{}".format(self.GOOGLE_SLIDE, self.presentation_id))
+
     
     @staticmethod
     def _get_url(path_img: str):
         url = GoogleSlideFactory.GITHUB_RELEASE + os.path.basename(path_img)
         return url
-    
-    @staticmethod
-    def _connect(crendential_file: str):
-                # Get creads
-        creds_folder = os.path.dirname(crendential_file)
-        token_file = os.path.join(creds_folder, "token.json")
-        creds = None
 
-        # Token alread exists
-        if os.path.exists(token_file):
-            creds = Credentials.from_authorized_user_file(token_file, GoogleSlideFactory.SCOPES)
-            
-        # If there are no (valid) credentials available, let the user log in.
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    crendential_file, GoogleSlideFactory.SCOPES
-                )
-                creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            with open(token_file, "w") as token:
-                token.write(creds.to_json())
-                
-        return creds
 
     @staticmethod
     def _create_presentation(title: str, service: googleapiclient.discovery.Resource):
