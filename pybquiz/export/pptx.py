@@ -73,14 +73,15 @@ class PptxFactory:
             for j in range(Nquestion):
                 # Add question slide
                 answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.ANSWERS]
+                difficulty = data[C.ROUNDS][i][C.QUESTIONS][j][C.DIFFICULTY]
                 self._add_question(
                     i=j+1, 
                     question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
                     answers=answers,
+                    difficulty=difficulty,
                     img_bg=img_bg_blurred,
                     pfont=pfont,
-                ) 
-                
+                )                
 
             self._add_title_subtitle(title="Exchange paper sheets", subtitle=None, img_bg=img_bg_paper, pfont=pfont)          
             self._add_title_subtitle(title=str_round, subtitle="Answers", img_bg=img_bg, pfont=pfont)            
@@ -89,11 +90,13 @@ class PptxFactory:
             for j in range(Nquestion):
                 # Add question slide
                 answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.ANSWERS]
+                difficulty = data[C.ROUNDS][i][C.QUESTIONS][j][C.DIFFICULTY]                
                 correct_answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.CORRECT_ANSWERS]
                 self._add_question(
                     i=j+1, 
                     question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
                     answers=answers,
+                    difficulty=difficulty,                    
                     answers_id=correct_answers,
                     img_bg=img_bg_blurred,
                     pfont=pfont,
@@ -200,7 +203,7 @@ class PptxFactory:
                     color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
                 )
             
-    def _add_question(self, i: int = 1, question: str = "", answers: list[str] = [], answers_id: list[int] = None, img_bg: str = None, pfont: str = None):
+    def _add_question(self, i: int = 1, question: str = "", difficulty: int = None, answers: list[str] = [], answers_id: list[int] = None, img_bg: str = None, pfont: str = None):
         
             # Add slide and question            
             question_slide = self.root.slides.add_slide(self.root.slide_layouts[PptxFactory.BLANK]) 
@@ -222,7 +225,20 @@ class PptxFactory:
                 color_text=RGBColor.from_string(self.st.COLOR_TEXT), 
                 color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
             )
-            
+
+            if difficulty is not None:
+                # Add difficulty
+                (x, y, w, h) = self.st.get_difficulty_bbox()
+                PptxFactory._add_frame(
+                    shapes=shapes,
+                    bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
+                    text=None,
+                    font_file=pfont,
+                    shapeid=MSO_SHAPE.OVAL,         
+                    color_bg=RGBColor.from_string(self.st.COLOR_DIFFICULTY[difficulty]), 
+                    color_line=RGBColor.from_string(self.st.COLOR_DIFFICULTY[difficulty]), 
+                )
+                        
             (x, y, w, h) = self.st.get_question_bbox()
             m_in = self.st.get_inner_margin()
             PptxFactory._add_frame(

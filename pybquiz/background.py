@@ -15,7 +15,12 @@ class BackgroundManager():
     FILE_ZIP = "backgrounds.zip"    
     FOLDER_NAME = "backgrounds"
     
-    def __init__(self, yaml_token: str, delay_api: int = 20, dirout: str = "output") -> None:
+    def __init__(
+        self, 
+        # yaml_token: str, 
+        # delay_api: int = 20, 
+        dirout: str = "output",
+    ) -> None:
         
         # Define filenames
         filename_zip = os.path.join(dirout, BackgroundManager.FILE_ZIP)
