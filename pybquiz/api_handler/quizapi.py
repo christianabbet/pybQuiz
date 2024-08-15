@@ -129,7 +129,7 @@ class QuizAPI(BaseAPIHandler):
                 category=cat,
                 category_id=int(self.categories_id[np.argmax(self.categories == cat)]),
                 uuid=raw_question.get(self.KEY_ID, self.KEY_R_ERROR),
-                difficulty=raw_question.get(self.KEY_DIFFICULTY, self.KEY_R_ERROR),
+                difficulty=difficulty,
                 type="text",
             )
             # Append question

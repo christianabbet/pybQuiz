@@ -7,16 +7,23 @@ class SlideTemplate:
     _FRAME_MARGIN = 0.1
     _FRAME_MMARGIN = 0.025
     _FRAME_MMMARGIN = 0.0125
+    _DIFFICULTY_DIAMETER = 0.02
     _QUESTION_HEIGHT = 0.15
     _ANSWER_HEIGHT = 0.1
     _ANSWER_INTER_HEIGHT = 0.025
 
-    # # COLORS
+    # COLORS
     COLOR_BBOX_BACKGROUND = "2881a1"
     COLOR_BBOX_BACKGROUND_CORRECT = "f3a600"
     COLOR_BBOX_LINE = "2881a1"
     COLOR_TEXT = "ffffff"
     
+    COLOR_DIFFICULTY = [
+        "6fbf72", # Easy
+        "e3b14d", # Easy
+        "c7524a", # Easy
+    ]
+
     def __init__(self, width: float = 254, height: float = 190.5) -> None:
         # Rescale all variables
         self.width = width
@@ -38,6 +45,16 @@ class SlideTemplate:
         ah = int(np.ceil(self._ANSWER_HEIGHT * self.height))
         ahs = int(np.ceil(self._ANSWER_INTER_HEIGHT * self.height))
         return ah, ahs
+    
+    def get_difficulty_bbox(self):
+        diameter = self._DIFFICULTY_DIAMETER * self.height
+        mmargin = self.get_inner_margin()
+        # Set bbox values
+        bbox_x = self.width - diameter - mmargin
+        bbox_y = self.height - diameter - mmargin
+        bbox_w = diameter
+        bbox_h = diameter  
+        return (bbox_x, bbox_y, bbox_w, bbox_h)
             
     def get_question_bbox(self):
         # Get margin to frame

@@ -24,6 +24,8 @@ def color_from_string(color: str):
 
 class GoogleSlideFactory:
     
+    # Requests https://developers.google.com/slides/api/reference/rest/v1/presentations/request
+    
     # If modifying these scopes, delete the file token.json.
     SCOPES = ["https://www.googleapis.com/auth/presentations"]
     GITHUB_RELEASE = "https://github.com/christianabbet/pybQuiz/releases/download/googleslide/"
@@ -82,10 +84,12 @@ class GoogleSlideFactory:
             for j in tqdm(range(Nquestion), desc="Questions"):
                 # Add question slide
                 answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.ANSWERS]
+                difficulty = data[C.ROUNDS][i][C.QUESTIONS][j][C.DIFFICULTY]                
                 self._add_question(
                     i=j+1, 
                     question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
                     answers=answers,
+                    difficulty=difficulty,
                     url_bg=url_bg_blurred,
                 ) 
                 
@@ -96,12 +100,14 @@ class GoogleSlideFactory:
             for j in tqdm(range(Nquestion), desc="Answers"):
                 # Add question slide
                 answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.ANSWERS]
+                difficulty = data[C.ROUNDS][i][C.QUESTIONS][j][C.DIFFICULTY]                                
                 correct_answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.CORRECT_ANSWERS]
 
                 self._add_question(
                     i=j+1, 
                     question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
                     answers=answers,
+                    difficulty=difficulty,
                     answers_id=correct_answers,                    
                     url_bg=url_bg_blurred,
                 )    
@@ -260,7 +266,7 @@ class GoogleSlideFactory:
         # self.send_request(requests=requests)
         return requests
         
-    def _add_question(self, i: int, question: str, answers: list[str] = None, answers_id: list[int] = None, page_id: str = None, url_bg: str = None):
+    def _add_question(self, i: int, question: str, difficulty: int = None, answers: list[str] = None, answers_id: list[int] = None, page_id: str = None, url_bg: str = None):
         
         # Create a new square textbox, using the supplied element ID.      
         request = []
@@ -291,6 +297,18 @@ class GoogleSlideFactory:
         )
         request.extend(r_q)
         
+        if difficulty is not None:
+            # Add difficulty
+            (x, y, w, h) = self.st.get_difficulty_bbox()
+            r_d = self._add_shape(
+                bbox=[x, y, w, h], 
+                page_id=page_id, 
+                shapeid="ELLIPSE", 
+                element_id="{}_difficulty".format(page_id), 
+                colorbg=self.st.COLOR_DIFFICULTY[difficulty],
+            )
+            request.extend(r_d)
+       
         # Get dimensions
         nQ = len(answers)
         nRows = np.ceil(nQ/2).astype(int)
@@ -341,7 +359,7 @@ class GoogleSlideFactory:
         self.send_request(requests=request)           
 
                 
-    def _add_shape(self, text: str, bbox: list[int], page_id: str, element_id: str, colorbg: str, colortext: str, fontsize: int):
+    def _add_shape(self, bbox: list[int], page_id: str, element_id: str, colorbg: str, text: str = None, colortext: str = None, fontsize: int = None, shapeid: str = "ROUND_RECTANGLE"):
         
         # Extract units
         x, y, w, h = bbox
@@ -368,14 +386,6 @@ class GoogleSlideFactory:
             },
             # Insert text into the box, using the supplied element ID.
             {
-                "insertText": {
-                    "objectId": element_id,
-                    "insertionIndex": 0,
-                    "text": text,
-                }
-            },
-            # Insert text into the box, using the supplied element ID.
-            {
                 "updateShapeProperties": {
                     "objectId": element_id,
                     "shapeProperties": {
@@ -394,22 +404,34 @@ class GoogleSlideFactory:
                     },
                     "fields": "shapeBackgroundFill.solidFill.color,outline.outlineFill.solidFill.color"
                 }
-            },       
-            {
-                "updateTextStyle": {
-                    "objectId": element_id,
-                    "style": {
-                        "foregroundColor": {
-                            "opaqueColor": {"rgbColor": color_from_string(colortext)}
-                        },
-                        "fontSize" : {
-                            "magnitude": str(fontsize), "unit": "PT", 
-                        },
-                    },
-                    "fields": "foregroundColor.opaqueColor,fontSize"
-                }
-            },             
+            },              
         ]
+        
+        if text is not None:
+            requests_text = [
+                {
+                    "insertText": {
+                        "objectId": element_id,
+                        "insertionIndex": 0,
+                        "text": text,
+                    }
+                },
+                {
+                    "updateTextStyle": {
+                        "objectId": element_id,
+                        "style": {
+                            "foregroundColor": {
+                                "opaqueColor": {"rgbColor": color_from_string(colortext)}
+                            },
+                            "fontSize" : {
+                                "magnitude": str(fontsize), "unit": "PT", 
+                            },
+                        },
+                        "fields": "foregroundColor.opaqueColor,fontSize"
+                    }
+                },             
+            ]
+            requests.extend(requests_text)
         
         # Send update
         return requests
