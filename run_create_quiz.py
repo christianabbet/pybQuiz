@@ -53,7 +53,7 @@ if __name__ == '__main__':
         prog='pybQuiz Creator',
         description='PybQuiz is a Python package designed to help you create and manage pub quizzes effortlessly',
     )
-    parser.add_argument('--cfg', default="config/quiztest.yml",
+    parser.add_argument('--cfg', default=None,
                         help='path to config file (default if None)')
     parser.add_argument('--dirout', default="output", 
                         help='path to output directory for data generation (default is "output")')
