@@ -186,8 +186,8 @@ APINinjas: YOUR_API_KEY_4
 ## Coming Next
 
 * [ ] Check if multiple time same question 
-    [ ] At the quiz level
-    [ ] Between multiple quizes
+  * [ ] At the quiz level
+  * [ ] Between multiple quizes
 * [ ] Google slide export
   * [ ] Check text auto adapt to size ?
   
