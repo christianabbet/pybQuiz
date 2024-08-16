@@ -36,8 +36,8 @@ def main(args):
     background_gen = BackgroundManager(dirout=args.dirout)
     
     # # Reload from json
-    # pptx = PptxFactory()
-    # pptx.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
+    pptx = PptxFactory()
+    pptx.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
 
     # Check if google slide available
     if os.path.exists(args.googlecreds):
