@@ -1,6 +1,6 @@
 # PybQuiz
 
-PybQuiz is a Python package designed to help you create and manage pub quizzes effortlessly. Whether you're hosting a small quiz night at a local pub or a large trivia event, PybQuiz has the tools you need to make your quiz a success. An example generated using the is available under the official [RELEASE](https://github.com/christianabbet/pybQuiz/releases) folder.
+PybQuiz is a Python package designed to help you create and manage pub quizzes effortlessly. Whether you're hosting a small quiz night at a local pub or a large trivia event, PybQuiz has the tools you need to make your quiz a success. An example generated using the is available under the official [RELEASE](https://github.com/christianabbet/pybQuiz/releases) folder. The repo is abel to generate a pptx file as well as export your quiz directely to Google slides and sheets to manage the teams scores during the quiz.
 
 ![plot](example2.png)
 
@@ -19,7 +19,7 @@ conda create -n pybquiz python=3.9
 conda activate pybquiz
 # Base packages
 pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich
-# To export to Google Slides
+# To export to Google Slides / Sheets
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 # To generate new backgorunds
 pip install --upgrade openai
@@ -185,10 +185,11 @@ APINinjas: YOUR_API_KEY_4
 
 ## Coming Next
 
-* [ ] Check if multiple time same question [apininjas]
+* [ ] Check if multiple time same question 
+    [ ] At the quiz level
+    [ ] Between multiple quizes
 * [ ] Google slide export
   * [ ] Check text auto adapt to size ?
-  * [ ] Table to handle scores
   
 
 ## Thanks

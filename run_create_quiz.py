@@ -49,8 +49,9 @@ def main(args):
         gpptx = GoogleSlideFactory(name=name, crendential_file=args.googlecreds)
         url_slide = gpptx.export(dump_path=outfile_json, background_gen=background_gen, spreadsheet_id=spreadsheet_id, sheet_chart_id=chart_id)
         
-        print("Spreadsheet availble: {}{}".format(url_sheet))
-        print("Presentation availble: {}{}".format(url_slide))
+        print("Spreadsheet availble: {}".format(url_sheet))
+        print("Presentation availble: {}".format(url_slide))
+
         
 if __name__ == '__main__':
     
