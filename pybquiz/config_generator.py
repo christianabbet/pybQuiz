@@ -23,11 +23,11 @@ class ConfigGenerator:
     STR_WELCOME = "Welcome to the PybQuiz creator, we will help you to generate your own quiz from scratch. Answer the following questions please."
     DIFF_LUT = [
         ("Random", None),
-        ("Easy", np.array([1., 0., 0.])),
-        ("Somewhat Easy", np.array([0.5, 0.5, 0.])),
+        ("Easy", np.array([0.8, 0.2, 0.0])),
+        ("Somewhat Easy", np.array([0.5, 0.4, 0.1])),
         ("Balanced", np.array([0.2, 0.6, 0.2])),
-        ("Somewhat Hard", np.array([0., 0.5, 0.5])),
-        ("Hard", np.array([0., 0., 1.])),
+        ("Somewhat Hard", np.array([0.1, 0.4, 0.5])),
+        ("Hard", np.array([0., 0.2, 0.8])),
     ]
     
     def __init__(self, yaml_api_file: str, dirout: str) -> None:
@@ -59,7 +59,7 @@ class ConfigGenerator:
             cat_print.extend(["  {}: {}".format(a, b) for a, b in zip(d["p_id"], d["c"])])
         
         # Difficulties
-        diff_print = ["{}: {}".format(i, d) for (i, (d, _)) in enumerate(self.DIFF_LUT)]
+        diff_print = ["{}: {}".format(i+1, d) for (i, (d, _)) in enumerate(self.DIFF_LUT)]
         
         self.console.print(Align.center(Panel(self.STR_TITLE), vertical="middle"))
         self.console.print(self.STR_WELCOME)
@@ -82,7 +82,7 @@ class ConfigGenerator:
             # Parse result
             _cat, _diff = answer.split(',')
             _cat = int(_cat)
-            _diff = int(_diff)
+            _diff = int(_diff) - 1
             # Get dfficulty
             _, diff_ratio = self.DIFF_LUT[_diff]
             if diff_ratio is None:
