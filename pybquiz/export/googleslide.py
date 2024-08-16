@@ -682,7 +682,7 @@ class GoogleSlideFactory:
             {
                 "createShape": {
                     "objectId": element_id,
-                    "shapeType": "ROUND_RECTANGLE",
+                    "shapeType": shapeid,
                     "elementProperties": {
                         "pageObjectId": page_id,
                         "size": {
