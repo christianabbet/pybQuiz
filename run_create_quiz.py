@@ -3,7 +3,7 @@ import os
 from pybquiz import PybQuiz
 from pybquiz.export.pptx import PptxFactory
 from pybquiz.background import BackgroundManager
-from pybquiz.export.googleslide import GoogleSlideFactory
+from pybquiz.export.googleslide import GoogleSlideFactory, GoogleSheetFactory
 from pybquiz.config_generator import ConfigGenerator
 
 
@@ -36,16 +36,22 @@ def main(args):
     background_gen = BackgroundManager(dirout=args.dirout)
     
     # # Reload from json
-    pptx = PptxFactory()
-    pptx.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
-    
+    # pptx = PptxFactory()
+    # pptx.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
+
     # Check if google slide available
     if os.path.exists(args.googlecreds):
+        
+        # Create spread sheet
+        gxls = GoogleSheetFactory(name=name, crendential_file=args.googlecreds)
+        url_sheet, spreadsheet_id, chart_id = gxls.export(dump_path=outfile_json)
+
         gpptx = GoogleSlideFactory(name=name, crendential_file=args.googlecreds)
-        gpptx.export(dump_path=outfile_json, background_gen=background_gen)
-
-
-
+        url_slide = gpptx.export(dump_path=outfile_json, background_gen=background_gen, spreadsheet_id=spreadsheet_id, sheet_chart_id=chart_id)
+        
+        print("Spreadsheet availble: {}{}".format(url_sheet))
+        print("Presentation availble: {}{}".format(url_slide))
+        
 if __name__ == '__main__':
     
     # Create parser

@@ -46,6 +46,16 @@ class SlideTemplate:
         ahs = int(np.ceil(self._ANSWER_INTER_HEIGHT * self.height))
         return ah, ahs
     
+    def get_chart_bbox(self):
+        
+        # Set bbox values
+        margin = self.get_frame_margin()
+        bbox_x = 2*margin
+        bbox_y = margin
+        bbox_w = self.width - 4*margin
+        bbox_h = self.height - 2*margin  
+        return (bbox_x, bbox_y, bbox_w, bbox_h)
+    
     def get_difficulty_bbox(self):
         diameter = self._DIFFICULTY_DIAMETER * self.height
         mmargin = self.get_inner_margin()

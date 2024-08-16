@@ -53,6 +53,9 @@ def color_from_string(color: str):
 
 class GoogleSheetFactory:
 
+    # Url
+    GOOGLE_SHEET = "https://docs.google.com/spreadsheets/d/"
+    
     # Values
     TXT_TEAMS = "Teams"
     TXT_TEAM = "Team"    
@@ -115,9 +118,11 @@ class GoogleSheetFactory:
         with open(dump_path, "r") as f:
             data = json.load(f)
     
+        print("Generating spreadsheet for scoring ...")
         # Get info
         Nr = len(data.get(C.ROUNDS, {})) 
-        ROUNDS = ["R{}".format(i+1) for i in range(Nr)]
+        # ROUNDS = ["R{}".format(i+1) for i in range(Nr)]
+        ROUNDS = ["{}".format(r[C.TITLE]) for r in data.get(C.ROUNDS, {})]
         HEADERS = np.concat(([self.TXT_TEAMS], ROUNDS, [self.TXT_TOTAL])).tolist()
         TEAMS = [["{}{}".format(self.TXT_TEAM.upper(), i+1)] for i in range(self.NTEAMS)]
         
@@ -141,7 +146,13 @@ class GoogleSheetFactory:
             values=TEAMS, 
             range_name="{}{}:{}{}".format(self.toColumn(TABLE_LEFT), TABLE_TOP+1, self.toColumn(TABLE_LEFT), TABLE_TOP + self.NTEAMS)
         )        
-    
+        
+        # Add random predictions
+        rnd_preds = np.random.randint(low=0, high=10, size=(self.NTEAMS, Nr)).tolist()
+        self.add_values(
+            values=rnd_preds, 
+            range_name="{}{}:{}{}".format(self.toColumn(TABLE_LEFT+1), TABLE_TOP+1, self.toColumn(TABLE_RIGHT-1), TABLE_TOP + self.NTEAMS)
+        )        
         # Add average over rounds
         sums = []
         for r in range(TABLE_TOP+1, TABLE_TOP + self.NTEAMS + 1):
@@ -176,6 +187,40 @@ class GoogleSheetFactory:
             values=[[sort_op]], 
             range_name="{}{}:{}{}".format(self.toColumn(TABLE_LEFT2), TABLE_TOP2 + 1, self.toColumn(TABLE_LEFT2), TABLE_TOP2 + 1)
         )   
+    
+        chart_id = self.add_chart(
+            n=Nr,
+            left=TABLE_LEFT2,
+            right=0,
+            top=TABLE_TOP2,
+            bottom=TABLE_BOTTOM2
+        )
+        
+        url = "{}{}".format(self.GOOGLE_SHEET, self.spreadsheet_id)
+        print("Spreadsheet availble: {}".format(url))
+        return url, self.spreadsheet_id, chart_id
+
+    def add_chart(self, n: int, left: int, right: int, top: int, bottom: int):
+                                        
+        r_series = []
+        for i in range(n):
+            r_serie = {
+                "series": {
+                    "sourceRange": {
+                    "sources": [
+                        {
+                        "sheetId": 0,
+                        "startRowIndex": top-1,
+                        "endRowIndex": bottom+1,
+                        "startColumnIndex": left+1+i,
+                        "endColumnIndex": left+2+i
+                        }
+                    ]
+                    }
+                },
+                "targetAxis": "LEFT_AXIS"
+            }
+            r_series.append(r_serie)
 
         # https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/charts#BasicChartSpec
         request_body = {
@@ -195,66 +240,17 @@ class GoogleSheetFactory:
                                 "sources": [
                                     {
                                     "sheetId": 0,
-                                    "startRowIndex": TABLE_TOP2-1, 
-                                    "endRowIndex": TABLE_BOTTOM2+1,
-                                    "startColumnIndex": TABLE_LEFT2,
-                                    "endColumnIndex": TABLE_LEFT2+1
+                                    "startRowIndex": top-1, 
+                                    "endRowIndex": bottom+1,
+                                    "startColumnIndex": left,
+                                    "endColumnIndex": left+1
                                     }
                                 ]
                                 }
                             }
                             }
                         ],
-                        "series": [
-                            {
-                            "series": {
-                                "sourceRange": {
-                                "sources": [
-                                    {
-                                    "sheetId": 0,
-                                    "startRowIndex": TABLE_TOP2-1,
-                                    "endRowIndex": TABLE_BOTTOM2+1,
-                                    "startColumnIndex": TABLE_LEFT2+1,
-                                    "endColumnIndex": TABLE_LEFT2+2
-                                    }
-                                ]
-                                }
-                            },
-                            "targetAxis": "LEFT_AXIS"
-                            },
-                            # {
-                            # "series": {
-                            #     "sourceRange": {
-                            #     "sources": [
-                            #         {
-                            #         "sheetId": 0,
-                            #         "startRowIndex": 0,
-                            #         "endRowIndex": 7,
-                            #         "startColumnIndex": 2,
-                            #         "endColumnIndex": 3
-                            #         }
-                            #     ]
-                            #     }
-                            # },
-                            # "targetAxis": "LEFT_AXIS"
-                            # },
-                            # {
-                            # "series": {
-                            #     "sourceRange": {
-                            #     "sources": [
-                            #         {
-                            #         "sheetId": 0,
-                            #         "startRowIndex": 0,
-                            #         "endRowIndex": 7,
-                            #         "startColumnIndex": 3,
-                            #         "endColumnIndex": 4
-                            #         }
-                            #     ]
-                            #     }
-                            # },
-                            # "targetAxis": "LEFT_AXIS"
-                            # }
-                        ],
+                        "series": r_series,
                         "headerCount": 1
                         }
                     },
@@ -262,8 +258,8 @@ class GoogleSheetFactory:
                         "overlayPosition": {
                         "anchorCell": {
                             "sheetId": 0,
-                            "rowIndex": TABLE_BOTTOM,
-                            "columnIndex": TABLE_LEFT
+                            "rowIndex": bottom,
+                            "columnIndex": left
                         },
                         "offsetXPixels": 50,
                         "offsetYPixels": 50
@@ -279,6 +275,10 @@ class GoogleSheetFactory:
             spreadsheetId=self.spreadsheet_id,
             body=request_body
         ).execute()
+
+        # Get chart ID
+        response.get("replies", {})
+        return response["replies"][0]["addChart"]["chart"]["chartId"]
 
 
     def add_values(self, values, range_name: str, wait: float = 1.0):
@@ -339,8 +339,8 @@ class GoogleSlideFactory:
         self.width = self.presentation.get("pageSize", {}).get("width", {}).get("magnitude", None)
         self.st = SlideTemplate(width=self.width, height=self.height)
         
-    def export(self, dump_path: str, background_gen = None):
-        
+    def export(self, dump_path: str, spreadsheet_id = None, sheet_chart_id = None, background_gen = None):
+                
         # Reload data
         with open(dump_path, "r") as f:
             data = json.load(f)
@@ -397,11 +397,15 @@ class GoogleSlideFactory:
                 )    
 
             # Final slide
-            self._add_title_subtitle(title="Bring back paper sheets", url_bg=url_bg_paper)        
+            self._add_title_subtitle(title="Bring back paper sheets", url_bg=url_bg_paper)     
+            
+            # Add scores
+            if spreadsheet_id is not None and sheet_chart_id is not None:
+                self._add_chartslide(spreadsheet_id=spreadsheet_id, sheet_chart_id=sheet_chart_id, url_bg=url_bg_blurred)   
 
         # Display link
-        print("Presentation availble: {}{}".format(self.GOOGLE_SLIDE, self.presentation_id))
-
+        url = "{}{}".format(self.GOOGLE_SLIDE, self.presentation_id)
+        return url
     
     @staticmethod
     def _get_url(path_img: str):
@@ -445,6 +449,55 @@ class GoogleSlideFactory:
         # Send
         # self.send_request(requests=requests)
         return requests, page_id
+    
+    def _add_chartslide(self, spreadsheet_id, sheet_chart_id, page_id: str = None, url_bg: str = None):
+        
+        # emu4m = {"magnitude": 4000000, "unit": "EMU"}
+        request = []
+        
+        if page_id is None:
+            r_slide, page_id = self._add_slide()
+            request.extend(r_slide)
+        
+        if url_bg is not None:
+            r_im = self._add_image(
+                url=url_bg,
+                bbox=[0, 0, self.width, self.height], 
+                page_id=page_id, 
+                element_id="{}_background".format(page_id), 
+            )
+            request.extend(r_im)
+            
+        x, y, w, h = self.st.get_chart_bbox()
+        r_chart = [
+            {
+                "createSheetsChart": {
+                    "objectId": "{}_chart".format(page_id),
+                    "spreadsheetId": spreadsheet_id,
+                    "chartId": sheet_chart_id,
+                    "linkingMode": "LINKED",
+                    "elementProperties": {
+                        "pageObjectId": page_id,
+                        "size": {
+                            "height": {"magnitude": h, "unit": self.unit}, 
+                            "width": {"magnitude": w, "unit": self.unit}
+                        },
+                        "transform": {
+                            "scaleX": 1,
+                            "scaleY": 1,
+                            "translateX": x,
+                            "translateY": y,
+                            "unit": "EMU",
+                        },
+                    },
+                }
+            }
+        ]
+                    
+        request.extend(r_chart)
+        
+        self.send_request(requests=request)
+
 
     def _add_title_subtitle(self, title: str, subtitle: str = None, page_id: str = None, url_bg: str = None):
 
