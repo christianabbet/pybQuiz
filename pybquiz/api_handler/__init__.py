@@ -4,11 +4,12 @@ import yaml
 from pybquiz.api_handler.base import BaseAPIHandler
 from pybquiz.api_handler.opentriviadb import OpenTriviaDB
 from pybquiz.api_handler.thetriviaapi import TheTriviaAPI
+from pybquiz.api_handler.jeopardy import JeopardyUS
 from pybquiz.api_handler.quizapi import QuizAPI
 from pybquiz.api_handler.apininjas import APINinjas
 import pybquiz.api_handler as API
 
-__all__ = ['OpenTriviaDB', "TheTriviaAPI", "QuizAPI", "APINinjas"]
+__all__ = ['OpenTriviaDB', "TheTriviaAPI", "QuizAPI", "APINinjas", "JeopardyUS"]
 
 
 def create_handler(name: str, delay_api: float = 5., token: str = None, verbose: bool = True, clear_cache: bool = False) -> BaseAPIHandler:

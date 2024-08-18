@@ -160,6 +160,31 @@ ${}^{*}$ Distribution of question categories and difficulties unknown.
 ${}^{**}$ No difficulty level
 
 
+### 5. Jeopardy US
+
+* **Tag**: jeopardy
+* **Link**: https://github.com/jwolle1/jeopardy_clue_dataset
+* **API-Token**: None
+* **Type** Open-ended (Open)
+
+We consider questions in range  $100, $200, $300, $400 (easy), $500, $600, $800, $1000, (medium), $1200, $1600, $2000 (hard)
+
+|ID|      Catgory      |Easy|Medium|Hard|Text|Image|
+|--|-------------------|----|------|----|----|-----|
+| 0|  American History | 634|  568 | 144|1346|  0  |
+| 1|      Animals      | 670|  311 | 25 |1006|  0  |
+| 2|Business & Industry| 707|  428 |  9 |1144|  0  |
+| 3|      History      | 744|  639 | 94 |1477|  0  |
+| 4|     Literature    | 588|  694 | 89 |1371|  0  |
+| 5|     Potpourri     | 717|  498 | 98 |1313|  0  |
+| 6|      Religion     | 548|  500 | 65 |1113|  0  |
+| 7|      Science      | 739|  625 | 197|1561|  0  |
+| 8|       Sports      | 890|  357 | 11 |1258|  0  |
+| 9|   Transportation  | 606|  339 | 76 |1021|  0  |
+|10|    Word Origins   | 546|  401 | 128|1075|  0  |
+|11|  World Geography  | 517|  538 | 64 |1119|  0  |
+|12|   World History   | 510|  472 | 104|1086|  0  |
+
 ## API Tokens and Google support
 
 To access certain content, you **need** an API Token. Once obtained, create a file `apitoken.yml` under the `config` folder. For each library ([OpenTriviaDB](https://opentdb.com/api_config.php), [TheTriviaAPI](https://the-trivia-api.com/license/), [QuizAPI](https://quizapi.io/clientarea/settings/token) [APINinjas](https://api-ninjas.com/profile)), you can generate you token by folowing the instructions linked. 
@@ -194,6 +219,7 @@ APINinjas: YOUR_API_KEY_4
   * [ ] Between multiple quizes
 * [ ] Google slide export
   * [ ] Check text auto adapt to size ?
+* Use WordEmbedding for categories 
   
 
 ## Thanks

@@ -15,6 +15,72 @@ BaseInfo:
 
 # List of rounds
 Rounds:
+# Jeopardy
+-
+  title: "American History"  
+  api: "Jeopardy"
+  theme_id: 0      
+  difficulty: [1, 1, 1] 
+-
+  title: "Animals"  
+  api: "Jeopardy"
+  theme_id: 1      
+  difficulty: [1, 1, 1] 
+-
+  title: "Business & Industry"  
+  api: "Jeopardy"
+  theme_id: 2      
+  difficulty: [1, 1, 1] 
+-
+  title: "History"  
+  api: "Jeopardy"
+  theme_id: 3      
+  difficulty: [1, 1, 1] 
+-
+  title: "Literature"  
+  api: "Jeopardy"
+  theme_id: 4      
+  difficulty: [1, 1, 1] 
+-
+  title: "Potpourri"  
+  api: "Jeopardy"
+  theme_id: 5      
+  difficulty: [1, 1, 1] 
+-
+  title: "Religion"  
+  api: "Jeopardy"
+  theme_id: 6      
+  difficulty: [1, 1, 1] 
+-
+  title: "Science"  
+  api: "Jeopardy"
+  theme_id: 7      
+  difficulty: [1, 1, 1] 
+-
+  title: "Sports"  
+  api: "Jeopardy"
+  theme_id: 8      
+  difficulty: [1, 1, 1] 
+-
+  title: "Transportation"  
+  api: "Jeopardy"
+  theme_id: 9      
+  difficulty: [1, 1, 1] 
+-
+  title: "Word Origins"  
+  api: "Jeopardy"
+  theme_id: 10      
+  difficulty: [1, 1, 1] 
+-
+  title: "World Geography"  
+  api: "Jeopardy"
+  theme_id: 11      
+  difficulty: [1, 1, 1] 
+-
+  title: "World History"  
+  api: "Jeopardy"
+  theme_id: 12     
+  difficulty: [1, 1, 1] 
 #  Open Trivia DB
 -
   title: "General Knowledge"    # Title of the round
