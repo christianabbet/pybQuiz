@@ -23,12 +23,14 @@ class BaseAPIHandler:
         verbose: bool = True,
         delay_api: float = 5.0,
         clear_cache: bool = False,
+        qtype: str = None,
     ) -> None:
         
         # Laod variables
         self.force_reload = False
         self.verbose = verbose
         self.delay_api = delay_api
+        self.qtype = qtype
         # Define cache file
         self.cache_dir = os.path.join(os.path.dirname(__file__), ".cache")
         self.cache_file = os.path.join(self.cache_dir, self.__class__.__name__.lower() + ".npy")

@@ -20,7 +20,10 @@ class ConfigGenerator:
     
     # Intro
     STR_TITLE = "PybQuiz Creator"
-    STR_WELCOME = "Welcome to the PybQuiz creator, we will help you to generate your own quiz from scratch. Answer the following questions please."
+    STR_WELCOME = """
+        Welcome to the PybQuiz creator, we will help you to generate your own quiz from scratch. The available 
+        question types are Muliple choice (MCQ), and open-ended (Open) questions.
+    """
     DIFF_LUT = [
         ("Random", None),
         ("Easy", np.array([0.8, 0.2, 0.0])),
@@ -29,33 +32,44 @@ class ConfigGenerator:
         ("Somewhat Hard", np.array([0.1, 0.4, 0.5])),
         ("Hard", np.array([0., 0.2, 0.8])),
     ]
+    OFFSET = 100
     
     def __init__(self, yaml_api_file: str, dirout: str) -> None:
         self.console = Console() 
         self.dirout = dirout
         self.apis = from_yaml(yaml_file=yaml_api_file)        
     
-    def run_terminal(self):
+    def run_terminal(self, use_navite_id: bool = False):
         
         # Get all categories
-        offset = 100
         dfs = []
+        count = 0
         for j, api_name in enumerate(self.apis.keys()):
             # Get stats
             c = self.apis[api_name].categories
             c_id = self.apis[api_name].categories_id
             # Create data frame
-            df = pd.DataFrame({"c": c, "c_id": c_id, "p_id": c_id + (j+1)*offset})
+            if use_navite_id:
+                p_id = c_id + (j+1)*self.OFFSET
+            else:
+                p_id = list(range(count, count+len(c_id)))
+                count = count + len(p_id)
+            df = pd.DataFrame({"c": c, "c_id": c_id, "p_id": p_id})
             df["api"] = api_name
+            df["qtype"] = self.apis[api_name].qtype
             dfs.append(df)
             
         # Create categoriy display
-        dfs = pd.concat(dfs)
+        dfs = pd.concat(dfs, ignore_index=True)
             
         # Create list
         cat_print = []
         for n, d in dfs.sort_values(by="p_id", ascending=True).groupby("api", sort=False):
-            cat_print.append("[red]{}".format(n))
+            title_cat = "[red]{}".format(n)
+            qtype = d["qtype"].iloc[0]
+            if qtype is not None:
+                title_cat = "{} ({})".format(title_cat, qtype)
+            cat_print.append(title_cat)
             cat_print.extend(["  {}: {}".format(a, b) for a, b in zip(d["p_id"], d["c"])])
         
         # Difficulties
@@ -78,7 +92,7 @@ class ConfigGenerator:
         
         for r in range(input_rcount):
             # Get answer
-            answer = Prompt.ask("Round {}: Enter categories and difficulty".format(r+1), default="109, 0")
+            answer = Prompt.ask("Round {}: Enter categories and difficulty".format(r+1), default="{}, 0".format(dfs.loc[0, "p_id"]))
             # Parse result
             _cat, _diff = answer.split(',')
             _cat = int(_cat)

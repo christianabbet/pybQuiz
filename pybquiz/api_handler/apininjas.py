@@ -58,7 +58,7 @@ class APINinjas(BaseAPIHandler):
             raise NotImplementedError()
         
         self.token = token
-        super().__init__(verbose=verbose, delay_api=delay_api, clear_cache=clear_cache)
+        super().__init__(verbose=verbose, delay_api=delay_api, clear_cache=clear_cache, qtype="Open")
                 
     def initialize_db(self) -> Union[List[str], List[int], np.ndarray, np.ndarray]:
         """

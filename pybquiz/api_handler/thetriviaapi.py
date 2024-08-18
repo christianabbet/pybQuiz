@@ -62,7 +62,7 @@ class TheTriviaAPI(BaseAPIHandler):
         """
         
         self.token = token
-        super().__init__(verbose=verbose, delay_api=delay_api, clear_cache=clear_cache)
+        super().__init__(verbose=verbose, delay_api=delay_api, clear_cache=clear_cache, qtype="MCQ")
                 
     def initialize_db(self) -> Union[List[str], List[int], np.ndarray, np.ndarray]:
         """
