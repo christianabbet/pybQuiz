@@ -57,6 +57,7 @@ Note that some APIs need a token to be accessed. Please refer to the API section
 * **Tag**: opentriviadb
 * **Link**: https://opentdb.com/
 * **API-Token**: Not required
+* **Type** multiple choice question (MCQ)
 
 |ID|               Category               |Easy|Medium|Hard|Text|Image|
 |--|-------------------------------------|----|------|----|----|-----|
@@ -91,6 +92,7 @@ Note that some APIs need a token to be accessed. Please refer to the API section
 * **Tag**: thetriviaapi
 * **Link**: https://the-trivia-api.com/
 * **API-Token**: Not required
+* **Type** multiple choice question (MCQ)
 
 
 
@@ -114,6 +116,7 @@ ${}^{*}$ Only available for premium users (not free). Not supported.
 * **Tag**: quizapi
 * **Link**: https://quizapi.io/
 * **API-Token**: Required
+* **Type** multiple choice question (MCQ)
 
 |ID|   Category   |Easy*|Medium*|Hard*|Text*|Image|
 |--|-------------|----|------|----|----|-----|
@@ -133,6 +136,7 @@ ${}^{*}$ Distribution of question categories and difficulties unknown.
 * **Tag**: apininjas
 * **Link**: https://api-ninjas.com/api/trivia
 * **API-Token**: Required
+* **Type** Open-ended (Open)
 
 
 |ID|     Category     |Easy**|Medium**|Hard**|Text*|Image|
