@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Literal
 from bs4 import BeautifulSoup
 from pybquiz.db.utils import slow_request
 from urllib.parse import urljoin
@@ -9,8 +9,12 @@ import pandas as pd
 import os
 import re
 import hashlib
+from rich.console import Console
+from rich.align import Align
+from rich.panel import Panel
 
-class WWRBAMKey():
+
+class WWTBAMKey():
     # Dataframe columns
     KEY_URL = "url"
     KEY_VALUE = "value"
@@ -80,7 +84,29 @@ class WWTBAMScrapper():
         if len(matches) == 0:
             return None
         else:
-            return matches[0]
+            return int(matches[0].replace(",", ""))
+        
+    @staticmethod
+    def _extract_year(text: str):
+        """Extract year from text
+
+        Parameters
+        ----------
+        text : str
+            Text containing the year
+
+        Returns
+        -------
+        year: int
+            Year of the show
+        """
+        # Get money valeu in text
+        matches = re.findall(r'([12]\d{3})', text)
+        # CHeck if found
+        if len(matches) == 0:
+            return None
+        else:
+            return int(matches[0])
         
     @staticmethod
     def get_contestant_questions_by_url(url: str):
@@ -145,15 +171,15 @@ class WWTBAMScrapper():
             uuid = hashlib.md5(qclean.encode('utf8')).hexdigest()
             data_row = {
                 # export to TSV (tab) + add hash for question
-                WWRBAMKey.KEY_URL: url,
-                WWRBAMKey.KEY_VALUE: WWTBAMScrapper._extract_value(text_value),
-                WWRBAMKey.KEY_QUESTION: qclean,
-                WWRBAMKey.KEY_CORRECT_ANSWER: WWTBAMScrapper._clean_text(text_answers[id_correct.item()]),
-                WWRBAMKey.KEY_WRONG_ANSWER_1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
-                WWRBAMKey.KEY_WRONG_ANSWER_2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
-                WWRBAMKey.KEY_WRONG_ANSWER_3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
-                WWRBAMKey.KEY_AIR_DATE: air_date,
-                WWRBAMKey.KEY_UUID: uuid
+                WWTBAMKey.KEY_URL: url,
+                WWTBAMKey.KEY_VALUE: WWTBAMScrapper._extract_value(text_value),
+                WWTBAMKey.KEY_QUESTION: qclean,
+                WWTBAMKey.KEY_CORRECT_ANSWER: WWTBAMScrapper._clean_text(text_answers[id_correct.item()]),
+                WWTBAMKey.KEY_WRONG_ANSWER_1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
+                WWTBAMKey.KEY_WRONG_ANSWER_2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
+                WWTBAMKey.KEY_WRONG_ANSWER_3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
+                WWTBAMKey.KEY_AIR_DATE: WWTBAMScrapper._extract_year(air_date),
+                WWTBAMKey.KEY_UUID: uuid
             }
 
             data.append(data_row)
@@ -212,7 +238,7 @@ class WWTBAM:
     def __init__(
         self, 
         cache: Optional[str] = '.cache', 
-        lang: Optional[str] = 'us',
+        lang: Literal['us', 'uk'] = 'us',
         filename_db: Optional[str] = "wwtbam",
     ) -> None:
         """Who wnats to be a millionaire database
@@ -221,11 +247,12 @@ class WWTBAM:
         ----------
         cache : Optional[str], optional
             Location of the database, by default '.cache'
-        lang : Optional[str], optional
+        lang : Literal['us', 'uk'], optional
             Lang of the show. Either 'uk' or 'us', by default 'us'
         filename_db : Optional[str], optional
             Name of the database, by default "wwtbam"
         """
+        
         # Define online scrapper
         self.cache = cache
         self.lang = lang
@@ -271,19 +298,21 @@ class WWTBAM:
             url_candidates_ = self.scapper.get_contestants_by_letter(lang=self.lang, letter=letter)
             # Append to list of candidates
             url_candidates.extend(url_candidates_)
-            break
         
         # Check only candidates that do not appear in db
         if self.db is not None:
-            url_candidates_exist = self.db[WWRBAMKey.KEY_URL].unique()
+            url_candidates_exist = self.db[WWTBAMKey.KEY_URL].unique()
             url_candidates = [u for u in url_candidates if u not in url_candidates_exist]
         
         # Parse candidates info
         for i, url in enumerate(tqdm(url_candidates, "Get '{}' candidates questions ...".format(self.lang))):
             # Get info from page
             data = self.scapper.get_contestant_questions_by_url(url)
-            df_chunk = pd.DataFrame(data)
+            # Check if at least one entry to add
+            if len(data) == 0:
+                continue
             # Check if db exists
+            df_chunk = pd.DataFrame(data)
             if self.db is None:
                 self.db = df_chunk
             else:
@@ -295,3 +324,44 @@ class WWTBAM:
                 
         # End of program final backup
         self.save_db()
+        
+    def clean(self):
+        """Check for abnormality in database
+        """
+                
+        # Check duplicates in questions
+        self.db.drop_duplicates(subset=WWTBAMKey.KEY_UUID, keep=False, inplace=True)
+        
+        # Drop item if question of answer are empty
+        self.db.dropna(
+            subset=[
+                WWTBAMKey.KEY_VALUE, WWTBAMKey.KEY_QUESTION, WWTBAMKey.KEY_CORRECT_ANSWER, 
+                WWTBAMKey.KEY_WRONG_ANSWER_1, WWTBAMKey.KEY_WRONG_ANSWER_2, WWTBAMKey.KEY_WRONG_ANSWER_3
+            ],
+            inplace=True,
+        )
+        
+        # Save update
+        self.save_db()
+        
+        
+    def stats(self):
+        """Display stats on database
+        """
+        
+        name = self.__class__.__name__
+        n_candidates = len(self.db[WWTBAMKey.KEY_URL].unique())
+        n_questions = len(self.db)
+        v_min = self.db[WWTBAMKey.KEY_VALUE].min()
+        v_max = self.db[WWTBAMKey.KEY_VALUE].max()
+        d_min = self.db[WWTBAMKey.KEY_AIR_DATE].min()
+        d_max = self.db[WWTBAMKey.KEY_AIR_DATE].max()
+        
+        # Create a console
+        console = Console() 
+        console.print(Panel.fit("Database {} ({})".format(name, self.lang)))
+
+        console.print("# Candidates: {}".format(n_candidates))
+        console.print("# Questions: {}".format(n_questions))
+        console.print("Value range: {}-{}".format(int(v_min), int(v_max)))
+        console.print("Air date range: {}-{}".format(int(d_min), int(d_max)))

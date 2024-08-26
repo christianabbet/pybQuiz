@@ -4,9 +4,17 @@ from pybquiz.db.wwtbam import WWTBAM
 
 def main(args):
     
-    wwtbam_db = WWTBAM()
-    wwtbam_db.update()
+    # WWTBAM US
+    wwtbam_us_db = WWTBAM(lang='us')
+    wwtbam_us_db.update()
+    wwtbam_us_db.clean()
+    wwtbam_us_db.stats()
     
+    # WWTBAM UK
+    wwtbam_uk_db = WWTBAM(lang='uk')
+    wwtbam_uk_db.update()
+    wwtbam_uk_db.clean()
+    wwtbam_uk_db.stats()
 
 if __name__ == '__main__':
     
