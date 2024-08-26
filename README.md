@@ -18,7 +18,7 @@ cd pybQuiz
 conda create -n pybquiz python=3.9
 conda activate pybquiz
 # Base packages
-pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich
+pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich beautifulsoup4
 # To export to Google Slides / Sheets
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 # To generate new backgorunds
@@ -190,9 +190,33 @@ APINinjas: YOUR_API_KEY_4
   * [ ] Between multiple quizes
 * [ ] Google slide export
   * [ ] Check text auto adapt to size ?
-  
+* Error quiz time
+  * Retry export if failed (googl slides)
+  * Check duplicates questions
+  * Check answer always display for one answer cases
 
+* Other APIs
+  * https://cluebase.readthedocs.io/en/latest/
+  * https://www.reddit.com/r/trivia/comments/3wzpvt/free_database_of_50000_trivia_questions/
+    * https://drive.google.com/file/d/0Bzs-xvR-5hQ3SGdxNXpWVHFNWG8/view?resourcekey=0-5QvXBiHQPm_KmkhXP9RO8g
+  
+* Familly Feud
+  * https://docs.google.com/spreadsheets/d/1y5TtM4rXHfv_9BktCiJEW621939RzJucXxhJidJZbfQ/htmlview
+  * https://drive.google.com/file/d/0Bzs-xvR-5hQ3WktpWVA2RmROY1U/view?resourcekey=0-u03CutV7Ye9rxiuUE8c_UQ
+
+* Who want to be a millionaire
+  * https://www.millionairedb.com/questions/1757s-battle-of-plassey-was-fought-in-which-country/
+  * https://millionaire.fandom.com/wiki/Category:Contestants_from_the_UK
+  * https://millionaire.fandom.com/wiki/Category:Contestants_from_the_U.S.
+
+* Jeopardy
+  * https://github.com/jwolle1/jeopardy_clue_dataset
+
+* MasterMinds
+  * https://fikklefame.com/?s=master+minds
+  
 ## Thanks
+
 
 
 ```bash
