@@ -12,6 +12,7 @@ import hashlib
 from rich.console import Console
 from rich.align import Align
 from rich.panel import Panel
+from py_markdown_table.markdown_table import markdown_table
 
 
 class WWTBAMKey():
@@ -25,6 +26,7 @@ class WWTBAMKey():
     KEY_CORRECT_ANSWER = "correct_answer"
     KEY_AIR_DATE = "air_date"
     KEY_UUID = "uuid"
+    KEY_DIFFICULTY = "diffuculty"
     
 
 class WWTBAMScrapper():
@@ -136,10 +138,10 @@ class WWTBAMScrapper():
         # general infos
         # Get other info ([0]: City, [1]: Air date, [2]: Money won)
         infos = soup.find_all("div", class_="pi-data-value pi-font")
-        air_date = ""
+        infos_text = ""
         
-        if len(infos) >= 2:
-            air_date = infos[1].text
+        if len(infos) > 0:
+            infos_text = ", ".join([i.text for i in infos])
 
         # Store data
         data = []
@@ -181,7 +183,7 @@ class WWTBAMScrapper():
                 WWTBAMKey.KEY_WRONG_ANSWER_1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
                 WWTBAMKey.KEY_WRONG_ANSWER_2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
                 WWTBAMKey.KEY_WRONG_ANSWER_3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
-                WWTBAMKey.KEY_AIR_DATE: WWTBAMScrapper._extract_year(air_date),
+                WWTBAMKey.KEY_AIR_DATE: WWTBAMScrapper._extract_year(infos_text),
                 WWTBAMKey.KEY_UUID: uuid
             }
 
@@ -233,6 +235,64 @@ class WWTBAMScrapper():
     
 class WWTBAM:
     
+    # US: https://en.wikipedia.org/wiki/Who_Wants_to_Be_a_Millionaire_(American_game_show)
+    
+    # Value ranges 
+    LUT_US_RND = [
+        999, 1000, 2000, 3000, 4000, 
+        4999, 5000, 10000, 20000, 30000, 
+        49999, 50000, 100000, 500000, 1000000
+    ]
+    
+    # Value ranges 1999-2004 
+    LUT_US_1999_2004_2020_NOW = [
+        100, 200, 300, 500, 1000, 
+        2000, 4000, 8000, 16000, 32000, 
+        64000, 125000, 250000, 500000, 1000000
+    ]
+    
+    # Value ranges 1999-2009
+    LUT_US_2004_2009 = [
+        100, 200, 300, 500, 1000, 
+        2000, 4000, 8000, 16000, 25000, 
+        50000, 100000, 250000, 500000, 1000000
+    ]
+        
+    # Value ranges 2009-2010
+    LUT_US_2009_2010 = [
+        500, 1000, 2000, 3000, 5000, 
+        7500, 10000, 12500, 15000, 25000, 
+        50000, 100000, 250000, 500000, 1000000
+    ]
+    
+    # Value ranges 2010-2015 (rnd 99999 offset)
+    LUT_US_2010_2015 = [
+        100, 500, 1000, 2000, 3000, 
+        5000, 7000, 10000, 15000, 25000, 
+        99999, 100000, 250000, 500000, 1000000
+    ]
+    
+    # Value ranges 2015-2019 (rnd 99999 offset)
+    LUT_US_2015_2019 = [
+        500, 1000, 2000, 3000, 5000, 
+        7000, 10000, 20000, 30000, 50000, 
+        99999, 100000, 250000, 500000, 1000000
+    ]
+    
+    # UK: https://en.wikipedia.org/wiki/Who_Wants_to_Be_a_Millionaire%3F_(British_game_show)
+    # Value ranges 1999-2004 
+    LUT_UK_1998_2007_2018_NOW = [
+        100, 200, 300, 500, 1000, 
+        2000, 4000, 8000, 16000, 32000, 
+        64000, 125000, 250000, 500000, 1000000
+    ]
+    
+    LUT_UK_2007_2014 = [
+        499, 500, 1000, 2000, 5000, 
+        9999, 10000, 20000, 50000, 75000, 
+        149999, 150000, 250000, 500000, 1000000
+    ]
+    
     URL_CONTESTANT = {
         'us': 'https://millionaire.fandom.com/wiki/Category:Contestants_from_the_U.S.',
         'uk': 'https://millionaire.fandom.com/wiki/Category:Contestants_from_the_UK',
@@ -281,7 +341,7 @@ class WWTBAM:
     def save_db(self):
         """Save data base
         """
-        self.db.to_csv(self.path_db, sep="\t", index=False)
+        self.db.to_csv(self.path_db, sep="\t", index=False)        
     
     def update(self, chuck_bcp: int = 10):
         """Update database by looking up if new questions where added
@@ -337,12 +397,30 @@ class WWTBAM:
                 
         # Check duplicates in questions
         self.db.drop_duplicates(subset=WWTBAMKey.KEY_UUID, keep=False, inplace=True)
+        self.db.dropna(subset=WWTBAMKey.KEY_VALUE, inplace=True)
+
+        # Convert to difficulty level (year based)
+        self.db[WWTBAMKey.KEY_DIFFICULTY] = np.nan
         
+        for _, df_cand in self.db.groupby(WWTBAMKey.KEY_URL):
+            # Check year
+            year = df_cand.iloc[0][WWTBAMKey.KEY_AIR_DATE]
+            numbers = WWTBAM.convert_values_to_number(
+                values=df_cand[WWTBAMKey.KEY_VALUE].values.tolist(),
+                year=year, 
+                lang=self.lang
+            )
+            
+            # If exists, append value
+            if numbers is not None:           
+                self.db.loc[df_cand.index, WWTBAMKey.KEY_DIFFICULTY] = numbers
+                
         # Drop item if question of answer are empty
         self.db.dropna(
             subset=[
-                WWTBAMKey.KEY_VALUE, WWTBAMKey.KEY_QUESTION, WWTBAMKey.KEY_CORRECT_ANSWER, 
-                WWTBAMKey.KEY_WRONG_ANSWER_1, WWTBAMKey.KEY_WRONG_ANSWER_2, WWTBAMKey.KEY_WRONG_ANSWER_3
+                WWTBAMKey.KEY_QUESTION, WWTBAMKey.KEY_CORRECT_ANSWER, 
+                WWTBAMKey.KEY_WRONG_ANSWER_1, WWTBAMKey.KEY_WRONG_ANSWER_2, WWTBAMKey.KEY_WRONG_ANSWER_3,
+                # WWTBAMKey.KEY_AIR_DATE, WWTBAMKey.KEY_DIFFICULTY,
             ],
             inplace=True,
         )
@@ -364,10 +442,76 @@ class WWTBAM:
         d_max = self.db[WWTBAMKey.KEY_AIR_DATE].max()
         
         # Create a console
+        data = {
+            "Lang": self.lang,
+            "Candidates": n_candidates,
+            "Questions": n_questions,
+            "Values": "{}-{}".format(int(v_min), int(v_max)),
+            "Air date": "{}-{}".format(int(d_min), int(d_max)),
+        }
+        
+        # Add difficulty ranges
+        difficulties = pd.cut(self.db[WWTBAMKey.KEY_DIFFICULTY], bins=[0, 4, 9, 14]).value_counts(sort=False)
+        data.update({str(k): v for k, v in difficulties.items()})
+        
+        # Display final output
         console = Console() 
         console.print(Panel.fit("Database {} ({})".format(name, self.lang)))
-
-        console.print("# Candidates: {}".format(n_candidates))
-        console.print("# Questions: {}".format(n_questions))
-        console.print("Value range: {}-{}".format(int(v_min), int(v_max)))
-        console.print("Air date range: {}-{}".format(int(d_min), int(d_max)))
+        
+        markdown = markdown_table([data]).set_params(row_sep = 'markdown')
+        markdown.quote = False
+        markdown = markdown.get_markdown()
+        console.print(markdown)
+        
+    @staticmethod
+    def convert_values_to_number(values: list[float], year: int, lang: Literal['us', 'uk'] = 'us'):
+        
+        # Conversion tables
+        luts = []
+        
+        if lang == 'us':
+            # Check dates (it's a mess I know)
+            luts.append(WWTBAM.LUT_US_RND)
+            if year <= 2004:
+                luts.append(WWTBAM.LUT_US_1999_2004_2020_NOW)
+            if year >= 2004 and year <= 2009:
+                luts.append(WWTBAM.LUT_US_2004_2009)
+            if year >= 2009 and year <= 2010:
+                luts.append(WWTBAM.LUT_US_2009_2010)
+            if year >= 2010 and year <= 2015:
+                luts.append(WWTBAM.LUT_US_2010_2015)
+            if year >= 2015 and year <= 2019:
+                luts.append(WWTBAM.LUT_US_2015_2019)
+            if year >= 2020:
+                luts.append(WWTBAM.LUT_US_1999_2004_2020_NOW)
+        elif lang == 'uk':
+            # Check year
+            if year >= 1998 and year <= 2007:
+                luts.append(WWTBAM.LUT_UK_1998_2007_2018_NOW)
+            if year >= 2007 and year <= 2014:
+                luts.append(WWTBAM.LUT_UK_2007_2014)
+            if year >= 2018:
+                luts.append(WWTBAM.LUT_UK_1998_2007_2018_NOW)
+        else:
+            raise NotImplementedError
+        
+        # Process values
+        matches = np.array([np.all([v in lut for v in values]) for lut in luts])
+        
+        # Check id luts
+        id_match = np.nonzero(matches)[0]
+        if len(id_match) == 0:
+            # No match
+            return None
+        elif len(id_match) == 1:
+            # Single match
+            id_match = id_match[0]
+        else:
+            # If two possible answers, take the one with the highest first value
+            highest = np.argmax([l[0] for l in luts])
+            id_match = id_match[highest]
+        
+        # Replace dictionnary for values
+        replace = {int(k): i for i, k in enumerate(luts[id_match])}
+        number = [replace[v] for v in values]
+        return number

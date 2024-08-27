@@ -18,7 +18,7 @@ cd pybQuiz
 conda create -n pybquiz python=3.9
 conda activate pybquiz
 # Base packages
-pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich beautifulsoup4
+pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich beautifulsoup4 tabulate
 # To export to Google Slides / Sheets
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 # To generate new backgorunds
@@ -49,6 +49,18 @@ Note that some APIs need a token to be accessed. Please refer to the API section
 
 ![plot](creator.png)
 
+## Available DBs
+
+https://quizbowlpackets.com/
+
+### 1. Who wants to be Millionaire
+
+https://millionaire.fandom.com
+
+|Lang|Candidates|Questions|   Values  | Air date|(0, 4]|(4, 9]|(9, 14]|
+|----|----------|---------|-----------|---------|------|------|-------|
+| us |   1948   |  17080  |100-2180000|1953-2024| 6503 | 7291 |  1508 |
+| uk |   1234   |  11296  |100-1000000|1998-2024| 4833 | 4656 |  783  |
 
 ## Available APIs
 
@@ -233,16 +245,14 @@ APINinjas: YOUR_API_KEY_4
   * https://docs.google.com/spreadsheets/d/1y5TtM4rXHfv_9BktCiJEW621939RzJucXxhJidJZbfQ/htmlview
   * https://drive.google.com/file/d/0Bzs-xvR-5hQ3WktpWVA2RmROY1U/view?resourcekey=0-u03CutV7Ye9rxiuUE8c_UQ
 
-* Who want to be a millionaire
-  * https://www.millionairedb.com/questions/1757s-battle-of-plassey-was-fought-in-which-country/
-  * https://millionaire.fandom.com/wiki/Category:Contestants_from_the_UK
-  * https://millionaire.fandom.com/wiki/Category:Contestants_from_the_U.S.
-
 * Jeopardy
   * https://github.com/jwolle1/jeopardy_clue_dataset
 
 * MasterMinds
   * https://fikklefame.com/?s=master+minds
+
+* Others
+  * https://quizbowlpackets.com/
   
 ## Thanks
 
