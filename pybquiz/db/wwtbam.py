@@ -136,7 +136,10 @@ class WWTBAMScrapper():
         # general infos
         # Get other info ([0]: City, [1]: Air date, [2]: Money won)
         infos = soup.find_all("div", class_="pi-data-value pi-font")
-        air_date = infos[1].text
+        air_date = ""
+        
+        if len(infos) >= 2:
+            air_date = infos[1].text
 
         # Store data
         data = []
@@ -298,6 +301,9 @@ class WWTBAM:
             url_candidates_ = self.scapper.get_contestants_by_letter(lang=self.lang, letter=letter)
             # Append to list of candidates
             url_candidates.extend(url_candidates_)
+        
+        # Drop duplicates
+        url_candidates = pd.DataFrame(url_candidates).drop_duplicates().values.flatten().tolist()
         
         # Check only candidates that do not appear in db
         if self.db is not None:
