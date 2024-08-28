@@ -13,9 +13,10 @@ from rich.console import Console
 from rich.align import Align
 from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
+from pybquiz.db.base import TriviaDB
 
 
-class WWTBAMKey():
+class WWTBAMKey(TriviaDB):
     # Dataframe columns
     KEY_URL = "url"
     KEY_VALUE = "value"
@@ -374,9 +375,11 @@ class WWTBAM:
         for i, url in enumerate(tqdm(url_candidates, "Get '{}' candidates questions ...".format(self.lang))):
             # Get info from page
             data = self.scapper.get_contestant_questions_by_url(url)
+            
             # Check if at least one entry to add
             if len(data) == 0:
                 continue
+            
             # Check if db exists
             df_chunk = pd.DataFrame(data)
             if self.db is None:
@@ -389,6 +392,7 @@ class WWTBAM:
                 self.save_db()
                 
         # End of program final backup
+        self.clean()
         self.save_db()
         
     def clean(self):
@@ -424,10 +428,7 @@ class WWTBAM:
             ],
             inplace=True,
         )
-        
-        # Save update
-        self.save_db()
-        
+                
         
     def stats(self):
         """Display stats on database
