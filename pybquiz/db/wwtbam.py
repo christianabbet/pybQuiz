@@ -10,13 +10,12 @@ import os
 import re
 import hashlib
 from rich.console import Console
-from rich.align import Align
 from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
-from pybquiz.db.base import TriviaDB
+from pybquiz.db.base import TriviaTSVDB
 
 
-class WWTBAMKey(TriviaDB):
+class WWTBAMKey:
     # Dataframe columns
     KEY_URL = "url"
     KEY_VALUE = "value"
@@ -30,7 +29,7 @@ class WWTBAMKey(TriviaDB):
     KEY_DIFFICULTY = "diffuculty"
     
 
-class WWTBAMScrapper():
+class WWTBAMScrapper:
     
     # Base website
     WEB_BASE = "https://millionaire.fandom.com"
@@ -234,7 +233,7 @@ class WWTBAMScrapper():
         return url_candidates
     
     
-class WWTBAM:
+class WWTBAM(TriviaTSVDB):
     
     # US: https://en.wikipedia.org/wiki/Who_Wants_to_Be_a_Millionaire_(American_game_show)
     
@@ -317,32 +316,13 @@ class WWTBAM:
             Name of the database, by default "wwtbam"
         """
         
-        # Define online scrapper
-        self.cache = cache
+        super().__init__(
+            cache=cache, 
+            path_db=os.path.join(cache, filename_db + lang + ".tsv")
+        )
+        # Other variables
         self.lang = lang
-        self.scapper = WWTBAMScrapper()   
-        self.path_db = os.path.join(self.cache, filename_db + self.lang + ".tsv")
-        self.db = self.load_db()
-        os.makedirs(self.cache, exist_ok=True)
-    
-    def load_db(self):
-        """Load database from file
-
-        Returns
-        -------
-        database: pd.DataFrame
-            Loaded database
-        """
-        # If exists, reload it
-        if os.path.exists(self.path_db):
-            return pd.read_csv(self.path_db, sep="\t")
-        else:
-            return None
-        
-    def save_db(self):
-        """Save data base
-        """
-        self.db.to_csv(self.path_db, sep="\t", index=False)        
+        self.scapper = WWTBAMScrapper()     
     
     def update(self, chuck_bcp: int = 10):
         """Update database by looking up if new questions where added

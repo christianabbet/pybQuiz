@@ -62,6 +62,15 @@ https://millionaire.fandom.com
 | us |   1948   |  17080  |100-2180000|1953-2024| 6503 | 7291 |  1508 |
 | uk |   1234   |  11296  |100-1000000|1998-2024| 4833 | 4656 |  783  |
 
+### 2. Jeopardy!
+
+Difficulty is graded from to 0 (lowest) to 11 (highest). This correspond to the clue values from $100 to $2000
+
+|Lang|Questions| Values | Air date|(0, 3]|(3, 7]|(7, 11]|
+|----|---------|--------|---------|------|------|-------|
+| us |  482067 |100-2000|1984-2024|192881|187847| 79738 |
+
+
 ## Available APIs
 
 ### 1. Open Trivia DB
