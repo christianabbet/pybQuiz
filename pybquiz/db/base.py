@@ -49,24 +49,17 @@ class TriviaTSVDB(TriviaDB):
         # Init main cach location
         super().__init__(cache=cache)          
         self.path_db = path_db
-        
-        self.initialize()
+                    
+        # Load db
         self.load()
         
-        # Check if update is needed
-        if update:
-            self.update()
-            
-        self.finalize()
-        self.save()
-        # Pretty print
-        self.pprint()
             
     def load(self):
-        """ Load database from file """
-        # If exists, reload it
+        # Check if DB exists otherwise init it
         if os.path.exists(self.path_db):
             self.db = pd.read_csv(self.path_db, sep="\t")
+        else:
+            self.db = self.initialize()
         
     def save(self):
         """ Save database to file """
@@ -83,17 +76,13 @@ class TriviaTSVDB(TriviaDB):
         return len(self.db)
         
     @abstractmethod
-    def initialize(self):
+    def initialize(self) -> pd.DataFrame:
         raise NotImplementedError
             
     @abstractmethod
     def update(self):
         raise NotImplementedError
-    
-    @abstractmethod
-    def finalize(self):
-        raise NotImplementedError    
-    
+
     @abstractmethod        
     def pprint(self):
         raise NotImplementedError

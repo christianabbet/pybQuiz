@@ -2,6 +2,7 @@ import time
 import requests
 from typing import Optional
 import numpy as np
+import hashlib
 
 
 STATUS_OK = 200
@@ -13,6 +14,9 @@ HEADERS_SCRAP = {
     # 'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/26.0 Chrome/122.0.0.0 Mobile Safari/537.3',
 }
 
+
+def to_uuid(text: str):
+    return hashlib.md5(text.encode('utf8')).hexdigest()
 
 
 def check_code(status_code: int):

@@ -7,22 +7,28 @@ import pandas as pd
 from rich.console import Console
 from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
+from pybquiz.db.utils import to_uuid
+import numpy as np
 
 
 class JeopardyCst:
     
     URL_JEOPARDY = "https://raw.githubusercontent.com/jwolle1/jeopardy_clue_dataset/main/combined_season1-40.tsv"
     
-    KEY_CAT = "category"
-    KEY_CAT_ID = "category_id"
-    KEY_CAT_SIMPLIFIED = "category_simplified"
+    # Base TSV
+    KEY_ROUND = "round"
     KEY_CLUE = "clue_value"
     KEY_DOUBLE_CLUE = "daily_double_value"
-    KEY_DIFFICULTY = "difficulty"
-    KEY_NOTES = "notes"
+    KEY_CAT = "category"
     KEY_COMMENTS = "comments"
+    KEY_ANSWER = "answer"
+    KEY_QUESTION = "question"
     KEY_AIR_DATE = "air_date"
-    
+    KEY_NOTES = "notes"
+    # New columns
+    KEY_DIFFICULTY = "difficulty"
+    KEY_UUID = "uuid"
+    # Others
     CAT_OTHERS = "OTHERS"
     PPRINT_BINS = [0, 3, 7, 11]
     
@@ -58,43 +64,42 @@ class Jeopardy(TriviaTSVDB):
             path_db=os.path.join(cache, filename_db + lang + ".tsv")
         )
 
-    def initialize(self):
-        # Download db if needed
-        if not os.path.exists(self.path_db):
-            # Otherwise download it
-            urllib.request.urlretrieve(JeopardyCst.URL_JEOPARDY, self.path_db)  
-                  
+    def initialize(self) -> pd.DataFrame:
+        
+        # Otherwise download it
+        urllib.request.urlretrieve(JeopardyCst.URL_JEOPARDY, self.path_db)  
+            
+        # Notes not needed
+        db = pd.read_csv(self.path_db, sep="\t")
+        db.drop(columns=[JeopardyCst.KEY_NOTES], inplace=True)
+        # Comments not needed
+        db.drop(columns=[JeopardyCst.KEY_COMMENTS], inplace=True)
+        # Round information not needed
+        db.drop(columns=[JeopardyCst.KEY_ROUND], inplace=True)
+                
+        # Check for values
+        is_valid_clue = (db[JeopardyCst.KEY_CLUE] != 0) & (db[JeopardyCst.KEY_DOUBLE_CLUE] == 0)
+        db = db[is_valid_clue]
+        
+        # Get possible values
+        value_range = db[JeopardyCst.KEY_CLUE].unique()
+        # Rank them
+        value_range.sort()
+        # Add difficulty indicator
+        db[JeopardyCst.KEY_DIFFICULTY] = db[JeopardyCst.KEY_CLUE].replace({v: k for k, v in enumerate(value_range)})
+        
+        # Add uuid for entires
+        db[JeopardyCst.KEY_UUID] = [to_uuid(s) for s in db[JeopardyCst.KEY_ANSWER].values]
+        
+        # Convert years if needed
+        year_str = db[JeopardyCst.KEY_AIR_DATE].str.slice(start=0, stop=4)
+        db[JeopardyCst.KEY_AIR_DATE] = pd.to_numeric(year_str, errors='coerce')
+            
+        return db
         
     def update(self):
         pass
-    
-    def finalize(self):
-        
-        # Get categories above threshold
-        simplifed_cats = self.db[JeopardyCst.KEY_CAT].value_counts()
-        simplifed_cats = simplifed_cats[simplifed_cats > self.simplified_tresh].index.tolist()
-        
-        # Add dumy class for the rest
-        simplifed_cats.append(JeopardyCst.CAT_OTHERS)
-        self.db[JeopardyCst.KEY_CAT_SIMPLIFIED] = pd.Categorical(self.db[JeopardyCst.KEY_CAT], categories=simplifed_cats)
-        self.db[JeopardyCst.KEY_CAT_SIMPLIFIED] = self.db[JeopardyCst.KEY_CAT_SIMPLIFIED].fillna(JeopardyCst.CAT_OTHERS)
 
-        # Drop daily double (values not ranked)
-        is_valid_clue = (self.db[JeopardyCst.KEY_CLUE] != 0) & (self.db[JeopardyCst.KEY_DOUBLE_CLUE] == 0)
-        self.db = self.db[is_valid_clue]
-        self.db.drop(columns=[JeopardyCst.KEY_NOTES, JeopardyCst.KEY_COMMENTS], inplace=True, errors="ignore")
-    
-        # Define difficulty
-        value_range = self.db[JeopardyCst.KEY_CLUE].unique()
-        value_range.sort()
-        self.db[JeopardyCst.KEY_DIFFICULTY] = self.db[JeopardyCst.KEY_CLUE].replace({v: k for k, v in enumerate(value_range)})
-        
-        # Convert years if needed
-        if isinstance(self.db[JeopardyCst.KEY_AIR_DATE].dtype, str):
-            year_str = self.db[JeopardyCst.KEY_AIR_DATE].str.slice(start=0, stop=4)
-            self.db[JeopardyCst.KEY_AIR_DATE] = pd.to_numeric(year_str, errors='coerce')
-        
-        
     def pprint(self):
                 
         name = self.__class__.__name__

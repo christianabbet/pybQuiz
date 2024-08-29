@@ -1,6 +1,6 @@
 from typing import Optional, Literal
 from bs4 import BeautifulSoup
-from pybquiz.db.utils import slow_request
+from pybquiz.db.utils import slow_request, to_uuid
 from urllib.parse import urljoin
 import string
 from tqdm import tqdm
@@ -232,7 +232,6 @@ class WWTBAMScrapper:
             # Finale data merge
             qclean = WWTBAMScrapper._clean_text(text_question) 
             # Hash text (unique question)
-            uuid = hashlib.md5(qclean.encode('utf8')).hexdigest()
             data_row = {
                 # export to TSV (tab) + add hash for question
                 WWTBAMCst.KEY_URL: url,
@@ -243,7 +242,7 @@ class WWTBAMScrapper:
                 WWTBAMCst.KEY_WRONG_ANSWER_2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
                 WWTBAMCst.KEY_WRONG_ANSWER_3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
                 WWTBAMCst.KEY_AIR_DATE: WWTBAMScrapper._extract_year(infos_text),
-                WWTBAMCst.KEY_UUID: uuid
+                WWTBAMCst.KEY_UUID: to_uuid(qclean).hexdigest()
             }
 
             data.append(data_row)
@@ -298,7 +297,6 @@ class WWTBAM(TriviaTSVDB):
         self, 
         lang: Literal['us', 'uk'] = 'us',
         filename_db: Optional[str] = "wwtbam",
-        update: Optional[bool] = True,        
         cache: Optional[str] = '.cache', 
         chunks: Optional[int] = 10,
     ) -> None:
@@ -310,8 +308,6 @@ class WWTBAM(TriviaTSVDB):
             Lang of the show. Either 'uk' or 'us', by default 'us'
         filename_db : Optional[str], optional
             Name of the database, by default "wwtbam"
-        update : Optional[bool], optional
-            _description_, by default True
         cache : Optional[str], optional
             Location of the database, by default '.cache'
         chunks : Optional[int], optional
@@ -327,11 +323,17 @@ class WWTBAM(TriviaTSVDB):
         super().__init__(
             cache=cache, 
             path_db=os.path.join(cache, filename_db + lang + ".tsv"),
-            update=update,
         )
 
     def initialize(self):
-        pass
+        
+        return pd.DataFrame(
+            columns=[
+                WWTBAMCst.KEY_URL, WWTBAMCst.KEY_VALUE,  WWTBAMCst.KEY_QUESTION, WWTBAMCst.KEY_CORRECT_ANSWER,
+                WWTBAMCst.KEY_WRONG_ANSWER_1,  WWTBAMCst.KEY_WRONG_ANSWER_2,  WWTBAMCst.KEY_WRONG_ANSWER_3,
+                WWTBAMCst.KEY_AIR_DATE,  WWTBAMCst.KEY_UUID,  WWTBAMCst.KEY_DIFFICULTY
+            ]
+        )
     
     def update(self):
         """ Update database by looking up if new questions where added """
@@ -375,6 +377,7 @@ class WWTBAM(TriviaTSVDB):
                 self.save()
                 
         # End of program final backup
+        self.finalize()
         self.save()
         
     def finalize(self):

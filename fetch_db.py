@@ -4,14 +4,33 @@ from pybquiz.db.jeopardy import Jeopardy
 
 def main(args):
     
+    # MasterMinds
+    # https://fikklefame.com/?s=master+minds
+    
+    # Trivia DB
+    # https://opentdb.com/
+    
+    # The Trivia API
+    # https://the-trivia-api.com/
+    
+    # API ninja (check liscence)
+    # https://api.api-ninjas.com/v1/riddles
+    # https://api-ninjas.com/api/trivia
+    # https://api-ninjas.com/api/embeddings
+    
     # WWTBAM US
-    wwtbam_us_db = WWTBAM(lang='us', update=False)
+    wwtbam_us_db = WWTBAM(lang='us')
+    # wwtbam_us_db.update()
+    wwtbam_us_db.pprint()
     
     # WWTBAM UK
-    wwtbam_uk_db = WWTBAM(lang='uk', update=False)
+    wwtbam_us_db = WWTBAM(lang='uk')
+    # wwtbam_us_db.update()
+    wwtbam_us_db.pprint()
     
     # Jeopardy
     jeopardy_us_db = Jeopardy()
+    jeopardy_us_db.pprint()
 
 if __name__ == '__main__':
     
@@ -22,12 +41,6 @@ if __name__ == '__main__':
     )
     # parser.add_argument('--cfg', default=None,
     #                     help='path to config file (default if None)')
-    # parser.add_argument('--dirout', default="output", 
-    #                     help='path to output directory for data generation (default is "output")')
-    # parser.add_argument('--apitoken', default='config/apitoken.yml', 
-    #                     help='path to stored API tokens (default is "config/apitoken.yml")')
-    # parser.add_argument('--googlecreds', default='config/credentials.json', 
-    #                     help='path to stored Google credentials (default is "config/credentials.json")')
     args = parser.parse_args()
     
     main(args=args)
