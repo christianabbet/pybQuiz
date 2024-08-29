@@ -17,8 +17,8 @@ if __name__ == '__main__':
     
     # Create parser
     parser = argparse.ArgumentParser(
-        prog='Update Databases',
-        description='Update remote databases',
+        prog='Fetch / update Databases',
+        description='Fetch / update databases',
     )
     # parser.add_argument('--cfg', default=None,
     #                     help='path to config file (default if None)')
