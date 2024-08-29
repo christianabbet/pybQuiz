@@ -15,7 +15,8 @@ from py_markdown_table.markdown_table import markdown_table
 from pybquiz.db.base import TriviaTSVDB
 
 
-class WWTBAMKey:
+class WWTBAMCst:
+    
     # Dataframe columns
     KEY_URL = "url"
     KEY_VALUE = "value"
@@ -27,9 +28,7 @@ class WWTBAMKey:
     KEY_AIR_DATE = "air_date"
     KEY_UUID = "uuid"
     KEY_DIFFICULTY = "diffuculty"
-    
-
-class WWTBAMScrapper:
+    PPRINT_BINS = [0, 4, 9, 14]
     
     # Base website
     WEB_BASE = "https://millionaire.fandom.com"
@@ -45,7 +44,67 @@ class WWTBAMScrapper:
     
     # Color answers
     WEB_ANSWER_OK = "#0bda51"
+
+    # US: https://en.wikipedia.org/wiki/Who_Wants_to_Be_a_Millionaire_(American_game_show)
+    # Value ranges 
+    LUT_US_RND = [
+        999, 1000, 2000, 3000, 4000, 
+        4999, 5000, 10000, 20000, 30000, 
+        49999, 50000, 100000, 500000, 1000000
+    ]
     
+    # Value ranges 1999-2004 
+    LUT_US_1999_2004_2020_NOW = [
+        100, 200, 300, 500, 1000, 
+        2000, 4000, 8000, 16000, 32000, 
+        64000, 125000, 250000, 500000, 1000000
+    ]
+    
+    # Value ranges 1999-2009
+    LUT_US_2004_2009 = [
+        100, 200, 300, 500, 1000, 
+        2000, 4000, 8000, 16000, 25000, 
+        50000, 100000, 250000, 500000, 1000000
+    ]
+        
+    # Value ranges 2009-2010
+    LUT_US_2009_2010 = [
+        500, 1000, 2000, 3000, 5000, 
+        7500, 10000, 12500, 15000, 25000, 
+        50000, 100000, 250000, 500000, 1000000
+    ]
+    
+    # Value ranges 2010-2015 (rnd 99999 offset)
+    LUT_US_2010_2015 = [
+        100, 500, 1000, 2000, 3000, 
+        5000, 7000, 10000, 15000, 25000, 
+        99999, 100000, 250000, 500000, 1000000
+    ]
+    
+    # Value ranges 2015-2019 (rnd 99999 offset)
+    LUT_US_2015_2019 = [
+        500, 1000, 2000, 3000, 5000, 
+        7000, 10000, 20000, 30000, 50000, 
+        99999, 100000, 250000, 500000, 1000000
+    ]
+    
+    # UK: https://en.wikipedia.org/wiki/Who_Wants_to_Be_a_Millionaire%3F_(British_game_show)
+    # Value ranges 1999-2004 
+    LUT_UK_1998_2007_2018_NOW = [
+        100, 200, 300, 500, 1000, 
+        2000, 4000, 8000, 16000, 32000, 
+        64000, 125000, 250000, 500000, 1000000
+    ]
+    # Value ranges 2007-2014 
+    LUT_UK_2007_2014 = [
+        499, 500, 1000, 2000, 5000, 
+        9999, 10000, 20000, 50000, 75000, 
+        149999, 150000, 250000, 500000, 1000000
+    ]
+    
+
+class WWTBAMScrapper:
+        
     @staticmethod
     def _clean_text(text: str):
         """Clean text to remove question letter (A to D) as well as new line
@@ -77,7 +136,7 @@ class WWTBAMScrapper:
 
         Returns
         -------
-        match: str
+        match: Jeopardystr
             Matched value
         """
         # Get money valeu in text
@@ -163,7 +222,7 @@ class WWTBAMScrapper:
             text_question = qbody_lines[1].text
             # Rest is answers
             text_answers = [q.text for q in qbody_lines[2:6]]
-            color_answer = [WWTBAMScrapper.WEB_ANSWER_OK in q.get("style", "") for q in qbody_lines[2:6]]
+            color_answer = [WWTBAMCst.WEB_ANSWER_OK in q.get("style", "") for q in qbody_lines[2:6]]
             # Get ids
             id_wrong = np.array(np.nonzero(np.logical_not(color_answer))).flatten()
             id_correct = np.array(np.nonzero(color_answer)).flatten()
@@ -176,15 +235,15 @@ class WWTBAMScrapper:
             uuid = hashlib.md5(qclean.encode('utf8')).hexdigest()
             data_row = {
                 # export to TSV (tab) + add hash for question
-                WWTBAMKey.KEY_URL: url,
-                WWTBAMKey.KEY_VALUE: WWTBAMScrapper._extract_value(text_value),
-                WWTBAMKey.KEY_QUESTION: qclean,
-                WWTBAMKey.KEY_CORRECT_ANSWER: WWTBAMScrapper._clean_text(text_answers[id_correct.item()]),
-                WWTBAMKey.KEY_WRONG_ANSWER_1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
-                WWTBAMKey.KEY_WRONG_ANSWER_2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
-                WWTBAMKey.KEY_WRONG_ANSWER_3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
-                WWTBAMKey.KEY_AIR_DATE: WWTBAMScrapper._extract_year(infos_text),
-                WWTBAMKey.KEY_UUID: uuid
+                WWTBAMCst.KEY_URL: url,
+                WWTBAMCst.KEY_VALUE: WWTBAMScrapper._extract_value(text_value),
+                WWTBAMCst.KEY_QUESTION: qclean,
+                WWTBAMCst.KEY_CORRECT_ANSWER: WWTBAMScrapper._clean_text(text_answers[id_correct.item()]),
+                WWTBAMCst.KEY_WRONG_ANSWER_1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
+                WWTBAMCst.KEY_WRONG_ANSWER_2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
+                WWTBAMCst.KEY_WRONG_ANSWER_3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
+                WWTBAMCst.KEY_AIR_DATE: WWTBAMScrapper._extract_year(infos_text),
+                WWTBAMCst.KEY_UUID: uuid
             }
 
             data.append(data_row)
@@ -209,8 +268,8 @@ class WWTBAMScrapper:
             List of urls to candidates questions
         """
         # Form URL
-        url_base = WWTBAMScrapper.WEB_BASE
-        url_lang = WWTBAMScrapper.WEB_CONTESTANT_LANG.get(lang, None) 
+        url_base = WWTBAMCst.WEB_BASE
+        url_lang = WWTBAMCst.WEB_CONTESTANT_LANG.get(lang, None) 
         
         # Check if none
         if url_lang is None:
@@ -218,7 +277,7 @@ class WWTBAMScrapper:
         
         # Get page
         url = urljoin(url_base, url_lang)
-        page = slow_request(url=url, params={WWTBAMScrapper.WEB_CONTESTANT_PARAMS_FROM: letter.upper()})
+        page = slow_request(url=url, params={WWTBAMCst.WEB_CONTESTANT_PARAMS_FROM: letter.upper()})
                 
         # If code not valid return None
         if page is None: 
@@ -226,112 +285,56 @@ class WWTBAMScrapper:
         
         # Load from page
         soup = BeautifulSoup(page.content, features="lxml")
-        candidates = soup.find_all(WWTBAMScrapper.WEB_CONTESTANT_LIST_TAG, class_=WWTBAMScrapper.WEB_CONTESTANT_LIST_CLASS)
+        candidates = soup.find_all(WWTBAMCst.WEB_CONTESTANT_LIST_TAG, class_=WWTBAMCst.WEB_CONTESTANT_LIST_CLASS)
 
         # Get all contestant
-        url_candidates = [urljoin(WWTBAMScrapper.WEB_BASE, c.get("href")) for c in candidates if "href" in c.attrs]
+        url_candidates = [urljoin(WWTBAMCst.WEB_BASE, c.get("href")) for c in candidates if "href" in c.attrs]
         return url_candidates
     
     
 class WWTBAM(TriviaTSVDB):
     
-    # US: https://en.wikipedia.org/wiki/Who_Wants_to_Be_a_Millionaire_(American_game_show)
-    
-    # Value ranges 
-    LUT_US_RND = [
-        999, 1000, 2000, 3000, 4000, 
-        4999, 5000, 10000, 20000, 30000, 
-        49999, 50000, 100000, 500000, 1000000
-    ]
-    
-    # Value ranges 1999-2004 
-    LUT_US_1999_2004_2020_NOW = [
-        100, 200, 300, 500, 1000, 
-        2000, 4000, 8000, 16000, 32000, 
-        64000, 125000, 250000, 500000, 1000000
-    ]
-    
-    # Value ranges 1999-2009
-    LUT_US_2004_2009 = [
-        100, 200, 300, 500, 1000, 
-        2000, 4000, 8000, 16000, 25000, 
-        50000, 100000, 250000, 500000, 1000000
-    ]
-        
-    # Value ranges 2009-2010
-    LUT_US_2009_2010 = [
-        500, 1000, 2000, 3000, 5000, 
-        7500, 10000, 12500, 15000, 25000, 
-        50000, 100000, 250000, 500000, 1000000
-    ]
-    
-    # Value ranges 2010-2015 (rnd 99999 offset)
-    LUT_US_2010_2015 = [
-        100, 500, 1000, 2000, 3000, 
-        5000, 7000, 10000, 15000, 25000, 
-        99999, 100000, 250000, 500000, 1000000
-    ]
-    
-    # Value ranges 2015-2019 (rnd 99999 offset)
-    LUT_US_2015_2019 = [
-        500, 1000, 2000, 3000, 5000, 
-        7000, 10000, 20000, 30000, 50000, 
-        99999, 100000, 250000, 500000, 1000000
-    ]
-    
-    # UK: https://en.wikipedia.org/wiki/Who_Wants_to_Be_a_Millionaire%3F_(British_game_show)
-    # Value ranges 1999-2004 
-    LUT_UK_1998_2007_2018_NOW = [
-        100, 200, 300, 500, 1000, 
-        2000, 4000, 8000, 16000, 32000, 
-        64000, 125000, 250000, 500000, 1000000
-    ]
-    
-    LUT_UK_2007_2014 = [
-        499, 500, 1000, 2000, 5000, 
-        9999, 10000, 20000, 50000, 75000, 
-        149999, 150000, 250000, 500000, 1000000
-    ]
-    
-    URL_CONTESTANT = {
-        'us': 'https://millionaire.fandom.com/wiki/Category:Contestants_from_the_U.S.',
-        'uk': 'https://millionaire.fandom.com/wiki/Category:Contestants_from_the_UK',
-    }
-    
     def __init__(
         self, 
-        cache: Optional[str] = '.cache', 
         lang: Literal['us', 'uk'] = 'us',
         filename_db: Optional[str] = "wwtbam",
+        update: Optional[bool] = True,        
+        cache: Optional[str] = '.cache', 
+        chunks: Optional[int] = 10,
     ) -> None:
-        """Who wnats to be a millionaire database
+        """ Who wnats to be a millionaire database
 
         Parameters
         ----------
-        cache : Optional[str], optional
-            Location of the database, by default '.cache'
         lang : Literal['us', 'uk'], optional
             Lang of the show. Either 'uk' or 'us', by default 'us'
         filename_db : Optional[str], optional
             Name of the database, by default "wwtbam"
-        """
+        update : Optional[bool], optional
+            _description_, by default True
+        cache : Optional[str], optional
+            Location of the database, by default '.cache'
+        chunks : Optional[int], optional
+            Size of the update chunks before saving, by default 10
+        """        
         
-        super().__init__(
-            cache=cache, 
-            path_db=os.path.join(cache, filename_db + lang + ".tsv")
-        )
         # Other variables
         self.lang = lang
+        self.chunks = chunks
         self.scapper = WWTBAMScrapper()     
-    
-    def update(self, chuck_bcp: int = 10):
-        """Update database by looking up if new questions where added
+        
+        # Call super method
+        super().__init__(
+            cache=cache, 
+            path_db=os.path.join(cache, filename_db + lang + ".tsv"),
+            update=update,
+        )
 
-        Parameters
-        ----------
-        chuck_bcp : int, optional
-            Number of pages to parse before dumping the results, by default 10
-        """
+    def initialize(self):
+        pass
+    
+    def update(self):
+        """ Update database by looking up if new questions where added """
         # Get url contestant
         letters = string.ascii_uppercase
         
@@ -348,7 +351,7 @@ class WWTBAM(TriviaTSVDB):
         
         # Check only candidates that do not appear in db
         if self.db is not None:
-            url_candidates_exist = self.db[WWTBAMKey.KEY_URL].unique()
+            url_candidates_exist = self.db[WWTBAMCst.KEY_URL].unique()
             url_candidates = [u for u in url_candidates if u not in url_candidates_exist]
         
         # Parse candidates info
@@ -368,59 +371,56 @@ class WWTBAM(TriviaTSVDB):
                 # Save db
                 self.db = pd.concat([self.db, df_chunk], ignore_index=True)
             # Check if backup needed
-            if i%chuck_bcp == 0:
-                self.save_db()
+            if i%self.chunks == 0:
+                self.save()
                 
         # End of program final backup
-        self.clean()
-        self.save_db()
+        self.save()
         
-    def clean(self):
-        """Check for abnormality in database
-        """
+    def finalize(self):
+        """ Check for abnormality in database """
                 
         # Check duplicates in questions
-        self.db.drop_duplicates(subset=WWTBAMKey.KEY_UUID, keep=False, inplace=True)
-        self.db.dropna(subset=WWTBAMKey.KEY_VALUE, inplace=True)
+        self.db.drop_duplicates(subset=WWTBAMCst.KEY_UUID, keep=False, inplace=True)
+        self.db.dropna(subset=WWTBAMCst.KEY_VALUE, inplace=True)
 
         # Convert to difficulty level (year based)
-        self.db[WWTBAMKey.KEY_DIFFICULTY] = np.nan
+        self.db[WWTBAMCst.KEY_DIFFICULTY] = np.nan
         
-        for _, df_cand in self.db.groupby(WWTBAMKey.KEY_URL):
+        for _, df_cand in self.db.groupby(WWTBAMCst.KEY_URL):
             # Check year
-            year = df_cand.iloc[0][WWTBAMKey.KEY_AIR_DATE]
+            year = df_cand.iloc[0][WWTBAMCst.KEY_AIR_DATE]
             numbers = WWTBAM.convert_values_to_number(
-                values=df_cand[WWTBAMKey.KEY_VALUE].values.tolist(),
+                values=df_cand[WWTBAMCst.KEY_VALUE].values.tolist(),
                 year=year, 
                 lang=self.lang
             )
             
             # If exists, append value
             if numbers is not None:           
-                self.db.loc[df_cand.index, WWTBAMKey.KEY_DIFFICULTY] = numbers
+                self.db.loc[df_cand.index, WWTBAMCst.KEY_DIFFICULTY] = numbers
                 
         # Drop item if question of answer are empty
         self.db.dropna(
             subset=[
-                WWTBAMKey.KEY_QUESTION, WWTBAMKey.KEY_CORRECT_ANSWER, 
-                WWTBAMKey.KEY_WRONG_ANSWER_1, WWTBAMKey.KEY_WRONG_ANSWER_2, WWTBAMKey.KEY_WRONG_ANSWER_3,
+                WWTBAMCst.KEY_QUESTION, WWTBAMCst.KEY_CORRECT_ANSWER, 
+                WWTBAMCst.KEY_WRONG_ANSWER_1, WWTBAMCst.KEY_WRONG_ANSWER_2, WWTBAMCst.KEY_WRONG_ANSWER_3,
                 # WWTBAMKey.KEY_AIR_DATE, WWTBAMKey.KEY_DIFFICULTY,
             ],
             inplace=True,
         )
                 
-        
-    def stats(self):
-        """Display stats on database
-        """
+
+    def pprint(self):
+        """ Display stats on database """
         
         name = self.__class__.__name__
-        n_candidates = len(self.db[WWTBAMKey.KEY_URL].unique())
-        n_questions = len(self.db)
-        v_min = self.db[WWTBAMKey.KEY_VALUE].min()
-        v_max = self.db[WWTBAMKey.KEY_VALUE].max()
-        d_min = self.db[WWTBAMKey.KEY_AIR_DATE].min()
-        d_max = self.db[WWTBAMKey.KEY_AIR_DATE].max()
+        n_candidates = len(self.db[WWTBAMCst.KEY_URL].unique())
+        n_questions = len(self)
+        v_min = self.db[WWTBAMCst.KEY_VALUE].min()
+        v_max = self.db[WWTBAMCst.KEY_VALUE].max()
+        d_min = self.db[WWTBAMCst.KEY_AIR_DATE].min()
+        d_max = self.db[WWTBAMCst.KEY_AIR_DATE].max()
         
         # Create a console
         data = {
@@ -432,7 +432,7 @@ class WWTBAM(TriviaTSVDB):
         }
         
         # Add difficulty ranges
-        difficulties = pd.cut(self.db[WWTBAMKey.KEY_DIFFICULTY], bins=[0, 4, 9, 14]).value_counts(sort=False)
+        difficulties = pd.cut(self.db[WWTBAMCst.KEY_DIFFICULTY], bins=WWTBAMCst.PPRINT_BINS).value_counts(sort=False)
         data.update({str(k): v for k, v in difficulties.items()})
         
         # Display final output
@@ -452,27 +452,27 @@ class WWTBAM(TriviaTSVDB):
         
         if lang == 'us':
             # Check dates (it's a mess I know)
-            luts.append(WWTBAM.LUT_US_RND)
+            luts.append(WWTBAMCst.LUT_US_RND)
             if year <= 2004:
-                luts.append(WWTBAM.LUT_US_1999_2004_2020_NOW)
+                luts.append(WWTBAMCst.LUT_US_1999_2004_2020_NOW)
             if year >= 2004 and year <= 2009:
-                luts.append(WWTBAM.LUT_US_2004_2009)
+                luts.append(WWTBAMCst.LUT_US_2004_2009)
             if year >= 2009 and year <= 2010:
-                luts.append(WWTBAM.LUT_US_2009_2010)
+                luts.append(WWTBAMCst.LUT_US_2009_2010)
             if year >= 2010 and year <= 2015:
-                luts.append(WWTBAM.LUT_US_2010_2015)
+                luts.append(WWTBAMCst.LUT_US_2010_2015)
             if year >= 2015 and year <= 2019:
-                luts.append(WWTBAM.LUT_US_2015_2019)
+                luts.append(WWTBAMCst.LUT_US_2015_2019)
             if year >= 2020:
-                luts.append(WWTBAM.LUT_US_1999_2004_2020_NOW)
+                luts.append(WWTBAMCst.LUT_US_1999_2004_2020_NOW)
         elif lang == 'uk':
             # Check year
             if year >= 1998 and year <= 2007:
-                luts.append(WWTBAM.LUT_UK_1998_2007_2018_NOW)
+                luts.append(WWTBAMCst.LUT_UK_1998_2007_2018_NOW)
             if year >= 2007 and year <= 2014:
-                luts.append(WWTBAM.LUT_UK_2007_2014)
+                luts.append(WWTBAMCst.LUT_UK_2007_2014)
             if year >= 2018:
-                luts.append(WWTBAM.LUT_UK_1998_2007_2018_NOW)
+                luts.append(WWTBAMCst.LUT_UK_1998_2007_2018_NOW)
         else:
             raise NotImplementedError
         

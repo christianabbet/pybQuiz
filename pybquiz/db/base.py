@@ -1,15 +1,41 @@
 import os
 import pandas as pd
+from abc import abstractmethod
+from typing import Optional
 
 
-class TriviaTSVDB:  
+class TriviaDB:
+    
+    def __init__(
+        self, 
+        cache: str, 
+    ) -> None:
+        """ 
+        Trivia database
+
+        Parameters
+        ----------
+        cache : str
+            Location of the database folder
+        """        
+        self.cache = cache
+        os.makedirs(self.cache, exist_ok=True)
+    
+    @abstractmethod
+    def __len__(self):
+        """ Return length of database """
+        raise NotImplementedError
+
+
+class TriviaTSVDB(TriviaDB):  
     
     def __init__(
         self, 
         cache: str, 
         path_db: str,
+        update: Optional[bool] = True,
     ) -> None:
-        """Who wnats to be a millionaire database
+        """ Trivia TSV database
 
         Parameters
         ----------
@@ -17,33 +43,57 @@ class TriviaTSVDB:
             Location of the database folder
         path_db : str
             Path to database file
+        update : Optional[bool], optional
+            Update database, by default True
         """        
-        self.cache = cache
+        # Init main cach location
+        super().__init__(cache=cache)          
         self.path_db = path_db
-        self.db = self.load_db()
-        os.makedirs(self.cache, exist_ok=True)
         
-    def update(self):
-        raise NotImplementedError
+        self.initialize()
+        self.load()
         
-    def stats(self):
-        raise NotImplementedError
-    
-    def load_db(self):
-        """Load database from file
+        # Check if update is needed
+        if update:
+            self.update()
+            
+        self.finalize()
+        self.save()
+        # Pretty print
+        self.pprint()
+            
+    def load(self):
+        """ Load database from file """
+        # If exists, reload it
+        if os.path.exists(self.path_db):
+            self.db = pd.read_csv(self.path_db, sep="\t")
+        
+    def save(self):
+        """ Save database to file """
+        self.db.to_csv(self.path_db, sep="\t", index=False)     
+        
+    def __len__(self):
+        """ Return length of database 
 
         Returns
         -------
-        database: pd.DataFrame
-            Loaded database
+        int
+            Length of the database
         """
-        # If exists, reload it
-        if os.path.exists(self.path_db):
-            return pd.read_csv(self.path_db, sep="\t")
-        else:
-            return None
+        return len(self.db)
         
-    def save_db(self):
-        """Save data base
-        """
-        self.db.to_csv(self.path_db, sep="\t", index=False)     
+    @abstractmethod
+    def initialize(self):
+        raise NotImplementedError
+            
+    @abstractmethod
+    def update(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def finalize(self):
+        raise NotImplementedError    
+    
+    @abstractmethod        
+    def pprint(self):
+        raise NotImplementedError
