@@ -10,10 +10,10 @@ def main(args):
     # https://fikklefame.com/?s=master+minds
     
     # Trivia DB
+    # https://opentdb.com/
     opentdb = OpenTriviaDB()
     opentdb.update()
     opentdb.pprint()
-    # https://opentdb.com/
     
     # The Trivia API
     # https://the-trivia-api.com/

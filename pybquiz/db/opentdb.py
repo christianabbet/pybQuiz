@@ -29,6 +29,7 @@ class OTDBKey:
     KEY_TYPE_MULIPLE = "multiple"
     
     URL_KEY_ID = "id"
+    URL_KEY_NAME = "name"
     URL_KEY_TRIVIA_CATEGORY = "trivia_categories"
     URL_KEY_CATEGORY = "category"
     URL_KEY_CATEGORY_COUNT = "category_question_count"
@@ -146,6 +147,7 @@ class OpenTriviaDB(TriviaTSVDB):
                     break
                 # Parse results
                 df_chunk = pd.DataFrame(self.parse_questions(api_result=json.loads(result.text)))
+                df_chunk[OTDBKey.KEY_CATEGORY_ID] = m[OTDBKey.KEY_CATEGORY_ID]
                 self.db = pd.concat([self.db, df_chunk], ignore_index=True)
 
         # Convert to dataframe and merge
@@ -163,7 +165,6 @@ class OpenTriviaDB(TriviaTSVDB):
                 OTDBKey.KEY_TYPE: question_type, 
                 OTDBKey.KEY_DIFFICULTY: q.get(OTDBKey.KEY_DIFFICULTY, ""),  
                 OTDBKey.KEY_CATEGORY: html.unescape(q.get(OTDBKey.KEY_CATEGORY, "")),
-                OTDBKey.KEY_CATEGORY_ID: q.get(OTDBKey.KEY_CATEGORY_ID, ""),
                 OTDBKey.KEY_QUESTION: question_str,
                 OTDBKey.KEY_CORRECT_ANSWER: html.unescape(q.get(OTDBKey.KEY_CORRECT_ANSWER, "")),  
                 OTDBKey.KEY_WRONG_ANSWER_1: html.unescape(q.get(OTDBKey.URL_KEY_INCORRECT, [None]*3)[0]),  
@@ -179,5 +180,25 @@ class OpenTriviaDB(TriviaTSVDB):
         return data
     
     def pprint(self):
-        pass
+        
+        # Define name
+        name = self.__class__.__name__        
+        df_print = pd.crosstab(index=self.db[OTDBKey.KEY_CATEGORY], columns=self.db[OTDBKey.KEY_DIFFICULTY])
+
+        # Group by categories and create df
+        data_all = {OTDBKey.KEY_CATEGORY: "All"}
+        data_all.update(df_print.sum().to_dict())
+        # Add all other values
+        data = [data_all]
+        for _, d in df_print.reset_index().iterrows():
+            data.append(d.to_dict())
+        
+        # Display final output
+        console = Console() 
+        console.print(Panel.fit("Database {}".format(name)))
+        
+        markdown = markdown_table(data).set_params(row_sep = 'markdown')
+        markdown.quote = False
+        markdown = markdown.get_markdown()
+        console.print(markdown)
         

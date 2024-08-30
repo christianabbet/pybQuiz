@@ -71,6 +71,36 @@ Difficulty is graded from to 0 (lowest) to 11 (highest). This correspond to the 
 | us |  482067 |100-2000|1984-2024|192881|187847| 79738 |
 
 
+### 3. Open Trivia DB
+
+|               category              |easy|hard|medium|
+|-------------------------------------|----|----|------|
+|                 All                 |1286| 871| 1864 |
+|               Animals               | 26 | 18 |  29  |
+|             Celebrities             | 13 |  8 |  31  |
+|      Entertainment: Board Games     | 19 | 25 |  15  |
+|         Entertainment: Books        | 28 | 24 |  36  |
+| Entertainment: Cartoon & Animations | 27 | 14 |  39  |
+|        Entertainment: Comics        | 15 | 18 |  34  |
+|         Entertainment: Film         | 88 | 43 |  119 |
+|Entertainment: Japanese Anime & Manga| 58 | 45 |  79  |
+|         Entertainment: Music        | 110| 68 |  189 |
+|      Entertainment: Television      | 69 | 29 |  72  |
+|      Entertainment: Video Games     | 329| 195|  448 |
+|          General Knowledge          | 128| 60 |  124 |
+|              Geography              | 80 | 56 |  139 |
+|               History               | 68 | 80 |  166 |
+|              Mythology              | 19 | 13 |  26  |
+|               Politics              | 18 | 15 |  26  |
+|           Science & Nature          | 61 | 69 |  100 |
+|          Science: Computers         | 48 | 37 |  74  |
+|         Science: Mathematics        | 14 | 17 |  23  |
+|                Sports               | 47 | 20 |  64  |
+|               Vehicles              | 21 | 17 |  31  |
+
+### 4. The Trivia API
+
+
 ## Available APIs
 
 ### 1. Open Trivia DB
