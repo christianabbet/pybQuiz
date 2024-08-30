@@ -254,9 +254,6 @@ APINinjas: YOUR_API_KEY_4
   * https://docs.google.com/spreadsheets/d/1y5TtM4rXHfv_9BktCiJEW621939RzJucXxhJidJZbfQ/htmlview
   * https://drive.google.com/file/d/0Bzs-xvR-5hQ3WktpWVA2RmROY1U/view?resourcekey=0-u03CutV7Ye9rxiuUE8c_UQ
 
-* Jeopardy
-  * https://github.com/jwolle1/jeopardy_clue_dataset
-
 * MasterMinds
   * https://fikklefame.com/?s=master+minds
 

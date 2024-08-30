@@ -23,10 +23,10 @@ def check_code(status_code: int):
     return status_code == STATUS_OK
 
 
-def slow_request(url: str, params: Optional[dict] = None, delay: Optional[float] = 3.0):
+def slow_request(url: str, params: Optional[dict] = None, delay: Optional[float] = 5.0, delay_rnd: Optional[float] = 1.0):
 
     # Add random delays to avoid detections
-    delay = delay * (0.5 + np.random.rand())
+    delay = delay + delay_rnd*(np.random.rand())
         
     # Build request
     start = time.time()    

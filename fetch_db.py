@@ -1,6 +1,8 @@
 import argparse
 from pybquiz.db.wwtbam import WWTBAM
 from pybquiz.db.jeopardy import Jeopardy
+from pybquiz.db.opentdb import OpenTriviaDB
+
 
 def main(args):
     
@@ -8,6 +10,9 @@ def main(args):
     # https://fikklefame.com/?s=master+minds
     
     # Trivia DB
+    opentdb = OpenTriviaDB()
+    opentdb.update()
+    opentdb.pprint()
     # https://opentdb.com/
     
     # The Trivia API
@@ -19,18 +24,18 @@ def main(args):
     # https://api-ninjas.com/api/embeddings
     
     # WWTBAM US
-    wwtbam_us_db = WWTBAM(lang='us')
+    # wwtbam_us_db = WWTBAM(lang='us')
     # wwtbam_us_db.update()
-    wwtbam_us_db.pprint()
+    # wwtbam_us_db.pprint()
     
     # WWTBAM UK
-    wwtbam_us_db = WWTBAM(lang='uk')
+    # wwtbam_us_db = WWTBAM(lang='uk')
     # wwtbam_us_db.update()
-    wwtbam_us_db.pprint()
+    # wwtbam_us_db.pprint()
     
     # Jeopardy
-    jeopardy_us_db = Jeopardy()
-    jeopardy_us_db.pprint()
+    # jeopardy_us_db = Jeopardy()
+    # jeopardy_us_db.pprint()
 
 if __name__ == '__main__':
     
