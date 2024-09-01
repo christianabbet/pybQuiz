@@ -1,48 +1,48 @@
-import os
-import yaml
+# import os
+# import yaml
 
-from pybquiz.api_handler.base import BaseAPIHandler
-from pybquiz.api_handler.opentriviadb import OpenTriviaDB
-from pybquiz.api_handler.thetriviaapi import TheTriviaAPI
-from pybquiz.api_handler.jeopardy import JeopardyUS
-from pybquiz.api_handler.quizapi import QuizAPI
-from pybquiz.api_handler.apininjas import APINinjas
-import pybquiz.api_handler as API
+# from pybquiz.api_handler.base import BaseAPIHandler
+# from pybquiz.api_handler.opentriviadb import OpenTriviaDB
+# from pybquiz.api_handler.thetriviaapi import TheTriviaAPI
+# from pybquiz.api_handler.jeopardy import JeopardyUS
+# from pybquiz.api_handler.quizapi import QuizAPI
+# from pybquiz.api_handler.apininjas import APINinjas
+# import pybquiz.api_handler as API
 
-__all__ = ['OpenTriviaDB', "TheTriviaAPI", "QuizAPI", "APINinjas", "JeopardyUS"]
+# __all__ = ['OpenTriviaDB', "TheTriviaAPI", "QuizAPI", "APINinjas", "JeopardyUS"]
 
 
-def create_handler(name: str, delay_api: float = 5., token: str = None, verbose: bool = True, clear_cache: bool = False) -> BaseAPIHandler:
+# def create_handler(name: str, delay_api: float = 5., token: str = None, verbose: bool = True, clear_cache: bool = False) -> BaseAPIHandler:
     
-    if not hasattr(API, name):
-        return NotImplementedError()
+#     if not hasattr(API, name):
+#         return NotImplementedError()
     
-    cls = getattr(API, name) 
-    return cls(delay_api=delay_api, token=token, verbose=verbose, clear_cache=clear_cache)
+#     cls = getattr(API, name) 
+#     return cls(delay_api=delay_api, token=token, verbose=verbose, clear_cache=clear_cache)
 
 
-def from_yaml(yaml_file: str):
+# def from_yaml(yaml_file: str):
     
     
-    # Check if file exists
-    data_token = None
-    if os.path.exists(yaml_file):
-        with open(yaml_file) as stream:
-            data_token = yaml.safe_load(stream)
+#     # Check if file exists
+#     data_token = None
+#     if os.path.exists(yaml_file):
+#         with open(yaml_file) as stream:
+#             data_token = yaml.safe_load(stream)
             
-    # Define apis
-    apis = {}
+#     # Define apis
+#     apis = {}
     
-    for api_name in __all__:
-        try:
-            # No token
-            api_token = None
-            # Check if attributes exists
-            if data_token is not None:
-                api_token = data_token.get(api_name, None)
-            # Get API
-            apis[api_name] = create_handler(name=api_name, token=api_token)
-        except NotImplementedError:
-            continue
+#     for api_name in __all__:
+#         try:
+#             # No token
+#             api_token = None
+#             # Check if attributes exists
+#             if data_token is not None:
+#                 api_token = data_token.get(api_name, None)
+#             # Get API
+#             apis[api_name] = create_handler(name=api_name, token=api_token)
+#         except NotImplementedError:
+#             continue
         
-    return apis
+#     return apis

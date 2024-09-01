@@ -2,6 +2,7 @@ import argparse
 from pybquiz.db.wwtbam import WWTBAM
 from pybquiz.db.jeopardy import Jeopardy
 from pybquiz.db.opentdb import OpenTriviaDB
+from pybquiz.db.thetrviaapi import TheTriviaAPIDB
 
 
 def main(args):
@@ -11,12 +12,15 @@ def main(args):
     
     # Trivia DB
     # https://opentdb.com/
-    opentdb = OpenTriviaDB()
-    opentdb.update()
-    opentdb.pprint()
+    # opentdb = OpenTriviaDB()
+    # opentdb.update()
+    # opentdb.pprint()
     
     # The Trivia API
     # https://the-trivia-api.com/
+    thetriviadb = TheTriviaAPIDB()
+    thetriviadb.update()
+    thetriviadb.pprint()
     
     # API ninja (check liscence)
     # https://api.api-ninjas.com/v1/riddles

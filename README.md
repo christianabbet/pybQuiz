@@ -18,7 +18,7 @@ cd pybQuiz
 conda create -n pybquiz python=3.9
 conda activate pybquiz
 # Base packages
-pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich beautifulsoup4 tabulate
+pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich beautifulsoup4 tabulate requests
 # To export to Google Slides / Sheets
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 # To generate new backgorunds
