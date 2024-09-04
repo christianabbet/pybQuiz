@@ -7,6 +7,9 @@ PybQuiz is a Python package designed to help you create and manage pub quizzes e
 
 ## Setup
 
+
+### Generate Quiz
+
 Clone repo and create environement
 
 ```bash
@@ -25,7 +28,7 @@ pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-
 pip install --upgrade openai
 ```
 
-Create your quiz
+<!-- Create your quiz
 
 ```bash
 # Run quiz creating 
@@ -45,7 +48,20 @@ options:
                         path to stored Google credentials (default is "config/credentials.json")
 ```
 
-Note that some APIs need a token to be accessed. Please refer to the API section to know how to setup tokens. 
+Note that some APIs need a token to be accessed. Please refer to the API section to know how to setup tokens.  -->
+
+### Update databases (advanced)
+
+# Using conda
+conda create -n clip python=3.9
+conda activate clip
+# Base packages
+conda install pytorch==1.7.1 torchvision==0.8.2 cpuonly -c pytorch
+conda install pandas==1.4.4 scikit-learn==1.2.1
+pip install ftfy regex tqdm rich py_markdown_table requests torcheval
+pip install git+https://github.com/openai/CLIP.git
+```
+
 
 ![plot](creator.png)
 
@@ -101,7 +117,7 @@ Difficulty is graded from to 0 (lowest) to 11 (highest). This correspond to the 
 ### 4. The Trivia API
 
 
-## Available APIs
+<!-- ## Available APIs
 
 ### 1. Open Trivia DB
 
@@ -290,7 +306,7 @@ APINinjas: YOUR_API_KEY_4
 * Others
   * https://quizbowlpackets.com/
   
-## Thanks
+## Thanks -->
 
 
 

@@ -1,4 +1,4 @@
-from pybquiz.db.base import TriviaTSVDB
+from pybquiz.db.base import TriviaTSVDB, TriviaQ
 
 import os
 from typing import Optional, Literal
@@ -202,3 +202,17 @@ class OpenTriviaDB(TriviaTSVDB):
         markdown = markdown.get_markdown()
         console.print(markdown)
         
+        
+    def __getitem__(self, index: int):
+        
+        # Get row
+        serie = self.db.iloc[index]
+        
+        data = {
+            TriviaQ.KEY_QUESTION: serie[OTDBKey.KEY_QUESTION],
+            TriviaQ.KEY_CORRECT_ANSWER: serie[OTDBKey.KEY_CORRECT_ANSWER],
+            TriviaQ.KEY_CATEGORY: serie[OTDBKey.KEY_CATEGORY],
+            TriviaQ.KEY_UUID: serie[OTDBKey.KEY_UUID],
+        }
+    
+        return data

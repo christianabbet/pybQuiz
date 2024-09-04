@@ -4,6 +4,14 @@ from abc import abstractmethod
 from typing import Optional
 
 
+class TriviaQ:
+    
+    KEY_QUESTION = "question"
+    KEY_CORRECT_ANSWER = "correct_answer"
+    KEY_CATEGORY = "category"
+    KEY_UUID = "uuid"
+
+
 class TriviaDB:
     
     def __init__(
@@ -85,4 +93,8 @@ class TriviaTSVDB(TriviaDB):
 
     @abstractmethod        
     def pprint(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def __getitem__(self, index: int):
         raise NotImplementedError
