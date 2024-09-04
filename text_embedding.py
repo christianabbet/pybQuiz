@@ -65,7 +65,7 @@ def main(args):
     from sklearn.metrics import confusion_matrix
     
     r = confusion_matrix(ys_code, ys_pred.numpy(), normalize="true")
-    r[np.eye(ns, ns).astype(bool)]
+    scores = r[np.eye(nc, nc).astype(bool)]
 
 if __name__ == '__main__':
     
