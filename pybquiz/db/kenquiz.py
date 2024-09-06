@@ -197,7 +197,6 @@ class KenQuizScrapper:
             
             # Error in question
             if sp_question is None or sp_answer is None:
-                print("Error {}: {}".format(i, url))
                 continue
             
             # Get texts
@@ -287,7 +286,7 @@ class KenQuizDB(TriviaTSVDB):
                 sub_url = sub_urls[j]
                 sub_cat = sub_categories[j]
                 # Read questions
-                text_questions, text_answers = self.scapper.get_questions(sub_url)
+                text_questions, text_answers = self.scapper.get_question_get(sub_url)
                 n_q = len(text_questions)
                 
                 # Store questions
