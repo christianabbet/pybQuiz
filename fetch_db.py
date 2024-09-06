@@ -3,6 +3,7 @@ from pybquiz.db.wwtbam import WWTBAM
 from pybquiz.db.jeopardy import Jeopardy
 from pybquiz.db.opentdb import OpenTriviaDB
 from pybquiz.db.thetrviaapi import TheTriviaAPIDB
+from pybquiz.db.kenquiz import KenQuizDB
 
 
 def main(args):
@@ -10,9 +11,15 @@ def main(args):
     # MasterMinds
     # https://fikklefame.com/?s=master+minds
     
+    # KenQuiz DB
+    # https://www.kensquiz.co.uk/quizzes//
+    kenquizdb = KenQuizDB()
+    kenquizdb.update()
+    kenquizdb.pprint()
+        
     # Trivia DB
     # https://opentdb.com/
-    opentdb = OpenTriviaDB()
+    # opentdb = OpenTriviaDB()
     # opentdb.update()
     # opentdb.pprint()
     
