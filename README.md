@@ -305,6 +305,9 @@ APINinjas: YOUR_API_KEY_4
 
 * Others
   * https://quizbowlpackets.com/
+  * Ding bats
+  * N'oubliez pas les paroles
+  * Kensquiz
   
 ## Thanks -->
 

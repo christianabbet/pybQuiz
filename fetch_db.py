@@ -12,15 +12,15 @@ def main(args):
     
     # Trivia DB
     # https://opentdb.com/
-    # opentdb = OpenTriviaDB()
+    opentdb = OpenTriviaDB()
     # opentdb.update()
     # opentdb.pprint()
     
     # The Trivia API
     # https://the-trivia-api.com/
-    thetriviadb = TheTriviaAPIDB()
-    thetriviadb.update()
-    thetriviadb.pprint()
+    # thetriviadb = TheTriviaAPIDB()
+    # thetriviadb.update()
+    # thetriviadb.pprint()
     
     # API ninja (check liscence)
     # https://api.api-ninjas.com/v1/riddles

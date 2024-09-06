@@ -1,4 +1,4 @@
-from pybquiz.db.base import TriviaTSVDB
+from pybquiz.db.base import TriviaTSVDB, TriviaQ
 
 import os
 from typing import Optional, Literal
@@ -8,10 +8,9 @@ from rich.console import Console
 from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
 from pybquiz.db.utils import to_uuid
-import numpy as np
 
 
-class JeopardyCst:
+class JeopardyKey:
     
     URL_JEOPARDY = "https://raw.githubusercontent.com/jwolle1/jeopardy_clue_dataset/main/combined_season1-40.tsv"
     
@@ -67,33 +66,33 @@ class Jeopardy(TriviaTSVDB):
     def initialize(self) -> pd.DataFrame:
         
         # Otherwise download it
-        urllib.request.urlretrieve(JeopardyCst.URL_JEOPARDY, self.path_db)  
+        urllib.request.urlretrieve(JeopardyKey.URL_JEOPARDY, self.path_db)  
             
         # Notes not needed
         db = pd.read_csv(self.path_db, sep="\t")
-        db.drop(columns=[JeopardyCst.KEY_NOTES], inplace=True)
+        db.drop(columns=[JeopardyKey.KEY_NOTES], inplace=True)
         # Comments not needed
-        db.drop(columns=[JeopardyCst.KEY_COMMENTS], inplace=True)
+        db.drop(columns=[JeopardyKey.KEY_COMMENTS], inplace=True)
         # Round information not needed
-        db.drop(columns=[JeopardyCst.KEY_ROUND], inplace=True)
+        db.drop(columns=[JeopardyKey.KEY_ROUND], inplace=True)
                 
         # Check for values
-        is_valid_clue = (db[JeopardyCst.KEY_CLUE] != 0) & (db[JeopardyCst.KEY_DOUBLE_CLUE] == 0)
+        is_valid_clue = (db[JeopardyKey.KEY_CLUE] != 0) & (db[JeopardyKey.KEY_DOUBLE_CLUE] == 0)
         db = db[is_valid_clue]
         
         # Get possible values
-        value_range = db[JeopardyCst.KEY_CLUE].unique()
+        value_range = db[JeopardyKey.KEY_CLUE].unique()
         # Rank them
         value_range.sort()
         # Add difficulty indicator
-        db[JeopardyCst.KEY_DIFFICULTY] = db[JeopardyCst.KEY_CLUE].replace({v: k for k, v in enumerate(value_range)})
+        db[JeopardyKey.KEY_DIFFICULTY] = db[JeopardyKey.KEY_CLUE].replace({v: k for k, v in enumerate(value_range)})
         
         # Add uuid for entires
-        db[JeopardyCst.KEY_UUID] = [to_uuid(s) for s in db[JeopardyCst.KEY_ANSWER].values]
+        db[JeopardyKey.KEY_UUID] = [to_uuid(s) for s in db[JeopardyKey.KEY_ANSWER].values]
         
         # Convert years if needed
-        year_str = db[JeopardyCst.KEY_AIR_DATE].str.slice(start=0, stop=4)
-        db[JeopardyCst.KEY_AIR_DATE] = pd.to_numeric(year_str, errors='coerce')
+        year_str = db[JeopardyKey.KEY_AIR_DATE].str.slice(start=0, stop=4)
+        db[JeopardyKey.KEY_AIR_DATE] = pd.to_numeric(year_str, errors='coerce')
             
         return db
         
@@ -104,10 +103,10 @@ class Jeopardy(TriviaTSVDB):
                 
         name = self.__class__.__name__
         n_questions = len(self.db)
-        v_min = self.db[JeopardyCst.KEY_CLUE].min()
-        v_max = self.db[JeopardyCst.KEY_CLUE].max()
-        d_min = self.db[JeopardyCst.KEY_AIR_DATE].min()
-        d_max = self.db[JeopardyCst.KEY_AIR_DATE].max()
+        v_min = self.db[JeopardyKey.KEY_CLUE].min()
+        v_max = self.db[JeopardyKey.KEY_CLUE].max()
+        d_min = self.db[JeopardyKey.KEY_AIR_DATE].min()
+        d_max = self.db[JeopardyKey.KEY_AIR_DATE].max()
         
         # Create a console
         data = {            
@@ -117,7 +116,7 @@ class Jeopardy(TriviaTSVDB):
             "Air date": "{}-{}".format(int(d_min), int(d_max)),
         }
         
-        difficulties = pd.cut(self.db[JeopardyCst.KEY_DIFFICULTY], bins=JeopardyCst.PPRINT_BINS).value_counts(sort=False)
+        difficulties = pd.cut(self.db[JeopardyKey.KEY_DIFFICULTY], bins=JeopardyKey.PPRINT_BINS).value_counts(sort=False)
         data.update({str(k): v for k, v in difficulties.items()})
         
         # Display final output
@@ -129,4 +128,16 @@ class Jeopardy(TriviaTSVDB):
         markdown = markdown.get_markdown()
         console.print(markdown)
         
+        
+    def __getitem__(self, index: int):
+        
+        # Get row
+        serie = self.db.iloc[index]
+        
+        data = {
+            TriviaQ.KEY_QUESTION: serie[JeopardyKey.KEY_ANSWER],
+            TriviaQ.KEY_CATEGORY: serie[JeopardyKey.KEY_CAT],
+            TriviaQ.KEY_UUID: serie[JeopardyKey.KEY_UUID],
+        }
     
+        return data

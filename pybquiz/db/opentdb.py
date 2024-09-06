@@ -210,7 +210,6 @@ class OpenTriviaDB(TriviaTSVDB):
         
         data = {
             TriviaQ.KEY_QUESTION: serie[OTDBKey.KEY_QUESTION],
-            TriviaQ.KEY_CORRECT_ANSWER: serie[OTDBKey.KEY_CORRECT_ANSWER],
             TriviaQ.KEY_CATEGORY: serie[OTDBKey.KEY_CATEGORY],
             TriviaQ.KEY_UUID: serie[OTDBKey.KEY_UUID],
         }
