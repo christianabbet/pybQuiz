@@ -14,8 +14,9 @@ def main(args):
     # KenQuiz DB
     # https://www.kensquiz.co.uk/quizzes//
     kenquizdb = KenQuizDB()
-    kenquizdb.update()
-    kenquizdb.pprint()
+    # kenquizdb.update()
+    kenquizdb.update_brutforce()
+    # kenquizdb.pprint()
         
     # Trivia DB
     # https://opentdb.com/

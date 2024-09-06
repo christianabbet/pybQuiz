@@ -1,6 +1,6 @@
 from typing import Optional, Literal
 from bs4 import BeautifulSoup
-from pybquiz.db.utils import slow_request, to_uuid
+from pybquiz.db.utils import slow_get_request, to_uuid
 from urllib.parse import urljoin
 import string
 from tqdm import tqdm
@@ -11,7 +11,10 @@ from rich.console import Console
 from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
 from pybquiz.db.base import TriviaTSVDB, TriviaQ
+from pybquiz.db.utils import check_code
 import re
+import time
+import requests
 
 
 class KenQuizKey:
@@ -34,6 +37,12 @@ class KenQuizKey:
     WEB_CLASS_QUESTION_LIST = "kensquizsite_questionlistitem"
     WEB_CLASS_QUESTION = "kensquizsite_questionlist_question"
     WEB_CLASS_ANSWER = "kensquizsite_questionlist_answer"
+    
+    WEB_POST_URL = "https://www.kensquiz.co.uk/the-quiz-vault/"
+    WEB_POST_HEADER = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    N_DIFF = [10, 20, 30]
             
 class KenQuizScrapper:
         
@@ -52,7 +61,7 @@ class KenQuizScrapper:
             Links to pages
         """
         # Remove question letter
-        page = slow_request(url=url_base)
+        page = slow_get_request(url=url_base)
                 
         # If code not valid return None
         if page is None: 
@@ -90,7 +99,7 @@ class KenQuizScrapper:
             Links to pages
         """
         # Remove question letter
-        page = slow_request(url=sub_base)
+        page = slow_get_request(url=sub_base)
                 
         # If code not valid return None
         if page is None: 
@@ -114,9 +123,48 @@ class KenQuizScrapper:
 
         return urls, titles
     
-        
     @staticmethod
-    def get_questions(url: str):
+    def slow_post_diff(
+        url: str, 
+        data: dict,
+        delay: Optional[float] = 6.0, 
+        delay_rnd: Optional[float] = 1.0
+    ):
+
+        # Add random delays to avoid detections
+        delay = delay + delay_rnd*(np.random.rand())
+            
+        # Build request
+        start = time.time()    
+        page = requests.post(
+            url, 
+            headers=KenQuizKey.WEB_POST_HEADER,
+            data=data
+        )
+        is_valid = check_code(status_code=page.status_code)
+        end = time.time()
+
+        # Wait for api time
+        time.sleep(max(delay - (end - start), 0)) 
+        
+        # If not valid
+        if not is_valid:
+            return None
+                    
+        return page
+
+    @staticmethod
+    def get_question_post(url: str, data: dict):                    
+        page = KenQuizScrapper.slow_post_diff(url=url, data=data)
+        return KenQuizScrapper.get_questions(page)
+    
+    @staticmethod
+    def get_question_get(url: str):
+        page = slow_get_request(url=url)
+        return KenQuizScrapper.get_questions(page)
+                
+    @staticmethod
+    def get_questions(page):
         """Clean text to remove question letter (A to D) as well as new line
 
         Parameters
@@ -129,12 +177,10 @@ class KenQuizScrapper:
         urls: list[str]
             Links to pages
         """
-        # Remove question letter
-        page = slow_request(url=url)
                 
         # If code not valid return None
         if page is None: 
-            return []
+            return [], []
     
         # Load from page
         soup = BeautifulSoup(page.content, features="lxml")     
@@ -275,38 +321,50 @@ class KenQuizDB(TriviaTSVDB):
         # Final save
         self.save()
         
-        # TEST 
-        # import requests
+
+    def update_brutforce(self, n_tot: int = 500, n_query: int = 20):
+             
+        # Clean database
+        # base = self.db[KenQuizKey.KEY_DIFFICULTY].isna()
+        # df_base = self.db[base].drop_duplicates(subset="uuid").drop("difficulty", axis=1)
+        # df_new = self.db[~base].drop_duplicates(subset="uuid").dropna(axis=1)[["uuid", "difficulty"]]
+        # df = pd.merge(df_base, df_new, on=KenQuizKey.KEY_UUID, how="left")
         
-        # page = requests.post(
-        #     url="https://www.kensquiz.co.uk/the-quiz-vault/", 
-        #     headers={
-        #         "Content-Type": "application/x-www-form-urlencoded",
-        #     },
-        #     data={
-        #         "quantity": 7, 
-        #         "quizvaultsubmit": "Go!", 
-        #         "category_id": 2, 
-        #         "question_difficulty": 30,
-        #     }
-        # )
-        # soup = BeautifulSoup(page.content, features="lxml")     
-        # print(soup.find_all("ol"))
-        
-        # # <option value='-1' selected>All Questions
-        # # <option value='9' >Christmas
-        # # <option value='8' >Culture
-        # # <option value='7' >Food and Drink
-        # # <option value='4' >History
-        # # <option value='6' >Music
-        # # <option value='3' >People and Places
-        # # <option value='2' >Science and Nature
-        # # <option value='1' >Sport
-        # # <option value='5' >TV and Film
-        # # https://www.kensquiz.co.uk/quizzes/quiz-archive/quiz-number-235/answers/
-            
-       
-        
+        # Get random questions to have difficulty set
+        for i, nd in enumerate(KenQuizKey.N_DIFF):
+            print("[{}] Difficulty: {}".format(i+1, nd))
+            for j in tqdm(range(n_tot)):
+                # Get set of questions
+                text_questions, text_answers = self.scapper.get_question_post(
+                    url=KenQuizKey.WEB_POST_URL,
+                    data={
+                        "quantity": n_query, 
+                        "quizvaultsubmit": "Go!", 
+                        "category_id": -1, 
+                        "question_difficulty": nd,
+                    },
+                )
+          
+                # Store questions
+                uuids = np.unique([to_uuid(t) for t in text_questions])
+                uuids = pd.DataFrame(uuids, columns=[KenQuizKey.KEY_UUID])
+                uuids[KenQuizKey.KEY_DIFFICULTY] = nd
+
+                # Check if value to append
+                if len(uuids) == 0:
+                    continue
+                
+                #Merge with existing
+                df_merge = self.db.merge(right=uuids, how="left", on=KenQuizKey.KEY_UUID, indicator=True)
+                is_new = df_merge[(df_merge['_merge'] == "both")].index
+                self.db.loc[is_new, KenQuizKey.KEY_DIFFICULTY] = nd
+                
+                if j%self.chunks == 0:
+                    self.save()
+                    
+            # Final save
+            self.save()
+         
     def finalize(self):
         pass
         """ Check for abnormality in database """

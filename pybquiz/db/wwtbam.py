@@ -1,6 +1,6 @@
 from typing import Optional, Literal
 from bs4 import BeautifulSoup
-from pybquiz.db.utils import slow_request, to_uuid
+from pybquiz.db.utils import slow_get_request, to_uuid
 from urllib.parse import urljoin
 import string
 from tqdm import tqdm
@@ -184,7 +184,7 @@ class WWTBAMScrapper:
             DIctionnary containing all the parsed questions
         """
         # Get contestant page
-        page = slow_request(url=url)
+        page = slow_get_request(url=url)
         # If code not valid return None
         if page is None: 
             return []
@@ -276,7 +276,7 @@ class WWTBAMScrapper:
         
         # Get page
         url = urljoin(url_base, url_lang)
-        page = slow_request(url=url, params={WWTBAMKey.WEB_CONTESTANT_PARAMS_FROM: letter.upper()})
+        page = slow_get_request(url=url, params={WWTBAMKey.WEB_CONTESTANT_PARAMS_FROM: letter.upper()})
                 
         # If code not valid return None
         if page is None: 

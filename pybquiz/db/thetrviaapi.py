@@ -10,7 +10,7 @@ from py_markdown_table.markdown_table import markdown_table
 import json
 from tqdm import tqdm
 import numpy as np
-from pybquiz.db.utils import slow_request, to_uuid
+from pybquiz.db.utils import slow_get_request, to_uuid
 import html
 
 
@@ -87,7 +87,7 @@ class TheTriviaAPIDB(TriviaTSVDB):
     def update(self):
         
         # Get existing categories
-        result = slow_request(TTAPIKey.URL_CATEGORY)
+        result = slow_get_request(TTAPIKey.URL_CATEGORY)
         # If code not valid return None
         if result is None: 
             return 
@@ -100,7 +100,7 @@ class TheTriviaAPIDB(TriviaTSVDB):
         n_update = np.ceil(n_type_text / self.chunk).astype(int)
         for _ in tqdm(range(n_update), "Update database"):
             # Send request                
-            result = slow_request(
+            result = slow_get_request(
                 TTAPIKey.URL_QUESTION, 
                 params={TTAPIKey.URL_KEY_R_LIMIT: self.chunk},
             )

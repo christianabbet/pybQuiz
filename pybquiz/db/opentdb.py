@@ -10,7 +10,7 @@ from py_markdown_table.markdown_table import markdown_table
 import json
 from tqdm import tqdm
 import numpy as np
-from pybquiz.db.utils import slow_request, to_uuid
+from pybquiz.db.utils import slow_get_request, to_uuid
 import html
 
 
@@ -85,7 +85,7 @@ class OpenTriviaDB(TriviaTSVDB):
     def update(self):
         
         # Get existing categories
-        result = slow_request(OTDBKey.URL_CATEGORY)
+        result = slow_get_request(OTDBKey.URL_CATEGORY)
         # If code not valid return None
         if result is None: 
             return 
@@ -98,7 +98,7 @@ class OpenTriviaDB(TriviaTSVDB):
         for cat in tqdm(categories):
             # Get cat id and number of questions
             cat_id = cat.get(OTDBKey.URL_KEY_ID, -1)
-            result = slow_request(OTDBKey.URL_CATEGORY_COUNT, params={OTDBKey.URL_KEY_CATEGORY:cat_id })
+            result = slow_get_request(OTDBKey.URL_CATEGORY_COUNT, params={OTDBKey.URL_KEY_CATEGORY:cat_id })
             if result is None: 
                 continue 
             # Convert results
@@ -122,7 +122,7 @@ class OpenTriviaDB(TriviaTSVDB):
             return
         
         # Get token
-        result = slow_request(OTDBKey.URL_TOKEN)
+        result = slow_get_request(OTDBKey.URL_TOKEN)
         if result is None: 
             return 
         token = json.loads(result.text).get(OTDBKey.URL_KEY_TOKEN, "")
@@ -134,7 +134,7 @@ class OpenTriviaDB(TriviaTSVDB):
             # Get all chunks
             for i in tqdm(range(n_update_cat), "Update categories [{}/{}]".format(i+1, n_update)):
                 # Send request                
-                result = slow_request(
+                result = slow_get_request(
                     OTDBKey.URL_QUESTION, 
                     params={
                         OTDBKey.URL_KEY_AMOUNT: self.chunk, 
