@@ -116,6 +116,37 @@ Difficulty is graded from to 0 (lowest) to 11 (highest). This correspond to the 
 
 ### 4. The Trivia API
 
+|      category     |easy|hard|medium|
+|-------------------|----|----|------|
+|        All        | 991|4843| 4363 |
+|arts_and_literature| 84 | 645|  356 |
+|    film_and_tv    | 105| 678|  602 |
+|   food_and_drink  | 80 | 301|  364 |
+| general_knowledge | 42 | 171|  175 |
+|     geography     | 195| 771|  635 |
+|      history      | 41 | 440|  441 |
+|       music       | 127| 583|  429 |
+|      science      | 115| 531|  578 |
+|society_and_culture| 150| 442|  585 |
+| sport_and_leisure | 52 | 281|  198 |
+
+### 5. KenQuiz
+
+|           category          |10.0|20.0|30.0|
+|-----------------------------|----|----|----|
+|             All             |3598|6145|4569|
+|      Christmas Quizzes      | 227| 379| 258|
+|           Culture           | 145| 320| 223|
+|     Food & Drink Quizzes    | 174| 294| 172|
+|  General Knowledge Quizzes  |1452|2073|1730|
+|       History Quizzes       | 244| 512| 377|
+|     Music Trivia Quizzes    | 271| 464| 344|
+|      People and Places      | 218| 427| 295|
+|Quizzes for Special Occasions| 178| 471| 350|
+|       Science & Nature      | 176| 362| 222|
+|        Sports Quizzes       | 231| 434| 309|
+|         TV and Films        | 282| 409| 289|
+
 
 <!-- ## Available APIs
 
