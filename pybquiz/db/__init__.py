@@ -2,6 +2,7 @@ from pybquiz.db.opentdb import OpenTriviaDB
 from pybquiz.db.wwtbam import WWTBAM
 from pybquiz.db.jeopardy import Jeopardy
 from pybquiz.db.thetrviaapi import TheTriviaAPIDB
+from pybquiz.db.kenquiz import KenQuizDB
 
 
 def get_all_trivia_db():
@@ -12,13 +13,15 @@ def get_all_trivia_db():
     wwtbam_us_db = WWTBAM(lang='us')
     wwtbam_uk_db = WWTBAM(lang='uk')
     jeopardy_us_db = Jeopardy() 
-    
+    kenquizdb = KenQuizDB()
+
     dbs = {
         "opentdb": opentdb,
         "thetriviadb": thetriviadb,
         "wwtbam_us_db": wwtbam_us_db,
         "wwtbam_uk_db": wwtbam_uk_db,
         "jeopardy_us_db": jeopardy_us_db,
+        "kenquizdb": kenquizdb,
     }
     
     return dbs
