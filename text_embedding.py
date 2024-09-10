@@ -1,108 +1,85 @@
-from pybquiz.db import get_all_trivia_db
-from pybquiz.db.base import TriviaTSVDB
-
-
-from torch.utils.data import DataLoader
-from tqdm import tqdm
-import pandas as pd
-import numpy as np
-from typing import Optional
+import os
 import argparse
-import torch
-import clip
-import torch.linalg
+import ollama
+import numpy as np
+from tqdm import tqdm
+from typing import Optional
+
+from pybquiz.db.base import UnifiedTSVDB
+from pybquiz.db.base import TriviaTSVDB, TriviaQ
 
 
 def embedd(
     dataset: TriviaTSVDB, 
-    model,
-    batch_size: Optional[int] = 128,
+    id_subset: list[int],
+    model_name: Optional[str] = "mxbai-embed-large",
 ):
 
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, drop_last=False)
-
-    # Apply on all questions
-    uuids = []
-    zs = []
-    xs = []
-    ys = []
-    
-    for data in tqdm(loader):
-        # Tokenize values
-        x_text = data.get("question", [])
-        y_text = data.get("category", [])
-        uuid_text = data.get("uuid", [])
+    # Get embedding size
+    result = ollama.embeddings(model=model_name, prompt="test")
+            
+    # Get item numbers
         
-        x_text_token = clip.tokenize(x_text).to("cpu")
-        # Embedd text
-        with torch.no_grad():
-            texts_features = model.encode_text(x_text_token)
-        # Append to results
-        uuids.extend(uuid_text)
-        xs.extend(x_text)
-        zs.extend(texts_features)        
-        ys.extend(y_text)
+    # Infer new ones
+    N_new = len(id_subset)
+    F = len(result.get("embedding", []))
+    z = np.zeros((N_new, F))
+    y = [None]*N_new
+    uuid = [None]*N_new
+    model = [None]*N_new
+    
+    for i in tqdm(range(N_new)):
+        # Get prompt
+        batch = dataset[id_subset[i]]
+        result = ollama.embeddings(
+            model=model_name,
+            prompt=batch.get(TriviaQ.KEY_QUESTION, "error"),
+        )
+        # Append results
+        z[i] = result.get("embedding", [])
+        y[i] = batch.get(TriviaQ.KEY_CATEGORY, None)
+        uuid[i] = batch.get(TriviaQ.KEY_UUID, None)
+        model[i] = batch.get("domain", None)
         
-    # Perform clustering
-    zs = torch.stack(zs)
-    zs = zs / torch.linalg.norm(zs, dim=1, keepdims=True)
-    
-    return zs, ys, uuids
+    # Return output
+    return z, y, uuid, model
 
-
-def to_df(zs, ys, uuids):
-    # Get sizes
-    N, F = zs.shape
-    
-    # Create df
-    name_f = ["f{}".format(f) for f in np.arange(F)]
-    df = pd.DataFrame(zs, columns=name_f)
-    
-    # Index values
-    df["uuid"] = uuids
-    df["y"] = ys
-
-    return df, name_f
-    
     
 def main(args):
-    
+
     
     # Get data and loader
-    dbs = get_all_trivia_db()
-
-    # Check if model is available
-    models_available = clip.available_models()
-    if args.arch not in models_available:
-        raise NotImplementedError
+    triviadb = UnifiedTSVDB(dbs=None)
+    path_npz = os.path.join(args.cache, "embedding_trivia.npz")
+    N = len(triviadb)
     
-    # Get pretrained model
-    model, _ = clip.load(args.arch, device="cpu")
- 
-    n_db = len(dbs)
-    dfs = []
-    for i, (db_name, db) in enumerate(dbs.items()):
-        print("[{}/{}] {}".format(i+1, n_db, db_name))
-        zs, ys, uuids = embedd(dataset=db, model=model)
-        df, name_f = to_df(zs, ys, uuids)
-        df["db"] = db_name
+    # Load existing
+    z, y, uuid, domain = [], [], [], []
+    
+    if os.path.exists(path_npz):
+        print("Load existing data ...")
+        data = np.load(path_npz, allow_pickle=True)["data"].item()
+        z = data["z"]
+        y = data["y"]
+        uuid = data["uuid"]
+        domain = data["domain"]
+
+    # Infer dummy
+    print("Check existing data ...")
+    exists = [d[TriviaQ.KEY_UUID] in uuid for d in triviadb]
+    id_subset = np.nonzero(np.logical_not(exists))[0]
+
+    # Check if update is needed    
+    if len(id_subset) != 0:
+        # Get new embedding
+        z_new, y_new, uuid_new, domain_new = embedd(dataset=triviadb, model_name=args.model, id_subset=id_subset)
+        # Append embedding
+        print("todo")
         
-    # Centers
-    dfs = pd.concat(dfs)
-    # mu = torch.zeros(nc, zs.shape[1])
-    
-    # for c in np.unique(ys_code):
-    #     mu[c] = zs[ys_code == c].mean(dim=0)
-    #     mu[c] = mu[c] / torch.linalg.norm(mu[c])
+    print("Saving ...")
+    np.savez_compressed(path_npz, data={"z": z, "y": y, "uuid": uuid, "domain": domain})
 
-    # # Predicted labels
-    # ys_pred = (mu @ zs.T).argmax(dim=0)
-    # np.mean(ys_pred.numpy() == ys_code)
-    
-    # from sklearn.metrics import confusion_matrix
-    
-    # r = confusion_matrix(ys_code, ys_pred.numpy(), normalize="true")
-    # scores = r[np.eye(nc, nc).astype(bool)]
+
 
 if __name__ == '__main__':
     
@@ -111,8 +88,11 @@ if __name__ == '__main__':
         prog='Text embedding',
         description='Embed text for feature description',
     )
-    parser.add_argument('--arch', default="RN50",
-                        help='Default pretrained architecture. Default is RN50.')
+    parser.add_argument('--model', default="mxbai-embed-large",
+                        choices=['mxbai-embed-large', 'nomic-embed-text', 'all-minilm'],
+                        help='Default embedding model (https://ollama.com/blog/embedding-models).')
+    parser.add_argument('--cache', default=".cache",
+                        help='Reference file for trianing.')    
     args = parser.parse_args()
     
     main(args=args)

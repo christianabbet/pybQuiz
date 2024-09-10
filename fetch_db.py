@@ -4,6 +4,9 @@ from pybquiz.db.jeopardy import Jeopardy
 from pybquiz.db.opentdb import OpenTriviaDB
 from pybquiz.db.thetrviaapi import TheTriviaAPIDB
 from pybquiz.db.kenquiz import KenQuizDB
+from pybquiz.db.ninjaapi import NinjaAPI
+from pybquiz.db.base import UnifiedTSVDB
+import pandas as pd
 
 
 def main(args):
@@ -15,25 +18,26 @@ def main(args):
     # https://www.kensquiz.co.uk/quizzes//
     kenquizdb = KenQuizDB()
     # kenquizdb.update()
-    kenquizdb.update_brutforce()
-    # kenquizdb.pprint()
+    # kenquizdb.update_brutforce()
+    kenquizdb.pprint()
         
-    # Trivia DB
+    # OpenTrivia DB
     # https://opentdb.com/
-    # opentdb = OpenTriviaDB()
+    opentdb = OpenTriviaDB()
     # opentdb.update()
-    # opentdb.pprint()
+    opentdb.pprint()
     
     # The Trivia API
     # https://the-trivia-api.com/
-    # thetriviadb = TheTriviaAPIDB()
+    thetriviadb = TheTriviaAPIDB()
     # thetriviadb.update()
-    # thetriviadb.pprint()
+    thetriviadb.pprint()
     
-    # API ninja (check liscence)
-    # https://api.api-ninjas.com/v1/riddles
+    # API ninja 
     # https://api-ninjas.com/api/trivia
-    # https://api-ninjas.com/api/embeddings
+    ninjaapi = NinjaAPI()
+    # ninjaapi.update()
+    ninjaapi.pprint()
     
     # WWTBAM US
     # wwtbam_us_db = WWTBAM(lang='us')
@@ -48,7 +52,14 @@ def main(args):
     # Jeopardy
     # jeopardy_us_db = Jeopardy()
     # jeopardy_us_db.pprint()
-
+    
+    # Merge Trivia DBs:
+    dbs = [kenquizdb, opentdb, ninjaapi, thetriviadb]
+    triviadb = UnifiedTSVDB(dbs=dbs)
+    triviadb.update()
+    triviadb.pprint()
+    
+    pd.concat
 if __name__ == '__main__':
     
     # Create parser

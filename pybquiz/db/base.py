@@ -125,9 +125,12 @@ class TriviaTSVDB(TriviaDB):
 
 class UnifiedTSVDB(TriviaTSVDB):
     
+    
+    KEY_DOMAIN = "domain"
+    
     def __init__(
         self, 
-        dbs: list[TriviaTSVDB],
+        dbs: Optional[list[TriviaTSVDB]] = None,
         filename_db: Optional[str] = "trivia",
         cache: Optional[str] = '.cache', 
     ) -> None:
@@ -158,20 +161,24 @@ class UnifiedTSVDB(TriviaTSVDB):
         for db in self.dbs:
             # Get standardized columns
             df = db.db
-            df["source"] = self.__class__.__name__        
+            df[self.KEY_DOMAIN] = db.__class__.__name__        
             dfs.append(df)
             
         # Merge columns
         dfs = pd.concat(dfs, ignore_index=True)
         # Get trivia cols
         ref_keys = TriviaQ.get_keys()
+        ref_keys.append(self.KEY_DOMAIN)
         dfs = dfs[ref_keys]
         return dfs
 
             
     @abstractmethod
     def update(self):
-        pass
+        # Check for duplicates
+        self.db.drop_duplicates(subset=TriviaQ.KEY_UUID)
+        # Notehing to do, just save version
+        self.save()
 
     @abstractmethod        
     def pprint(self):
@@ -195,3 +202,12 @@ class UnifiedTSVDB(TriviaTSVDB):
         markdown.quote = False
         markdown = markdown.get_markdown()
         console.print(markdown)
+
+    def __getitem__(self, index: int):
+        
+        # Get row and params
+        data = super().__getitem__(index)
+        data[self.KEY_DOMAIN] = self.db.loc[index, self.KEY_DOMAIN]
+    
+        return data
+    
