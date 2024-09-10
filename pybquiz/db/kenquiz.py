@@ -21,11 +21,8 @@ class KenQuizKey:
     
     # # Dataframe columns
     KEY_URL = "url"
-    KEY_QUESTION = "question"
-    KEY_CORRECT_ANSWER = "correct_answer"
-    KEY_UUID = "uuid"
-    KEY_CATEGORY = "category"
     KEY_CATEGORY_SUB = "category_sub"
+
     KEY_DIFFICULTY = "difficulty"
 
     
@@ -249,9 +246,18 @@ class KenQuizDB(TriviaTSVDB):
     def initialize(self):
         return pd.DataFrame(
             columns=[
-                KenQuizKey.KEY_URL, KenQuizKey.KEY_QUESTION, 
-                KenQuizKey.KEY_DIFFICULTY, KenQuizKey.KEY_CORRECT_ANSWER,
-                KenQuizKey.KEY_UUID, KenQuizKey.KEY_CATEGORY, KenQuizKey.KEY_CATEGORY_SUB,
+                # Mandatory keys
+                TriviaQ.KEY_UUID, 
+                TriviaQ.KEY_CATEGORY, 
+                TriviaQ.KEY_DIFFICULTY, 
+                TriviaQ.KEY_QUESTION, 
+                TriviaQ.KEY_CORRECT_ANSWER, 
+                TriviaQ.KEY_WRONG_ANSWER1, 
+                TriviaQ.KEY_WRONG_ANSWER2, 
+                TriviaQ.KEY_WRONG_ANSWER3, 
+                # Others
+                KenQuizKey.KEY_URL, 
+                KenQuizKey.KEY_CATEGORY_SUB,
             ]
         )
             
@@ -296,12 +302,12 @@ class KenQuizDB(TriviaTSVDB):
                     # Question
                     data = {
                         KenQuizKey.KEY_URL: sub_url, 
-                        KenQuizKey.KEY_CATEGORY: main_cat, 
+                        TriviaQ.KEY_CATEGORY: main_cat, 
                         KenQuizKey.KEY_CATEGORY_SUB: sub_cat,
-                        KenQuizKey.KEY_QUESTION: text_questions[k], 
-                        KenQuizKey.KEY_DIFFICULTY: None, 
-                        KenQuizKey.KEY_CORRECT_ANSWER: text_answers[k],
-                        KenQuizKey.KEY_UUID: to_uuid(text_questions[k]), 
+                        TriviaQ.KEY_QUESTION: text_questions[k], 
+                        TriviaQ.KEY_DIFFICULTY: None, 
+                        TriviaQ.KEY_CORRECT_ANSWER: text_answers[k],
+                        TriviaQ.KEY_UUID: to_uuid(text_questions[k]), 
                     }
                     
                     datas.append(data)
@@ -323,12 +329,6 @@ class KenQuizDB(TriviaTSVDB):
 
     def update_brutforce(self, n_tot: int = 500, n_query: int = 20):
              
-        # Clean database
-        # base = self.db[KenQuizKey.KEY_DIFFICULTY].isna()
-        # df_base = self.db[base].drop_duplicates(subset="uuid").drop("difficulty", axis=1)
-        # df_new = self.db[~base].drop_duplicates(subset="uuid").dropna(axis=1)[["uuid", "difficulty"]]
-        # df = pd.merge(df_base, df_new, on=KenQuizKey.KEY_UUID, how="left")
-        
         # Get random questions to have difficulty set
         for i, nd in enumerate(KenQuizKey.N_DIFF):
             print("[{}] Difficulty: {}".format(i+1, nd))
@@ -346,17 +346,17 @@ class KenQuizDB(TriviaTSVDB):
           
                 # Store questions
                 uuids = np.unique([to_uuid(t) for t in text_questions])
-                uuids = pd.DataFrame(uuids, columns=[KenQuizKey.KEY_UUID])
-                uuids[KenQuizKey.KEY_DIFFICULTY] = nd
+                uuids = pd.DataFrame(uuids, columns=[TriviaQ.KEY_UUID])
+                uuids[TriviaQ.KEY_DIFFICULTY] = nd
 
                 # Check if value to append
                 if len(uuids) == 0:
                     continue
                 
                 #Merge with existing
-                df_merge = self.db.merge(right=uuids, how="left", on=KenQuizKey.KEY_UUID, indicator=True)
+                df_merge = self.db.merge(right=uuids, how="left", on=TriviaQ.KEY_UUID, indicator=True)
                 is_new = df_merge[(df_merge['_merge'] == "both")].index
-                self.db.loc[is_new, KenQuizKey.KEY_DIFFICULTY] = nd
+                self.db.loc[is_new, TriviaQ.KEY_DIFFICULTY] = nd
                 
                 if j%self.chunks == 0:
                     self.save()
@@ -402,13 +402,13 @@ class KenQuizDB(TriviaTSVDB):
         
         name = self.__class__.__name__        
         df_print = pd.crosstab(
-            index=self.db[KenQuizKey.KEY_CATEGORY], 
-            columns=self.db[KenQuizKey.KEY_DIFFICULTY]
+            index=self.db[TriviaQ.KEY_CATEGORY], 
+            columns=self.db[TriviaQ.KEY_DIFFICULTY]
         )
         df_print.columns = [str(c) for c in df_print.columns]
 
         # Group by categories and create df
-        data_all = {KenQuizKey.KEY_CATEGORY: "All"}
+        data_all = {TriviaQ.KEY_CATEGORY: "All"}
         data_all.update(df_print.sum().to_dict())
         # Add all other values
         data = [data_all]
@@ -456,17 +456,3 @@ class KenQuizDB(TriviaTSVDB):
         # markdown = markdown.get_markdown()
         # console.print(markdown)
         
-        
-    def __getitem__(self, index: int):
-        
-        # Get row
-        serie = self.db.iloc[index]
-        
-        data = {
-            TriviaQ.KEY_QUESTION: serie[KenQuizKey.KEY_QUESTION],
-            TriviaQ.KEY_CATEGORY: serie[KenQuizKey.KEY_CATEGORY],
-            TriviaQ.KEY_UUID: serie[KenQuizKey.KEY_UUID],
-        }
-    
-        return data
-    

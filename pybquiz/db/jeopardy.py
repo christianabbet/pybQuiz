@@ -128,16 +128,3 @@ class Jeopardy(TriviaTSVDB):
         markdown = markdown.get_markdown()
         console.print(markdown)
         
-        
-    def __getitem__(self, index: int):
-        
-        # Get row
-        serie = self.db.iloc[index]
-        
-        data = {
-            TriviaQ.KEY_QUESTION: serie[JeopardyKey.KEY_ANSWER],
-            TriviaQ.KEY_CATEGORY: serie[JeopardyKey.KEY_CAT],
-            TriviaQ.KEY_UUID: serie[JeopardyKey.KEY_UUID],
-        }
-    
-        return data

@@ -1,16 +1,7 @@
-# from pybquiz.api_handler.base import BaseAPIHandler
-# from typing import Union, List
-# import numpy as np
-# from tqdm import tqdm
-# from pybquiz.elements import Questions
-# import hashlib
-
-
 from pybquiz.db.base import TriviaTSVDB, TriviaQ
 
 import os
 from typing import Optional, Literal
-import urllib
 import pandas as pd
 from rich.console import Console
 from rich.panel import Panel
@@ -19,16 +10,10 @@ import json
 from tqdm import tqdm
 import numpy as np
 from pybquiz.db.utils import slow_get_request, to_uuid
-import html
 from rich.prompt import Prompt
 
 
 class NinjaDBKey:
-    
-    KEY_CATEGORY = "category"
-    KEY_QUESTION = "question"
-    KEY_CORRECT_ANSWER = "correct_answer"
-    KEY_UUID = "uuid"
 
     URL_KEY_QUESTION = "question"
     URL_KEY_CATEGORY = "category"
@@ -107,8 +92,15 @@ class NinjaAPI(TriviaTSVDB):
     def initialize(self):
         return pd.DataFrame(
             columns=[
-                NinjaDBKey.KEY_CATEGORY, NinjaDBKey.KEY_QUESTION,  
-                NinjaDBKey.KEY_CORRECT_ANSWER, NinjaDBKey.KEY_UUID,
+                # Mandatory keys
+                TriviaQ.KEY_UUID, 
+                TriviaQ.KEY_CATEGORY, 
+                TriviaQ.KEY_DIFFICULTY, 
+                TriviaQ.KEY_QUESTION, 
+                TriviaQ.KEY_CORRECT_ANSWER, 
+                TriviaQ.KEY_WRONG_ANSWER1, 
+                TriviaQ.KEY_WRONG_ANSWER2, 
+                TriviaQ.KEY_WRONG_ANSWER3, 
             ]
         )
         
@@ -146,15 +138,15 @@ class NinjaAPI(TriviaTSVDB):
                 question = result[0].get(NinjaDBKey.URL_KEY_QUESTION, None)
                 uuid = to_uuid(question)
                 
-                if uuid in self.db[NinjaDBKey.KEY_UUID].values:
+                if uuid in self.db[TriviaQ.KEY_UUID].values:
                     n_category_try += 1
                     continue
                 
                 data = pd.DataFrame([{
-                    NinjaDBKey.KEY_QUESTION: question,
-                    NinjaDBKey.KEY_CORRECT_ANSWER: result[0].get(NinjaDBKey.URL_KEY_ANSWER, None),
-                    NinjaDBKey.KEY_CATEGORY: result[0].get(NinjaDBKey.URL_KEY_CATEGORY, None),
-                    NinjaDBKey.KEY_UUID: uuid,
+                    TriviaQ.KEY_QUESTION: question,
+                    TriviaQ.KEY_CORRECT_ANSWER: result[0].get(NinjaDBKey.URL_KEY_ANSWER, None),
+                    TriviaQ.KEY_CATEGORY: result[0].get(NinjaDBKey.URL_KEY_CATEGORY, None),
+                    TriviaQ.KEY_UUID: uuid,
                 }])
                 
                 self.db = pd.concat([self.db, data], ignore_index=True)
@@ -168,38 +160,23 @@ class NinjaAPI(TriviaTSVDB):
 
     def pprint(self):
         
-        pass
         # Define name
-        # name = self.__class__.__name__        
-        # df_print = pd.crosstab(index=self.db[OTDBKey.KEY_CATEGORY], columns=self.db[OTDBKey.KEY_DIFFICULTY])
+        name = self.__class__.__name__        
+        df_print = self.db[TriviaQ.KEY_CATEGORY].value_counts().reset_index()
+        df_print.columns = [TriviaQ.KEY_CATEGORY, "count"]
+        # Group by categories and create df
+        data_all = {TriviaQ.KEY_CATEGORY: "All", "count": df_print["count"].sum()}
+        # Add all other values
+        data = [data_all]
+        for _, d in df_print.iterrows():
+            data.append(d.to_dict())
+        
+        # Display final output
+        console = Console() 
+        console.print(Panel.fit("Database {}".format(name)))
+        
+        markdown = markdown_table(data).set_params(row_sep = 'markdown')
+        markdown.quote = False
+        markdown = markdown.get_markdown()
+        console.print(markdown)
 
-        # # Group by categories and create df
-        # data_all = {OTDBKey.KEY_CATEGORY: "All"}
-        # data_all.update(df_print.sum().to_dict())
-        # # Add all other values
-        # data = [data_all]
-        # for _, d in df_print.reset_index().iterrows():
-        #     data.append(d.to_dict())
-        
-        # # Display final output
-        # console = Console() 
-        # console.print(Panel.fit("Database {}".format(name)))
-        
-        # markdown = markdown_table(data).set_params(row_sep = 'markdown')
-        # markdown.quote = False
-        # markdown = markdown.get_markdown()
-        # console.print(markdown)
-        
-        
-    def __getitem__(self, index: int):
-        
-        # Get row
-        serie = self.db.iloc[index]
-        
-        data = {
-            TriviaQ.KEY_QUESTION: serie[NinjaDBKey.KEY_QUESTION],
-            TriviaQ.KEY_CATEGORY: serie[NinjaDBKey.KEY_CATEGORY],
-            TriviaQ.KEY_UUID: serie[NinjaDBKey.KEY_UUID],
-        }
-    
-        return data

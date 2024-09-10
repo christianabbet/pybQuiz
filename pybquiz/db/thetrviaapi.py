@@ -16,15 +16,16 @@ import html
 
 class TTAPIKey:
     
-    KEY_DIFFICULTY = "difficulty"
-    KEY_CATEGORY = "category"
+    # KEY_DIFFICULTY = "difficulty"
+    # KEY_CATEGORY = "category"
+    # KEY_QUESTION = "question"
+    # KEY_CORRECT_ANSWER = "correct_answer"
+    # KEY_WRONG_ANSWER_1 = "wrong_answers_1"
+    # KEY_WRONG_ANSWER_2 = "wrong_answers_2"
+    # KEY_WRONG_ANSWER_3 = "wrong_answers_3"
+    # KEY_UUID = "uuid"
+    
     KEY_TAGS = "tags"
-    KEY_QUESTION = "question"
-    KEY_CORRECT_ANSWER = "correct_answer"
-    KEY_WRONG_ANSWER_1 = "wrong_answers_1"
-    KEY_WRONG_ANSWER_2 = "wrong_answers_2"
-    KEY_WRONG_ANSWER_3 = "wrong_answers_3"
-    KEY_UUID = "uuid"
     KEY_IS_NICHE = "isNiche"
     
     URL_KEY_ID = "id"
@@ -76,10 +77,18 @@ class TheTriviaAPIDB(TriviaTSVDB):
     def initialize(self):
         return pd.DataFrame(
             columns=[
-                TTAPIKey.KEY_CATEGORY, TTAPIKey.KEY_DIFFICULTY,  TTAPIKey.KEY_TAGS,
-                TTAPIKey.KEY_QUESTION, TTAPIKey.KEY_CORRECT_ANSWER,
-                TTAPIKey.KEY_WRONG_ANSWER_1, TTAPIKey.KEY_WRONG_ANSWER_2, TTAPIKey.KEY_WRONG_ANSWER_3, 
-                TTAPIKey.KEY_IS_NICHE,  TTAPIKey.KEY_UUID,
+                # Mandatory keys
+                TriviaQ.KEY_UUID, 
+                TriviaQ.KEY_CATEGORY, 
+                TriviaQ.KEY_DIFFICULTY, 
+                TriviaQ.KEY_QUESTION, 
+                TriviaQ.KEY_CORRECT_ANSWER, 
+                TriviaQ.KEY_WRONG_ANSWER1, 
+                TriviaQ.KEY_WRONG_ANSWER2, 
+                TriviaQ.KEY_WRONG_ANSWER3, 
+                # Others
+                TTAPIKey.KEY_TAGS,
+                TTAPIKey.KEY_IS_NICHE, 
             ]
         )
 
@@ -114,7 +123,7 @@ class TheTriviaAPIDB(TriviaTSVDB):
             self.db = pd.concat([self.db, df_chunk], ignore_index=True)
 
         # Convert to dataframe and merge
-        self.db.drop_duplicates(subset=TTAPIKey.KEY_UUID, keep="first", inplace=True)
+        self.db.drop_duplicates(subset=TriviaQ.KEY_UUID, keep="first", inplace=True)
         self.save()        
         
     @staticmethod
@@ -123,16 +132,16 @@ class TheTriviaAPIDB(TriviaTSVDB):
         for q in api_result:
             # Get infos
             data_row = {
-                TTAPIKey.KEY_CATEGORY: q.get(TTAPIKey.URL_KEY_CATEGORY, ""), 
-                TTAPIKey.KEY_DIFFICULTY: q.get(TTAPIKey.URL_KEY_DIFFICULTY, ""), 
+                TriviaQ.KEY_CATEGORY: q.get(TTAPIKey.URL_KEY_CATEGORY, ""), 
+                TriviaQ.KEY_DIFFICULTY: q.get(TTAPIKey.URL_KEY_DIFFICULTY, ""), 
                 TTAPIKey.KEY_TAGS: q.get(TTAPIKey.URL_KEY_TAGS, ""),
                 TTAPIKey.KEY_IS_NICHE: q.get(TTAPIKey.URL_IS_NICHE, ""), 
-                TTAPIKey.KEY_QUESTION: q.get(TTAPIKey.URL_KEY_QUESTION, {}).get("text", ""), 
-                TTAPIKey.KEY_CORRECT_ANSWER: q.get(TTAPIKey.URL_KEY_CORRECT_ANSWER, None), 
-                TTAPIKey.KEY_WRONG_ANSWER_1: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[0], 
-                TTAPIKey.KEY_WRONG_ANSWER_2: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[1],
-                TTAPIKey.KEY_WRONG_ANSWER_3: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[2],
-                TTAPIKey.KEY_UUID: q.get(TTAPIKey.URL_KEY_ID, None),            
+                TriviaQ.KEY_QUESTION: q.get(TTAPIKey.URL_KEY_QUESTION, {}).get("text", ""), 
+                TriviaQ.KEY_CORRECT_ANSWER: q.get(TTAPIKey.URL_KEY_CORRECT_ANSWER, None), 
+                TriviaQ.KEY_WRONG_ANSWER1: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[0], 
+                TriviaQ.KEY_WRONG_ANSWER2: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[1],
+                TriviaQ.KEY_WRONG_ANSWER3: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[2],
+                TriviaQ.KEY_UUID: q.get(TTAPIKey.URL_KEY_ID, None),            
             }
 
             # APpend to row
@@ -144,10 +153,10 @@ class TheTriviaAPIDB(TriviaTSVDB):
         
         # Define name
         name = self.__class__.__name__        
-        df_print = pd.crosstab(index=self.db[TTAPIKey.KEY_CATEGORY], columns=self.db[TTAPIKey.KEY_DIFFICULTY])
+        df_print = pd.crosstab(index=self.db[TriviaQ.KEY_CATEGORY], columns=self.db[TriviaQ.KEY_DIFFICULTY])
 
         # Group by categories and create df
-        data_all = {TTAPIKey.KEY_CATEGORY: "All"}
+        data_all = {TriviaQ.KEY_CATEGORY: "All"}
         data_all.update(df_print.sum().to_dict())
         # Add all other values
         data = [data_all]
@@ -163,17 +172,3 @@ class TheTriviaAPIDB(TriviaTSVDB):
         markdown = markdown.get_markdown()
         console.print(markdown)
 
-        
-    def __getitem__(self, index: int):
-        
-        # Get row
-        serie = self.db.iloc[index]
-        
-        data = {
-            TriviaQ.KEY_QUESTION: serie[TTAPIKey.KEY_QUESTION],
-            TriviaQ.KEY_CATEGORY: serie[TTAPIKey.KEY_CATEGORY],
-            TriviaQ.KEY_UUID: serie[TTAPIKey.KEY_UUID],
-        }
-    
-        return data
-    
