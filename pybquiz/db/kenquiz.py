@@ -458,15 +458,15 @@ class KenQuizDB(TriviaTSVDB):
         
         
     def __getitem__(self, index: int):
-        pass
-        # # Get row
-        # serie = self.db.iloc[index]
         
-        # # data = {
-        # #     TriviaQ.KEY_QUESTION: serie[WWTBAMKey.KEY_QUESTION],
-        # #     TriviaQ.KEY_CATEGORY: None,
-        # #     TriviaQ.KEY_UUID: serie[WWTBAMKey.KEY_UUID],
-        # # }
+        # Get row
+        serie = self.db.iloc[index]
+        
+        data = {
+            TriviaQ.KEY_QUESTION: serie[KenQuizKey.KEY_QUESTION],
+            TriviaQ.KEY_CATEGORY: serie[KenQuizKey.KEY_CATEGORY],
+            TriviaQ.KEY_UUID: serie[KenQuizKey.KEY_UUID],
+        }
     
-        # return data
+        return data
     

@@ -508,7 +508,6 @@ class WWTBAM(TriviaTSVDB):
         
         data = {
             TriviaQ.KEY_QUESTION: serie[WWTBAMKey.KEY_QUESTION],
-            TriviaQ.KEY_CATEGORY: None,
             TriviaQ.KEY_UUID: serie[WWTBAMKey.KEY_UUID],
         }
     

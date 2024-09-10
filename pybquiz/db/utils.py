@@ -25,6 +25,7 @@ def check_code(status_code: int):
 
 def slow_get_request(
     url: str, 
+    header: Optional[dict] = None,
     params: Optional[dict] = None, 
     delay: Optional[float] = 6.0, 
     delay_rnd: Optional[float] = 1.0
@@ -32,12 +33,16 @@ def slow_get_request(
 
     # Add random delays to avoid detections
     delay = delay + delay_rnd*(np.random.rand())
-        
+    header_ = HEADERS_SCRAP
+    
+    # Add header if possible
+    if header is not None:
+        header_.update(header)
     # Build request
     start = time.time()    
     page = requests.get(
         url, 
-        headers=HEADERS_SCRAP,
+        headers=header_,
         params=params
     )
     is_valid = check_code(status_code=page.status_code)

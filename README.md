@@ -22,6 +22,9 @@ conda create -n pybquiz python=3.9
 conda activate pybquiz
 # Base packages
 pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich beautifulsoup4 tabulate requests
+conda install -c conda-forge pycirclize
+conda install umap-learn matplotlib seaborn
+
 # To export to Google Slides / Sheets
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 # To generate new backgorunds
@@ -52,10 +55,28 @@ Note that some APIs need a token to be accessed. Please refer to the API section
 
 ### Update databases (advanced)
 
+# Install LLM
+
+EMBEDDING + LDA (Multilevel)
+
+```bash
+# https://ollama.com/blog/embedding-models
+# Get installer
+curl -fsSL https://ollama.com/install.sh | sh
+# Get model embedding
+ollama pull mxbai-embed-large
+# Install python package
+pip install ollama
+```
+
 # Using conda
+```bash
 conda create -n clip python=3.9
 conda activate clip
+```
 # Base packages
+
+```bash
 conda install pytorch==1.7.1 torchvision==0.8.2 cpuonly -c pytorch
 conda install pandas==1.4.4 scikit-learn==1.2.1
 pip install ftfy regex tqdm rich py_markdown_table requests torcheval
@@ -146,6 +167,29 @@ Difficulty is graded from to 0 (lowest) to 11 (highest). This correspond to the 
 |       Science & Nature      | 176| 362| 222|
 |        Sports Quizzes       | 231| 434| 309|
 |         TV and Films        | 282| 409| 289|
+
+
+
+### Unification of categories
+
+* Sport:
+  ["Sport and Leisure, ]
+
+| ID | Category          | KenQuiz          | TheTriviaAPI        | OpenTriviaDB | tSNE |
+|----|-------------------|------------------|---------------------|--------------|------|
+|  1 | Art & Literature  | -                | arts_and_literature | Books        |  OK  |
+|  2 | Computers         | -                | -                   | Science: Computers |  OK  |
+|  3 | Geography         | -                | geography           | Geography    |  OK  |
+|  4 | History           | -                | history             | History      |  OK  |
+|  5 | Music             | Music Trivia     | music               | Music        |  OK  |
+|  6 | Film & TV         | (TV and Films)   | film_and_tv         | Film / Television |  OK  |
+|  7 | Food & Drink      | Food & Drink     | food_and_drink      | -            |  OK  |
+|  8 | Science & Nature  | Science & Nature | science             | Science & Nature / Animals / Mathematics |  OK  |
+|  9 | Society & Culture | -                | society_and_culture | Mythology    |  OK  |
+| 10 | Sport & Leisure   | Sports           | sport_and_leisure   | Sports / Board Games       |  OK  |
+| 11 | Video Games & Anime | -              | -                   | Video games / Japanese Anime & Manga |  OK  |
+| 12 | Xmas Special      | Christmas        | -                   | -            |  OK  |
+| 13 | Pot pourri        | -                | -                   | -            |  -   |
 
 
 <!-- ## Available APIs
