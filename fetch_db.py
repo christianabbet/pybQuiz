@@ -55,8 +55,8 @@ def main(args):
     
     # Merge Trivia DBs:
     dbs = [kenquizdb, opentdb, ninjaapi, thetriviadb]
-    triviadb = UnifiedTSVDB(dbs=dbs)
-    triviadb.update()
+    triviadb = UnifiedTSVDB()
+    triviadb.update(dbs)
     triviadb.pprint()
     
     pd.concat
@@ -67,8 +67,6 @@ if __name__ == '__main__':
         prog='Fetch / update Databases',
         description='Fetch / update databases',
     )
-    # parser.add_argument('--cfg', default=None,
-    #                     help='path to config file (default if None)')
     args = parser.parse_args()
     
     main(args=args)

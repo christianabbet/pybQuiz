@@ -4,12 +4,33 @@ import ollama
 import numpy as np
 from tqdm import tqdm
 from typing import Optional
+import umap
 
 from pybquiz.db.base import UnifiedTSVDB
 from pybquiz.db.base import TriviaTSVDB, TriviaQ
+from pybquiz.viz import plot_umap, plot_chord
 
 
-def embedd(
+def embed_umap(
+    z: np.ndarray, 
+    M: Optional[int] = 5000, 
+    seed: Optional[int] = 0,
+):
+    
+    # Fit values   
+    N = len(z) 
+    reducer = umap.UMAP(random_state=seed)      
+    rndState = np.random.RandomState(seed=seed)
+    idrnd = rndState.permutation(N)[:M]
+    
+    print("Fit ...")
+    reducer.fit(z[idrnd])
+    print("Transform ...")
+    z_umap = reducer.transform(z)
+    return z_umap
+    
+    
+def embed(
     dataset: TriviaTSVDB, 
     id_subset: list[int],
     model_name: Optional[str] = "mxbai-embed-large",
@@ -17,9 +38,7 @@ def embedd(
 
     # Get embedding size
     result = ollama.embeddings(model=model_name, prompt="test")
-            
-    # Get item numbers
-        
+                    
     # Infer new ones
     N_new = len(id_subset)
     F = len(result.get("embedding", []))
@@ -48,7 +67,7 @@ def embedd(
 def main(args):
 
     # Get data and loader
-    triviadb = UnifiedTSVDB(dbs=None)
+    triviadb = UnifiedTSVDB()
     path_npz = os.path.join(args.cache, "embedding_trivia.npz")
     N = len(triviadb)
     
@@ -65,13 +84,13 @@ def main(args):
 
     # Infer dummy
     print("Check existing data ...")
-    exists = [d[TriviaQ.KEY_UUID] in uuid for d in triviadb]
+    exists = [d in uuid for d in triviadb.db[TriviaQ.KEY_UUID].values]
     id_subset = np.nonzero(np.logical_not(exists))[0]
 
     # Check if update is needed    
     if len(id_subset) != 0:
         # Get new embedding
-        z_new, y_new, uuid_new, domain_new = embedd(dataset=triviadb, model_name=args.model, id_subset=id_subset)
+        z_new, y_new, uuid_new, domain_new = embed(dataset=triviadb, model_name=args.model, id_subset=id_subset)
         # Append embedding
         z = np.concatenate([z, z_new], axis=0)
         y = np.concatenate([y, y_new], axis=0)
@@ -85,8 +104,41 @@ def main(args):
         print("Saving ...")
         np.savez_compressed(path_npz, data={"z": z, "y": y, "uuid": uuid, "domain": domain})
 
-    print("Done")
+    # Normalize entires
+    z = z / np.linalg.norm(z, axis=1, keepdims=True)
+    # print("umap ...")
+    # z_umap = embed_umap(z=z)
+    # plot_umap(z=z_umap, y=y, domain=domain)
+    
+    # print("Plot Circle")
+    # plot_chord(z=z, y=y, domain=domain)
+    
+    # Fit LDA / KNN
 
+    import numpy as np
+
+    from sklearn.decomposition import PCA
+    from sklearn.cluster import KMeans
+    
+    # Reduction
+    pca = PCA(n_components=300)
+    z_pca = pca.fit_transform(z)
+    total = pca.explained_variance_ratio_.sum()
+    print(total)
+    
+    # Test 
+    
+    kmeans = KMeans(n_clusters=10, random_state=0, n_init="auto")
+    y_hat = kmeans.fit_predict(z_pca)
+    
+    from sklearn.mixture import GaussianMixture
+    gm = GaussianMixture(n_components=10, random_state=0)
+    gm.score(z_pca)
+    r = gm.fit_predict(z_pca)
+    r = gm.predict_proba(z_pca)
+
+
+        
 if __name__ == '__main__':
     
     # Create parser

@@ -130,7 +130,6 @@ class UnifiedTSVDB(TriviaTSVDB):
     
     def __init__(
         self, 
-        dbs: Optional[list[TriviaTSVDB]] = None,
         filename_db: Optional[str] = "trivia",
         cache: Optional[str] = '.cache', 
     ) -> None:
@@ -147,7 +146,6 @@ class UnifiedTSVDB(TriviaTSVDB):
         """        
 
         # Call super method
-        self.dbs = dbs
         super().__init__(
             cache=cache, 
             path_db=os.path.join(cache, filename_db + ".tsv"),
@@ -156,28 +154,40 @@ class UnifiedTSVDB(TriviaTSVDB):
     @abstractmethod
     def initialize(self) -> pd.DataFrame:
         
-        # Get databases
-        dfs = []
-        for db in self.dbs:
-            # Get standardized columns
-            df = db.db
-            df[self.KEY_DOMAIN] = db.__class__.__name__        
-            dfs.append(df)
-            
-        # Merge columns
-        dfs = pd.concat(dfs, ignore_index=True)
-        # Get trivia cols
-        ref_keys = TriviaQ.get_keys()
-        ref_keys.append(self.KEY_DOMAIN)
-        dfs = dfs[ref_keys]
-        return dfs
+        return pd.DataFrame(
+            columns=[
+                # Mandatory keys
+                TriviaQ.KEY_UUID, 
+                TriviaQ.KEY_CATEGORY, 
+                TriviaQ.KEY_DIFFICULTY, 
+                TriviaQ.KEY_QUESTION, 
+                TriviaQ.KEY_CORRECT_ANSWER, 
+                TriviaQ.KEY_WRONG_ANSWER1, 
+                TriviaQ.KEY_WRONG_ANSWER2, 
+                TriviaQ.KEY_WRONG_ANSWER3, 
+                UnifiedTSVDB.KEY_DOMAIN, 
+            ]
+        )
 
             
     @abstractmethod
-    def update(self):
+    def update(self, dbs: list[TriviaTSVDB]):
+        
         # Check for duplicates
-        self.db.drop_duplicates(subset=TriviaQ.KEY_UUID)
-        # Notehing to do, just save version
+        dbs_ = []
+        for db in dbs:
+            # Get standardized columns
+            df = db.db
+            df[self.KEY_DOMAIN] = db.__class__.__name__        
+            dbs_.append(df)
+            
+        # Merge columns
+        dbs_ = pd.concat(dbs_, ignore_index=True)
+        # Get trivia cols
+        dbs_ = dbs_[self.db.columns]
+        dbs_ = dbs_.drop_duplicates(subset=TriviaQ.KEY_UUID)
+        self.db = dbs_
+        # Nothing to do, just save version
         self.save()
 
     @abstractmethod        

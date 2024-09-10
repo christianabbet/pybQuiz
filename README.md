@@ -69,21 +69,6 @@ ollama pull mxbai-embed-large
 pip install ollama
 ```
 
-# Using conda
-```bash
-conda create -n clip python=3.9
-conda activate clip
-```
-# Base packages
-
-```bash
-conda install pytorch==1.7.1 torchvision==0.8.2 cpuonly -c pytorch
-conda install pandas==1.4.4 scikit-learn==1.2.1
-pip install ftfy regex tqdm rich py_markdown_table requests torcheval
-pip install git+https://github.com/openai/CLIP.git
-```
-
-
 ![plot](creator.png)
 
 ## Available DBs
