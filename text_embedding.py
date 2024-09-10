@@ -47,7 +47,6 @@ def embedd(
     
 def main(args):
 
-    
     # Get data and loader
     triviadb = UnifiedTSVDB(dbs=None)
     path_npz = os.path.join(args.cache, "embedding_trivia.npz")
@@ -74,12 +73,19 @@ def main(args):
         # Get new embedding
         z_new, y_new, uuid_new, domain_new = embedd(dataset=triviadb, model_name=args.model, id_subset=id_subset)
         # Append embedding
-        print("todo")
+        z = np.concatenate([z, z_new], axis=0)
+        y = np.concatenate([y, y_new], axis=0)
+        uuid = np.concatenate([uuid, uuid_new], axis=0)
+        domain = np.concatenate([domain, domain_new], axis=0)
         
-    print("Saving ...")
-    np.savez_compressed(path_npz, data={"z": z, "y": y, "uuid": uuid, "domain": domain})
+        # Sanity check
+        assert len(z) == len(y) and len(z) == len(uuid) and len(z) == len(domain)
+                
+        # Save output
+        print("Saving ...")
+        np.savez_compressed(path_npz, data={"z": z, "y": y, "uuid": uuid, "domain": domain})
 
-
+    print("Done")
 
 if __name__ == '__main__':
     
