@@ -22,9 +22,7 @@ class KenQuizKey:
     # # Dataframe columns
     KEY_URL = "url"
     KEY_CATEGORY_SUB = "category_sub"
-
-    KEY_DIFFICULTY = "difficulty"
-
+    KEY_DIFFICULTY_KEN = "difficulty_ken"
     
     # # Base website
     WEB_HOME = "https://www.kensquiz.co.uk/quizzes/"
@@ -258,6 +256,7 @@ class KenQuizDB(TriviaTSVDB):
                 # Others
                 KenQuizKey.KEY_URL, 
                 KenQuizKey.KEY_CATEGORY_SUB,
+                KenQuizKey.KEY_DIFFICULTY_KEN, 
             ]
         )
             
@@ -306,6 +305,7 @@ class KenQuizDB(TriviaTSVDB):
                         KenQuizKey.KEY_CATEGORY_SUB: sub_cat,
                         TriviaQ.KEY_QUESTION: text_questions[k], 
                         TriviaQ.KEY_DIFFICULTY: None, 
+                        KenQuizKey.KEY_DIFFICULTY_KEN: None, 
                         TriviaQ.KEY_CORRECT_ANSWER: text_answers[k],
                         TriviaQ.KEY_UUID: to_uuid(text_questions[k]), 
                     }
@@ -324,6 +324,7 @@ class KenQuizDB(TriviaTSVDB):
                     self.save()
         
         # Final save
+        self.finalize()
         self.save()
         
 
@@ -334,7 +335,7 @@ class KenQuizDB(TriviaTSVDB):
             print("[{}] Difficulty: {}".format(i+1, nd))
             for j in tqdm(range(n_tot)):
                 # Get set of questions
-                text_questions, text_answers = self.scapper.get_question_post(
+                text_questions, _ = self.scapper.get_question_post(
                     url=KenQuizKey.WEB_POST_URL,
                     data={
                         "quantity": n_query, 
@@ -347,7 +348,7 @@ class KenQuizDB(TriviaTSVDB):
                 # Store questions
                 uuids = np.unique([to_uuid(t) for t in text_questions])
                 uuids = pd.DataFrame(uuids, columns=[TriviaQ.KEY_UUID])
-                uuids[TriviaQ.KEY_DIFFICULTY] = nd
+                uuids[KenQuizKey.KEY_DIFFICULTY_KEN] = nd
 
                 # Check if value to append
                 if len(uuids) == 0:
@@ -356,103 +357,22 @@ class KenQuizDB(TriviaTSVDB):
                 #Merge with existing
                 df_merge = self.db.merge(right=uuids, how="left", on=TriviaQ.KEY_UUID, indicator=True)
                 is_new = df_merge[(df_merge['_merge'] == "both")].index
-                self.db.loc[is_new, TriviaQ.KEY_DIFFICULTY] = nd
+                self.db.loc[is_new, KenQuizKey.KEY_DIFFICULTY_KEN] = nd
                 
                 if j%self.chunks == 0:
                     self.save()
                     
             # Final save
+            self.finalize()
             self.save()
          
     def finalize(self):
-        pass
-        """ Check for abnormality in database """
-                
-        # # Check duplicates in questions
-        # self.db.drop_duplicates(subset=WWTBAMKey.KEY_UUID, keep=False, inplace=True)
-        # self.db.dropna(subset=WWTBAMKey.KEY_VALUE, inplace=True)
-
-        # # Convert to difficulty level (year based)
-        # self.db[WWTBAMKey.KEY_DIFFICULTY] = np.nan
         
-        # for _, df_cand in self.db.groupby(WWTBAMKey.KEY_URL):
-        #     # Check year
-        #     year = df_cand.iloc[0][WWTBAMKey.KEY_AIR_DATE]
-        #     numbers = WWTBAM.convert_values_to_number(
-        #         values=df_cand[WWTBAMKey.KEY_VALUE].values.tolist(),
-        #         year=year, 
-        #         lang=self.lang
-        #     )
-            
-        #     # If exists, append value
-        #     if numbers is not None:           
-        #         self.db.loc[df_cand.index, WWTBAMKey.KEY_DIFFICULTY] = numbers
-                
-        # # Drop item if question of answer are empty
-        # self.db.dropna(
-        #     subset=[
-        #         WWTBAMKey.KEY_QUESTION, WWTBAMKey.KEY_CORRECT_ANSWER, 
-        #         # WWTBAMKey.KEY_AIR_DATE, WWTBAMKey.KEY_DIFFICULTY,
-        #     ],
-        #     inplace=True,
-        # )
-                
-
-    def pprint(self):
-        
-        name = self.__class__.__name__        
-        df_print = pd.crosstab(
-            index=self.db[TriviaQ.KEY_CATEGORY], 
-            columns=self.db[TriviaQ.KEY_DIFFICULTY]
-        )
-        df_print.columns = [str(c) for c in df_print.columns]
-
-        # Group by categories and create df
-        data_all = {TriviaQ.KEY_CATEGORY: "All"}
-        data_all.update(df_print.sum().to_dict())
-        # Add all other values
-        data = [data_all]
-        for _, d in df_print.reset_index().iterrows():
-            data.append(d.to_dict())
-        
-        # Display final output
-        console = Console() 
-        console.print(Panel.fit("Database {}".format(name)))
-        
-        markdown = markdown_table(data).set_params(row_sep = 'markdown')
-        markdown.quote = False
-        markdown = markdown.get_markdown()
-        console.print(markdown)
-        
-        """ Display stats on database """
-        
-        # name = self.__class__.__name__
-        # n_candidates = len(self.db[WWTBAMKey.KEY_URL].unique())
-        # n_questions = len(self)
-        # v_min = self.db[WWTBAMKey.KEY_VALUE].min()
-        # v_max = self.db[WWTBAMKey.KEY_VALUE].max()
-        # d_min = self.db[WWTBAMKey.KEY_AIR_DATE].min()
-        # d_max = self.db[WWTBAMKey.KEY_AIR_DATE].max()
-        
-        # # Create a console
-        # data = {
-        #     "Lang": self.lang,
-        #     "Candidates": n_candidates,
-        #     "Questions": n_questions,
-        #     "Values": "{}-{}".format(int(v_min), int(v_max)),
-        #     "Air date": "{}-{}".format(int(d_min), int(d_max)),
-        # }
-        
-        # # Add difficulty ranges
-        # difficulties = pd.cut(self.db[WWTBAMKey.KEY_DIFFICULTY], bins=WWTBAMKey.PPRINT_BINS).value_counts(sort=False)
-        # data.update({str(k): v for k, v in difficulties.items()})
-        
-        # # Display final output
-        # console = Console() 
-        # console.print(Panel.fit("Database {} ({})".format(name, self.lang)))
-        
-        # markdown = markdown_table([data]).set_params(row_sep = 'markdown')
-        # markdown.quote = False
-        # markdown = markdown.get_markdown()
-        # console.print(markdown)
+        diff = self.db[KenQuizKey.KEY_DIFFICULTY_KEN].replace({
+            10.0: "easy",
+            20.0: "medium",
+            30.0: "hard",
+        })       
+        diff.fillna("none", inplace=True) 
+        self.db[TriviaQ.KEY_DIFFICULTY] = diff
         

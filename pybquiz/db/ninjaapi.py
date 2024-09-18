@@ -156,27 +156,3 @@ class NinjaAPI(TriviaTSVDB):
             
             # Save
             self.save()
-
-
-    def pprint(self):
-        
-        # Define name
-        name = self.__class__.__name__        
-        df_print = self.db[TriviaQ.KEY_CATEGORY].value_counts().reset_index()
-        df_print.columns = [TriviaQ.KEY_CATEGORY, "count"]
-        # Group by categories and create df
-        data_all = {TriviaQ.KEY_CATEGORY: "All", "count": df_print["count"].sum()}
-        # Add all other values
-        data = [data_all]
-        for _, d in df_print.iterrows():
-            data.append(d.to_dict())
-        
-        # Display final output
-        console = Console() 
-        console.print(Panel.fit("Database {}".format(name)))
-        
-        markdown = markdown_table(data).set_params(row_sep = 'markdown')
-        markdown.quote = False
-        markdown = markdown.get_markdown()
-        console.print(markdown)
-

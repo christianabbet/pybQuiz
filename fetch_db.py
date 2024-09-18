@@ -6,7 +6,6 @@ from pybquiz.db.thetrviaapi import TheTriviaAPIDB
 from pybquiz.db.kenquiz import KenQuizDB
 from pybquiz.db.ninjaapi import NinjaAPI
 from pybquiz.db.base import UnifiedTSVDB
-import pandas as pd
 
 
 def main(args):
@@ -18,7 +17,7 @@ def main(args):
     # https://www.kensquiz.co.uk/quizzes//
     kenquizdb = KenQuizDB()
     # kenquizdb.update()
-    # kenquizdb.update_brutforce()
+    # kenquizdb.update_brutforce(n_tot=10)
     kenquizdb.pprint()
         
     # OpenTrivia DB
@@ -58,8 +57,7 @@ def main(args):
     triviadb = UnifiedTSVDB()
     triviadb.update(dbs)
     triviadb.pprint()
-    
-    pd.concat
+
 if __name__ == '__main__':
     
     # Create parser

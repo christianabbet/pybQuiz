@@ -109,9 +109,34 @@ class TriviaTSVDB(TriviaDB):
     def update(self):
         raise NotImplementedError
 
-    @abstractmethod        
+
     def pprint(self):
-        raise NotImplementedError
+        
+        name = self.__class__.__name__    
+        self.db[TriviaQ.KEY_DIFFICULTY] = self.db[TriviaQ.KEY_DIFFICULTY].fillna("none")
+        df_print = pd.crosstab(
+            index=self.db[TriviaQ.KEY_CATEGORY], 
+            columns=self.db[TriviaQ.KEY_DIFFICULTY]
+        )
+        df_print.columns = [str(c) for c in df_print.columns]
+
+        # Group by categories and create df
+        data_all = {TriviaQ.KEY_CATEGORY: "All"}
+        data_all.update(df_print.sum().to_dict())
+        # Add all other values
+        data = [data_all]
+        for _, d in df_print.reset_index().iterrows():
+            data.append(d.to_dict())
+        
+        # Display final output
+        console = Console() 
+        console.print(Panel.fit("Database {}".format(name)))
+        
+        markdown = markdown_table(data).set_params(row_sep = 'markdown')
+        markdown.quote = False
+        markdown = markdown.get_markdown()
+        console.print(markdown)
+        
    
     def __getitem__(self, index: int):
         
@@ -127,6 +152,9 @@ class UnifiedTSVDB(TriviaTSVDB):
     
     
     KEY_DOMAIN = "domain"
+    KEY_O_CAT = "o_category"
+    KEY_O_UK = "o_is_uk"
+    KEY_O_USA = "o_is_usa"
     
     def __init__(
         self, 
@@ -166,6 +194,9 @@ class UnifiedTSVDB(TriviaTSVDB):
                 TriviaQ.KEY_WRONG_ANSWER2, 
                 TriviaQ.KEY_WRONG_ANSWER3, 
                 UnifiedTSVDB.KEY_DOMAIN, 
+                UnifiedTSVDB.KEY_O_CAT, 
+                UnifiedTSVDB.KEY_O_UK, 
+                UnifiedTSVDB.KEY_O_USA, 
             ]
         )
 
@@ -178,30 +209,45 @@ class UnifiedTSVDB(TriviaTSVDB):
         for db in dbs:
             # Get standardized columns
             df = db.db
-            df[self.KEY_DOMAIN] = db.__class__.__name__        
+            df[self.KEY_DOMAIN] = db.__class__.__name__ 
+            df[self.KEY_O_CAT] = None        
+            df[self.KEY_O_UK] = None        
+            df[self.KEY_O_USA] = None              
             dbs_.append(df)
             
         # Merge columns
         dbs_ = pd.concat(dbs_, ignore_index=True)
         # Get trivia cols
         dbs_ = dbs_[self.db.columns]
-        dbs_ = dbs_.drop_duplicates(subset=TriviaQ.KEY_UUID)
-        self.db = dbs_
+        dbs_ = dbs_.drop_duplicates(subset=TriviaQ.KEY_UUID, keep="first")
+        
+        # Merge with existing database        
+        self.db = pd.concat([self.db, dbs_], ignore_index=True)
+        self.db = self.db.drop_duplicates(subset=TriviaQ.KEY_UUID, keep="first")
+        self.db = self.db.set_index("uuid").fillna(dbs_.set_index("uuid")).reset_index()
         # Nothing to do, just save version
+        
         self.save()
 
-    @abstractmethod        
+
     def pprint(self):
         
-        # Define name
-        name = self.__class__.__name__        
-        df_print = self.db[TriviaQ.KEY_CATEGORY].value_counts().reset_index()
-        df_print.columns = [TriviaQ.KEY_CATEGORY, "count"]
+        name = self.__class__.__name__    
+        self.db[UnifiedTSVDB.KEY_O_CAT] = self.db[UnifiedTSVDB.KEY_O_CAT].fillna("miscellaneous")
+        self.db[UnifiedTSVDB.KEY_O_CAT] = self.db[UnifiedTSVDB.KEY_O_CAT].str.split("|").str[0] 
+        df_print = pd.crosstab(
+            index=self.db[UnifiedTSVDB.KEY_O_CAT], 
+            columns=self.db[TriviaQ.KEY_DIFFICULTY]
+        )
+        
+        df_print.columns = [str(c) for c in df_print.columns]
+
         # Group by categories and create df
-        data_all = {TriviaQ.KEY_CATEGORY: "All", "count": df_print["count"].sum()}
+        data_all = {UnifiedTSVDB.KEY_O_CAT: "All"}
+        data_all.update(df_print.sum().to_dict())
         # Add all other values
         data = [data_all]
-        for _, d in df_print.iterrows():
+        for _, d in df_print.reset_index().iterrows():
             data.append(d.to_dict())
         
         # Display final output
@@ -212,12 +258,12 @@ class UnifiedTSVDB(TriviaTSVDB):
         markdown.quote = False
         markdown = markdown.get_markdown()
         console.print(markdown)
-
+        
     def __getitem__(self, index: int):
         
         # Get row and params
         data = super().__getitem__(index)
         data[self.KEY_DOMAIN] = self.db.loc[index, self.KEY_DOMAIN]
-    
+
         return data
     

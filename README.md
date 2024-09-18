@@ -21,9 +21,9 @@ cd pybQuiz
 conda create -n pybquiz python=3.9
 conda activate pybquiz
 # Base packages
-pip install numpy pyyaml tqdm py-markdown-table pandas python-pptx rich beautifulsoup4 tabulate requests
+conda install matplotlib seabornumap-learn
 conda install -c conda-forge pycirclize
-conda install umap-learn matplotlib seaborn
+pip install pyyaml tqdm py-markdown-table python-pptx rich beautifulsoup4 tabulate requests
 
 # To export to Google Slides / Sheets
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
@@ -65,6 +65,7 @@ EMBEDDING + LDA (Multilevel)
 curl -fsSL https://ollama.com/install.sh | sh
 # Get model embedding
 ollama pull mxbai-embed-large
+ollama pull llama3.1
 # Install python package
 pip install ollama
 ```

@@ -3,7 +3,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib
-from pycirclize import Circos
+# from pycirclize import Circos
 import pandas as pd
 matplotlib.use('Agg') # set the backend before importing pyplot
 
@@ -12,16 +12,20 @@ def plot_umap(
     z: np.ndarray, 
     y: np.ndarray, 
     domain: np.ndarray,
-    path: Optional[str] = "viz_embedding.png"
+    path: Optional[str] = "viz_embedding.png",
 ):
     
     # get number of db
     name_dbs = np.unique(domain)
-    n_rows = len(name_dbs) // 2
+    n_rows = max(len(name_dbs) // 2, 1)
     n_cols = np.ceil(len(name_dbs) / n_rows).astype(int)
     _, axes = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(10*n_cols, 10*n_rows), sharex=True, sharey=True)
     
     # Flatten axis and remove axis
+    if not isinstance(axes, np.ndarray):
+        axes = np.array([axes])
+        
+    # Flatten array
     axes = axes.ravel()
     [a.axis("off") for a in axes]
     
@@ -32,15 +36,16 @@ def plot_umap(
         y_db = y[id_db]
         # Plot results
         axes[i].set_title(name_db)
-        palette = sns.color_palette("hls", len(np.unique(y_db)))
+        # palette = sns.color_palette("hls", len(np.unique(y_db)))
+        palette = sns.color_palette(palette="Set3", n_colors=len(np.unique(y_db)))
         sns.scatterplot(
-            x=z[id_db, 0], y=z[id_db, 1], hue=y_db, style=y_db, ax=axes[i], palette=palette)
+            x=z[id_db, 0], y=z[id_db, 1], hue=y_db, style=y_db, ax=axes[i], palette=palette
+        )
 
     plt.tight_layout()
     plt.savefig(path, bbox_inches='tight')
     plt.close()
         
-    
 
 def plot_chord(
     z: np.ndarray, 

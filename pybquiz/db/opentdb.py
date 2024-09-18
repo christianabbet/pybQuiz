@@ -182,25 +182,3 @@ class OpenTriviaDB(TriviaTSVDB):
         # Return parsed data
         return data
     
-    def pprint(self):
-        
-        # Define name
-        name = self.__class__.__name__        
-        df_print = pd.crosstab(index=self.db[TriviaQ.KEY_CATEGORY], columns=self.db[TriviaQ.KEY_DIFFICULTY])
-
-        # Group by categories and create df
-        data_all = {TriviaQ.KEY_CATEGORY: "All"}
-        data_all.update(df_print.sum().to_dict())
-        # Add all other values
-        data = [data_all]
-        for _, d in df_print.reset_index().iterrows():
-            data.append(d.to_dict())
-        
-        # Display final output
-        console = Console() 
-        console.print(Panel.fit("Database {}".format(name)))
-        
-        markdown = markdown_table(data).set_params(row_sep = 'markdown')
-        markdown.quote = False
-        markdown = markdown.get_markdown()
-        console.print(markdown)
