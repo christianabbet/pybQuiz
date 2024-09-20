@@ -54,7 +54,6 @@ class TriviaTSVDB(TriviaDB):
         self, 
         cache: str, 
         path_db: str,
-        update: Optional[bool] = True,
     ) -> None:
         """ Trivia TSV database
 
@@ -64,8 +63,6 @@ class TriviaTSVDB(TriviaDB):
             Location of the database folder
         path_db : str
             Path to database file
-        update : Optional[bool], optional
-            Update database, by default True
         """        
         # Init main cach location
         super().__init__(cache=cache)          
@@ -178,6 +175,8 @@ class UnifiedTSVDB(TriviaTSVDB):
             cache=cache, 
             path_db=os.path.join(cache, filename_db + ".tsv"),
         )
+        # Remove multiple cats
+        self.db[UnifiedTSVDB.KEY_O_CAT] = self.db[UnifiedTSVDB.KEY_O_CAT].str.split("|").str[0]
         
     @abstractmethod
     def initialize(self) -> pd.DataFrame:
@@ -264,6 +263,9 @@ class UnifiedTSVDB(TriviaTSVDB):
         # Get row and params
         data = super().__getitem__(index)
         data[self.KEY_DOMAIN] = self.db.loc[index, self.KEY_DOMAIN]
-
+        data[self.KEY_O_CAT] = self.db.loc[index, self.KEY_O_CAT]
+        data[self.KEY_O_USA] = self.db.loc[index, self.KEY_O_USA]
+        data[self.KEY_O_UK] = self.db.loc[index, self.KEY_O_UK]
+        
         return data
     

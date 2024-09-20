@@ -4,7 +4,7 @@ from pybquiz import PybQuiz
 from pybquiz.export.pptx import PptxFactory
 from pybquiz.background import BackgroundManager
 from pybquiz.export.googleslide import GoogleSlideFactory, GoogleSheetFactory
-from pybquiz.config_generator import ConfigGenerator
+from pybquiz.generator.terminal import GeneratorTerminal
 
 
 def main(args):
@@ -15,7 +15,7 @@ def main(args):
        
     # Assist quiz creation
     if cfg_yml is None or not os.path.exists(cfg_yml):
-        cfgGen = ConfigGenerator(yaml_api_file=token_path, dirout="config")
+        cfgGen = GeneratorTerminal(yaml_api_file=token_path, dirout="config")
         cfg_yml = cfgGen.run_terminal()
 
     # Create output directory

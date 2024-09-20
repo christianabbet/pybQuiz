@@ -69,7 +69,6 @@ class TheTriviaAPIDB(TriviaTSVDB):
         
         super().__init__(
             cache=cache, 
-            update=False,
             path_db=os.path.join(cache, filename_db + ".tsv")
         )
         

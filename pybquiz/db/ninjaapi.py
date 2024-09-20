@@ -66,7 +66,6 @@ class NinjaAPI(TriviaTSVDB):
         self.chunks = chunks
         super().__init__(
             cache=cache, 
-            update=False,
             path_db=os.path.join(cache, filename_db + ".tsv")
         )
         

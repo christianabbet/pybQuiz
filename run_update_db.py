@@ -18,28 +18,28 @@ def main(args):
     print("####### KenQuizDB #######")
     kenquizdb = KenQuizDB()
     # kenquizdb.update()
-    kenquizdb.update_brutforce()
+    # kenquizdb.update_brutforce()
     kenquizdb.pprint()
         
     # OpenTrivia DB
     # https://opentdb.com/
     print("####### OpenTriviaDB #######")
     opentdb = OpenTriviaDB()
-    opentdb.update()
+    # opentdb.update()
     opentdb.pprint()
     
     # The Trivia API
     # https://the-trivia-api.com/
     print("####### TheTriviaAPIDB #######")
     thetriviadb = TheTriviaAPIDB()
-    thetriviadb.update()
+    # thetriviadb.update()
     thetriviadb.pprint()
     
     # API ninja 
     # https://api-ninjas.com/api/trivia
     print("####### NinjaAPI #######")
     ninjaapi = NinjaAPI()
-    ninjaapi.update()
+    # ninjaapi.update()
     ninjaapi.pprint()
     
     # WWTBAM US
@@ -63,7 +63,7 @@ def main(args):
     print("####### UnifiedTSVDB #######")
     dbs = [kenquizdb, opentdb, ninjaapi, thetriviadb]
     triviadb = UnifiedTSVDB()
-    triviadb.update(dbs)
+    # triviadb.update(dbs)
     triviadb.pprint()
 
 if __name__ == '__main__':

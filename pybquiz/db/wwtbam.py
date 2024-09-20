@@ -20,14 +20,8 @@ class WWTBAMKey:
     # Dataframe columns
     KEY_URL = "url"
     KEY_VALUE = "value"
-    KEY_QUESTION = "question"
-    KEY_WRONG_ANSWER_1 = "wrong_answers_1"
-    KEY_WRONG_ANSWER_2 = "wrong_answers_2"
-    KEY_WRONG_ANSWER_3 = "wrong_answers_3"
-    KEY_CORRECT_ANSWER = "correct_answer"
+    KEY_DIFFICULTY = "difficulty_code"
     KEY_AIR_DATE = "air_date"
-    KEY_UUID = "uuid"
-    KEY_DIFFICULTY = "diffuculty"
     PPRINT_BINS = [0, 4, 9, 14]
     
     # Base website
@@ -234,15 +228,15 @@ class WWTBAMScrapper:
             # Hash text (unique question)
             data_row = {
                 # export to TSV (tab) + add hash for question
+                TriviaQ.KEY_UUID: to_uuid(qclean).hexdigest(),
+                TriviaQ.KEY_QUESTION: qclean,
+                TriviaQ.KEY_CORRECT_ANSWER: WWTBAMScrapper._clean_text(text_answers[id_correct.item()]),
+                TriviaQ.KEY_WRONG_ANSWER1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
+                TriviaQ.KEY_WRONG_ANSWER2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
+                TriviaQ.KEY_WRONG_ANSWER3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
+                WWTBAMKey.KEY_AIR_DATE: WWTBAMScrapper._extract_year(infos_text),
                 WWTBAMKey.KEY_URL: url,
                 WWTBAMKey.KEY_VALUE: WWTBAMScrapper._extract_value(text_value),
-                WWTBAMKey.KEY_QUESTION: qclean,
-                WWTBAMKey.KEY_CORRECT_ANSWER: WWTBAMScrapper._clean_text(text_answers[id_correct.item()]),
-                WWTBAMKey.KEY_WRONG_ANSWER_1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
-                WWTBAMKey.KEY_WRONG_ANSWER_2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
-                WWTBAMKey.KEY_WRONG_ANSWER_3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
-                WWTBAMKey.KEY_AIR_DATE: WWTBAMScrapper._extract_year(infos_text),
-                WWTBAMKey.KEY_UUID: to_uuid(qclean).hexdigest()
             }
 
             data.append(data_row)
@@ -329,9 +323,17 @@ class WWTBAM(TriviaTSVDB):
         
         return pd.DataFrame(
             columns=[
-                WWTBAMKey.KEY_URL, WWTBAMKey.KEY_VALUE,  WWTBAMKey.KEY_QUESTION, WWTBAMKey.KEY_CORRECT_ANSWER,
-                WWTBAMKey.KEY_WRONG_ANSWER_1,  WWTBAMKey.KEY_WRONG_ANSWER_2,  WWTBAMKey.KEY_WRONG_ANSWER_3,
-                WWTBAMKey.KEY_AIR_DATE,  WWTBAMKey.KEY_UUID,  WWTBAMKey.KEY_DIFFICULTY
+                # Mandatory
+                TriviaQ.KEY_UUID,
+                TriviaQ.KEY_CATEGORY,
+                TriviaQ.KEY_DIFFICULTY,
+                TriviaQ.KEY_QUESTION, TriviaQ.KEY_CORRECT_ANSWER,
+                TriviaQ.KEY_WRONG_ANSWER1, TriviaQ.KEY_WRONG_ANSWER2, TriviaQ.KEY_WRONG_ANSWER3,
+                # Local
+                WWTBAMKey.KEY_URL, 
+                WWTBAMKey.KEY_VALUE, 
+                WWTBAMKey.KEY_AIR_DATE, 
+                WWTBAMKey.KEY_DIFFICULTY
             ]
         )
     
@@ -384,7 +386,7 @@ class WWTBAM(TriviaTSVDB):
         """ Check for abnormality in database """
                 
         # Check duplicates in questions
-        self.db.drop_duplicates(subset=WWTBAMKey.KEY_UUID, keep=False, inplace=True)
+        self.db.drop_duplicates(subset=TriviaQ.KEY_UUID, keep=False, inplace=True)
         self.db.dropna(subset=WWTBAMKey.KEY_VALUE, inplace=True)
 
         # Convert to difficulty level (year based)
@@ -406,8 +408,8 @@ class WWTBAM(TriviaTSVDB):
         # Drop item if question of answer are empty
         self.db.dropna(
             subset=[
-                WWTBAMKey.KEY_QUESTION, WWTBAMKey.KEY_CORRECT_ANSWER, 
-                WWTBAMKey.KEY_WRONG_ANSWER_1, WWTBAMKey.KEY_WRONG_ANSWER_2, WWTBAMKey.KEY_WRONG_ANSWER_3,
+                TriviaQ.KEY_QUESTION, TriviaQ.KEY_CORRECT_ANSWER, 
+                TriviaQ.KEY_WRONG_ANSWER1, TriviaQ.KEY_WRONG_ANSWER2, TriviaQ.KEY_WRONG_ANSWER3,
                 # WWTBAMKey.KEY_AIR_DATE, WWTBAMKey.KEY_DIFFICULTY,
             ],
             inplace=True,
