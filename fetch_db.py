@@ -15,44 +15,52 @@ def main(args):
     
     # KenQuiz DB
     # https://www.kensquiz.co.uk/quizzes//
+    print("####### KenQuizDB #######")
     kenquizdb = KenQuizDB()
     # kenquizdb.update()
-    # kenquizdb.update_brutforce(n_tot=10)
+    kenquizdb.update_brutforce()
     kenquizdb.pprint()
         
     # OpenTrivia DB
     # https://opentdb.com/
+    print("####### OpenTriviaDB #######")
     opentdb = OpenTriviaDB()
-    # opentdb.update()
+    opentdb.update()
     opentdb.pprint()
     
     # The Trivia API
     # https://the-trivia-api.com/
+    print("####### TheTriviaAPIDB #######")
     thetriviadb = TheTriviaAPIDB()
-    # thetriviadb.update()
+    thetriviadb.update()
     thetriviadb.pprint()
     
     # API ninja 
     # https://api-ninjas.com/api/trivia
+    print("####### NinjaAPI #######")
     ninjaapi = NinjaAPI()
-    # ninjaapi.update()
+    ninjaapi.update()
     ninjaapi.pprint()
     
     # WWTBAM US
+    # print("####### WWTBAM US #######")
     # wwtbam_us_db = WWTBAM(lang='us')
     # wwtbam_us_db.update()
     # wwtbam_us_db.pprint()
     
     # WWTBAM UK
-    # wwtbam_us_db = WWTBAM(lang='uk')
-    # wwtbam_us_db.update()
-    # wwtbam_us_db.pprint()
+    # print("####### WWTBAM UK #######")
+    # wwtbam_uk_db = WWTBAM(lang='uk')
+    # wwtbam_uk_db.update()
+    # wwtbam_uk_db.pprint()
     
     # Jeopardy
+    # print("####### Jeopardy US #######")
     # jeopardy_us_db = Jeopardy()
     # jeopardy_us_db.pprint()
     
     # Merge Trivia DBs:
+    print("####### UnifiedTSVDB #######")
     dbs = [kenquizdb, opentdb, ninjaapi, thetriviadb]
     triviadb = UnifiedTSVDB()
     triviadb.update(dbs)

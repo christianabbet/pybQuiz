@@ -347,6 +347,7 @@ class KenQuizDB(TriviaTSVDB):
           
                 # Store questions
                 uuids = np.unique([to_uuid(t) for t in text_questions])
+                uuids = np.concatenate([uuids, ["2"]])
                 uuids = pd.DataFrame(uuids, columns=[TriviaQ.KEY_UUID])
                 uuids[KenQuizKey.KEY_DIFFICULTY_KEN] = nd
 
@@ -355,7 +356,7 @@ class KenQuizDB(TriviaTSVDB):
                     continue
                 
                 #Merge with existing
-                df_merge = self.db.merge(right=uuids, how="left", on=TriviaQ.KEY_UUID, indicator=True)
+                df_merge = self.db[[TriviaQ.KEY_UUID]].merge(right=uuids, how="left", on=TriviaQ.KEY_UUID, indicator=True)
                 is_new = df_merge[(df_merge['_merge'] == "both")].index
                 self.db.loc[is_new, KenQuizKey.KEY_DIFFICULTY_KEN] = nd
                 
