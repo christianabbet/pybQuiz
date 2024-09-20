@@ -190,7 +190,6 @@ def o_parse_link(text: str):
 
 def categorize(triviadb):
     
-        
     # Predefined categories
     CATS = [
         "authors and literature", 
@@ -206,7 +205,7 @@ def categorize(triviadb):
         "traditions and culture", 
         "miscellaneous",
     ]
-    n_chunks = 100
+
     txt_cats = ", ".join(CATS)
 
     # Get data and loader
@@ -241,8 +240,8 @@ def categorize(triviadb):
             triviadb.db.loc[id_loc, "o_is_usa"] = o_parse_link(text=response_usa["response"])       
 
         # Save update
-        if (i%n_chunks) == 0:
-            triviadb.save()
+        # if (i%n_chunks) == 0:
+        #     triviadb.save()
 
     # Clean wrong more than two cats
     n_cats = np.array([len(v) for v in triviadb.db["o_category"].fillna("").str.split("|").values])
@@ -262,7 +261,7 @@ def main(args):
     triviadb = UnifiedTSVDB()
     
     # Get categories from database 
-    # categorize(triviadb=triviadb)
+    categorize(triviadb=triviadb)
     
     # Load existing
     path_npz = os.path.join(args.cache, "embedding_trivia.npz")
@@ -301,6 +300,7 @@ def main(args):
 if __name__ == '__main__':
     
     # Create parser
+    # python -m scripts.text_embedding
     parser = argparse.ArgumentParser(
         prog='Text embedding',
         description='Embed text for feature description',
