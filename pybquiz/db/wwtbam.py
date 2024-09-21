@@ -228,7 +228,7 @@ class WWTBAMScrapper:
             # Hash text (unique question)
             data_row = {
                 # export to TSV (tab) + add hash for question
-                TriviaQ.KEY_UUID: to_uuid(qclean).hexdigest(),
+                TriviaQ.KEY_UUID: to_uuid(qclean),
                 TriviaQ.KEY_QUESTION: qclean,
                 TriviaQ.KEY_CORRECT_ANSWER: WWTBAMScrapper._clean_text(text_answers[id_correct.item()]),
                 TriviaQ.KEY_WRONG_ANSWER1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),

@@ -44,15 +44,15 @@ def main(args):
     
     # WWTBAM US
     # print("####### WWTBAM US #######")
-    # wwtbam_us_db = WWTBAM(lang='us')
+    wwtbam_us_db = WWTBAM(lang='us')
     # wwtbam_us_db.update()
-    # wwtbam_us_db.pprint()
+    wwtbam_us_db.pprint()
     
     # WWTBAM UK
     # print("####### WWTBAM UK #######")
-    # wwtbam_uk_db = WWTBAM(lang='uk')
+    wwtbam_uk_db = WWTBAM(lang='uk')
     # wwtbam_uk_db.update()
-    # wwtbam_uk_db.pprint()
+    wwtbam_uk_db.pprint()
     
     # Jeopardy
     # print("####### Jeopardy US #######")
@@ -63,7 +63,7 @@ def main(args):
     print("####### UnifiedTSVDB #######")
     dbs = [kenquizdb, opentdb, ninjaapi, thetriviadb]
     triviadb = UnifiedTSVDB()
-    # triviadb.update(dbs)
+    triviadb.update(dbs)
     triviadb.pprint()
 
 if __name__ == '__main__':
