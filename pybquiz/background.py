@@ -19,7 +19,7 @@ class BackgroundManager():
         self, 
         # yaml_token: str, 
         # delay_api: int = 20, 
-        dirout: str = "output",
+        dirout: str = ".cache",
     ) -> None:
         
         # Define filenames

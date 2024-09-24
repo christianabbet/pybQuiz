@@ -6,12 +6,12 @@ import pptx
 from pptx import Presentation     
 import numpy as np
 import json
-from pybquiz.const import PYBConst as C
 from sys import platform
 import os
 from pathlib import Path
 from pybquiz.export.slidetemplate import SlideTemplate
-
+from pybquiz.generator.base import QGenerator as C
+from tqdm import tqdm
 
 def pos_to_char(pos):
     return chr(pos + 97)
@@ -52,61 +52,91 @@ class PptxFactory:
             data = json.load(f)
 
         # Get font reference
+        print("Creating Quiz ...")
         pfont = PptxFactory.get_system_fonts()
 
-        # Add splide to presetation
+        # Add slide to presetation
         img_bg_quiz = background_gen.get_background("Pub Quiz")
-        img_bg_paper = background_gen.get_background("Quiz paper sheets")
-        self._add_title_subtitle(title=data[C.TITLE], subtitle=data[C.AUTHOR], img_bg=img_bg_quiz, pfont=pfont) 
+        img_bg_paper = background_gen.get_background("Quiz paper sheets")           
+        
+        # Add title slide to presetation
+        name = data.get(C.KEY_TITLE, "error")
+        author = data.get(C.KEY_AUTHOR, "error")
+        self._add_title_subtitle(title=name, subtitle=author, img_bg=img_bg_quiz, pfont=pfont) 
                     
         # Create rounds
-        Nround = len(data[C.ROUNDS])
+        rounds = data.get(C.KEY_ROUNDS, [])
+        Nround = len(rounds)
         for i in range(Nround):
+            # Log
+            print("[{}/{}]".format(i+1, Nround))
             # Create title slide
-            catname = data[C.ROUNDS][i][C.QUESTIONS][0][C.CATEGORY]
+            round_type = rounds[i].get(C.KEY_TYPE, None)
+            catname = rounds[i].get(C.KEY_CATEGORY, "error")
+            str_round = "Round {}: {}".format(i+1, catname.title())
+            # Images 
             img_bg = background_gen.get_background(catname, blurred=False)
             img_bg_blurred = background_gen.get_background(catname, blurred=True)
-            str_round = "Round {}: {}".format(i+1, data[C.ROUNDS][i][C.TITLE])
-            self._add_title_subtitle(title=str_round, img_bg=img_bg, pfont=pfont)            
-            
-            Nquestion = len(data[C.ROUNDS][i][C.QUESTIONS])
-            for j in range(Nquestion):
-                # Add question slide
-                answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.ANSWERS]
-                difficulty = data[C.ROUNDS][i][C.QUESTIONS][j][C.DIFFICULTY]
-                self._add_question(
-                    i=j+1, 
-                    question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
-                    answers=answers,
-                    difficulty=difficulty,
-                    img_bg=img_bg_blurred,
+        
+            if round_type == "trivia":
+                self.build_round_trivia(
+                    round=rounds[i],
+                    title=str_round,
+                    bgd_cat=img_bg,
+                    bgd_catblur=img_bg_blurred,
+                    bgd_paper=img_bg_paper,
                     pfont=pfont,
-                )                
+                )   
 
-            self._add_title_subtitle(title="Exchange paper sheets", subtitle=None, img_bg=img_bg_paper, pfont=pfont)          
-            self._add_title_subtitle(title=str_round, subtitle="Answers", img_bg=img_bg, pfont=pfont)            
-               
-            # Iterate over questions (answers)
-            for j in range(Nquestion):
-                # Add question slide
-                answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.ANSWERS]
-                difficulty = data[C.ROUNDS][i][C.QUESTIONS][j][C.DIFFICULTY]                
-                correct_answers = data[C.ROUNDS][i][C.QUESTIONS][j][C.CORRECT_ANSWERS]
-                self._add_question(
-                    i=j+1, 
-                    question=data[C.ROUNDS][i][C.QUESTIONS][j][C.QUESTIONS], 
-                    answers=answers,
-                    difficulty=difficulty,                    
-                    answers_id=correct_answers,
-                    img_bg=img_bg_blurred,
-                    pfont=pfont,
-                )                 
-
-            # Add splide to presetation
-            self._add_title_subtitle(title="Bring back paper sheets", subtitle=None, img_bg=img_bg_paper, pfont=pfont) 
-            
         # Saving file 
         self.root.save(outfile)             
+        
+    def build_round_trivia(self, round: dict, title: str, bgd_cat, bgd_catblur, bgd_paper, pfont):
+           
+        # Title
+        self._add_title_subtitle(title=title, img_bg=bgd_cat, pfont=pfont) 
+                    
+        # Paper image
+        questions = round.get(C.KEY_QUESTION, [])
+        Nquestion = len(questions)
+        for j in tqdm(range(Nquestion), "Trivia round ..."):
+            # Add question slide
+            order = [questions[j].get(o, "error") for o in questions[j].get(C.KEY_ORDER, [])]   
+            difficulty = questions[j][C.KEY_DIFFICULTY]
+            question = questions[j][C.KEY_QUESTION]
+            self._add_question(
+                i=j+1, 
+                question=question, 
+                answers=order,
+                difficulty=difficulty,
+                img_bg=bgd_catblur,
+                pfont=pfont,
+            )                
+
+
+        self._add_title_subtitle(title="Exchange paper sheets", subtitle=None, img_bg=bgd_paper, pfont=pfont)          
+        self._add_title_subtitle(title=title, subtitle="Answers", img_bg=bgd_cat, pfont=pfont)            
+            
+        # Iterate over questions (answers)
+        for j in range(Nquestion):
+            # Add question slide
+            order = [questions[j].get(o, "error") for o in questions[j].get(C.KEY_ORDER, [])] 
+            order_id = questions[j].get(C.KEY_ORDER_ID, -1)  
+            difficulty = questions[j][C.KEY_DIFFICULTY]
+            question = questions[j][C.KEY_QUESTION]
+            self._add_question(
+                i=j+1, 
+                question=question, 
+                answers=order,
+                difficulty=difficulty,                  
+                answers_id=order_id,
+                img_bg=bgd_catblur,
+                pfont=pfont,
+            )                  
+
+        # Add splide to presetation
+        self._add_title_subtitle(title="Bring back paper sheets", subtitle=None, img_bg=bgd_paper, pfont=pfont) 
+        
         
     @staticmethod
     def get_system_fonts(template: str = "Amiri-Regular"):
@@ -203,7 +233,7 @@ class PptxFactory:
                     color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
                 )
             
-    def _add_question(self, i: int = 1, question: str = "", difficulty: int = None, answers: list[str] = [], answers_id: list[int] = None, img_bg: str = None, pfont: str = None):
+    def _add_question(self, i: int = 1, question: str = "", difficulty: int = None, answers: list[str] = [], answers_id: int = None, img_bg: str = None, pfont: str = None):
         
             # Add slide and question            
             question_slide = self.root.slides.add_slide(self.root.slide_layouts[PptxFactory.BLANK]) 
@@ -255,7 +285,7 @@ class PptxFactory:
             self._add_answers(question_slide, answers, answers_id, pfont=pfont)
 
             
-    def _add_answers(self, slide, answers: list[str], answers_id: list[int] = None, pfont: str = None):
+    def _add_answers(self, slide, answers: list[str], answers_id: int = None, pfont: str = None):
                            
             nQ = len(answers)
             nRows = np.ceil(nQ/2).astype(int)
@@ -291,7 +321,7 @@ class PptxFactory:
                 # Check if one or more answers
                 a = answers[j]
     
-                if answers_id is not None and j in answers_id:
+                if answers_id is not None and j == answers_id:
                     color_bg = RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND_CORRECT)
                 else:
                     color_bg = RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND)

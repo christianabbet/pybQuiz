@@ -18,11 +18,12 @@ class SlideTemplate:
     COLOR_BBOX_LINE = "2881a1"
     COLOR_TEXT = "ffffff"
     
-    COLOR_DIFFICULTY = [
-        "6fbf72", # Easy
-        "e3b14d", # Easy
-        "c7524a", # Easy
-    ]
+    COLOR_DIFFICULTY = {
+        "easy": "6fbf72", # Easy
+        "medium": "e3b14d", # Medium
+        "hard": "c7524a", # Hard
+        "none": "808080", # None
+    }
 
     def __init__(self, width: float = 254, height: float = 190.5) -> None:
         # Rescale all variables

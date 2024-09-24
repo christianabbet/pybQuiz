@@ -3,8 +3,26 @@ from pybquiz.db.wwtbam import WWTBAM
 import pandas as pd
 import numpy as np
 
+    
+    
 class QGenerator:
     
+        
+    # Define constant for variables dump
+    # # For rounds
+
+            
+    # # For question
+    # CATEGORY_ID = "category_id"
+    
+    KEY_DIFFICULTY = "difficulty"
+    KEY_ANSWERS = "answers"
+    KEY_AUTHOR = "author"
+    KEY_TYPE = "type"
+    KEY_ROUNDS = "rounds"
+    KEY_QUESTION = "question"
+    KEY_ORDER = "order"
+    KEY_ORDER_ID = "order_id"
     KEY_INDEX = "index"
     KEY_CATEGORY = "category"
     KEY_NUMBER = "number"
@@ -150,7 +168,12 @@ class QGeneratorTrivia(QGenerator):
             use_usa=use_usa,
         )
         
-        return {"type": "trivia", "category": self.values.index[o_id], "questions": qs}
+        data = {
+            QGenerator.KEY_TYPE: "trivia", 
+            QGenerator.KEY_CATEGORY: self.values.index[o_id], 
+            QGenerator.KEY_QUESTION: qs,
+        }
+        return data
         
     
 class QGeneratorWWTBAM(QGenerator):

@@ -3,8 +3,8 @@ import os
 import json
 
 # from pybquiz import PybQuiz
-# from pybquiz.export.pptx import PptxFactory
-# from pybquiz.background import BackgroundManager
+from pybquiz.export.pptx import PptxFactory
+from pybquiz.background import BackgroundManager
 # from pybquiz.export.googleslide import GoogleSlideFactory, GoogleSheetFactory
 from pybquiz.generator.terminal import GeneratorTerminal
 from pybquiz.generator.base import QGeneratorTrivia, QGeneratorWWTBAM
@@ -41,26 +41,13 @@ def main(args):
         print("File not found: {}".format(dump_file))
         raise FileNotFoundError
     
-    # # Create output directory
-    # os.makedirs(args.dirout, exist_ok=True)
-    
-    # # Save to json
-    # name = os.path.splitext(os.path.basename(cfg_yml))[0]
-    # outfile_json = os.path.join(args.dirout, "{}.json".format(name))
-    # # outfile_pptx = os.path.join(args.dirout, "{}.pptx".format(name))
-            
-    # # Create quiz
-    # if not os.path.exists(outfile_json):
-    #     print("Quiz {} does not exists, create it ...".format(name))
-    #     quiz = PybQuiz.from_yaml(yaml_path=cfg_yml, yaml_token=token_path)
-    #     quiz.dump(file=outfile_json) 
-        
     # Create background handler                
-    # background_gen = BackgroundManager(dirout=args.dirout)
+    background_gen = BackgroundManager()
     
     # Reload from json
-    # pptx = PptxFactory()
-    # pptx.export(dump_path=outfile_json, outfile=outfile_pptx, background_gen=background_gen)
+    outfile_pptx = os.path.splitext(dump_file)[0] + ".pptx"
+    pptx = PptxFactory()
+    pptx.export(dump_path=dump_file, outfile=outfile_pptx, background_gen=background_gen)
 
     # # Check if google slide available
     # if os.path.exists(args.googlecreds):

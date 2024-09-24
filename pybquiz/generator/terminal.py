@@ -67,9 +67,9 @@ class GeneratorTerminal:
         input_rcount = 1
         
         dump_data = {
-            "name": input_qname,
-            "author": input_qauthor,
-            "raw": []
+            QGenerator.KEY_TITLE: input_qname,
+            QGenerator.KEY_AUTHOR: input_qauthor,
+            QGenerator.KEY_ROUNDS: []
         }
         
         for r in range(input_rcount):
@@ -86,11 +86,7 @@ class GeneratorTerminal:
                 continue
             # Get round info
             qs = self.dbs[code].get_round(options=answer)
-            
-            dump_data["raw"].append({
-                "type": self.dbs[code].__class__.__name__,
-                "questions": qs
-            })
+            dump_data[QGenerator.KEY_ROUNDS].append(qs)
         
         # Dump data
         # # Export as config file

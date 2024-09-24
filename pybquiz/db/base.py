@@ -5,6 +5,7 @@ from typing import Optional
 from rich.console import Console
 from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
+import numpy as np
 
 
 class TriviaQ:
@@ -257,7 +258,7 @@ class UnifiedTSVDB(TriviaTSVDB):
         markdown.quote = False
         markdown = markdown.get_markdown()
         console.print(markdown)
-        
+    
     def __getitem__(self, index: int):
         
         # Get row and params
@@ -266,6 +267,12 @@ class UnifiedTSVDB(TriviaTSVDB):
         data[self.KEY_O_CAT] = self.db.loc[index, self.KEY_O_CAT]
         data[self.KEY_O_USA] = self.db.loc[index, self.KEY_O_USA]
         data[self.KEY_O_UK] = self.db.loc[index, self.KEY_O_UK]
+        # Build answer to shuffle
+        answers = [TriviaQ.KEY_CORRECT_ANSWER, TriviaQ.KEY_WRONG_ANSWER1, TriviaQ.KEY_WRONG_ANSWER2, TriviaQ.KEY_WRONG_ANSWER3]
+        answers = [a for a in answers if not pd.isnull(data.get(a))]
+        answers = np.random.permutation(answers)
+        data["order"] = answers.tolist()
+        data["order_id"] = int(np.argmax(answers == TriviaQ.KEY_CORRECT_ANSWER))
         
         return data
     
