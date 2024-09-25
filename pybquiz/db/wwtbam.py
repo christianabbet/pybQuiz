@@ -23,6 +23,9 @@ class WWTBAMKey:
     KEY_DIFFICULTY = "difficulty_code"
     KEY_AIR_DATE = "air_date"
     PPRINT_BINS = [0, 4, 9, 14]
+    KEY_O_CAT = "o_category"
+    KEY_O_UK = "o_is_uk"
+    KEY_O_USA = "o_is_usa"
     
     # Base website
     WEB_BASE = "https://millionaire.fandom.com"
@@ -311,7 +314,8 @@ class WWTBAM(TriviaTSVDB):
         # Other variables
         self.lang = lang
         self.chunks = chunks
-        self.scapper = WWTBAMScrapper()     
+        self.scapper = WWTBAMScrapper()    
+        self.KEY_LANG =  WWTBAMKey.KEY_O_USA if lang == "us" else WWTBAMKey.KEY_O_UK
         
         # Call super method
         super().__init__(
@@ -333,7 +337,9 @@ class WWTBAM(TriviaTSVDB):
                 WWTBAMKey.KEY_URL, 
                 WWTBAMKey.KEY_VALUE, 
                 WWTBAMKey.KEY_AIR_DATE, 
-                WWTBAMKey.KEY_DIFFICULTY
+                WWTBAMKey.KEY_DIFFICULTY,
+                WWTBAMKey.KEY_O_CAT,
+                self.KEY_LANG,
             ]
         )
     

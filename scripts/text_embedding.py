@@ -9,39 +9,9 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
 from pybquiz.db.base import UnifiedTSVDB
+from pybquiz.db.wwtbam import WWTBAM
 from pybquiz.db.base import TriviaTSVDB, TriviaQ
 from pybquiz.viz import plot_umap, plot_chord
-
-
-# def find_ood(z, quantils: Optional[float] = 0.95):
-    
-#     v_hat = z.min(axis=1)
-#     ood_thresh = np.quantile(v_hat, quantils)
-    
-#     return v_hat > ood_thresh
-
-
-# def kmean_score(z: np.ndarray, y: np.ndarray, n: Optional[int] = 10000):
-    
-#     # Estimation of score
-#     id_est = np.random.permutation(y.shape[0])[:n]
-#     y_est = y[id_est]
-#     z_est = z[id_est]
-#     k = len(np.unique(y))
-    
-#     S = []
-#     for i in range(k):
-#         # Inner similarity
-#         z_in = z_est[y_est == i]
-#         # Outter similarity
-#         z_out = z_est[y_est != i]
-#         # Averages
-#         a = 1 - np.mean(z_in @ z_in.T - np.eye(z_in.shape[0]), axis=1)
-#         b = 1 - np.mean(z_in @ z_out.T, axis=1)
-#         s = (b-a) / np.max([a, b], axis=0)
-#         S.extend(s)
-
-#     return np.mean(S)
 
 
 def embed_umap(
@@ -188,7 +158,7 @@ def o_parse_link(text: str):
         return -1
     
 
-def categorize(triviadb):
+def categorize(triviadb, n_chunks: Optional[int] = 500):
     
     # Predefined categories
     CATS = [
@@ -220,8 +190,8 @@ def categorize(triviadb):
         
         # All values should be finite
         o_is_category = triviadb.db.loc[id_loc, ["o_category"]].notnull().item()
-        o_is_uk = triviadb.db.loc[id_loc, ["o_is_uk"]].notnull().item()
-        o_is_usa = triviadb.db.loc[id_loc, ["o_is_usa"]].notnull().item()
+        o_is_uk = ("o_is_uk" not in triviadb.db.columns) or (triviadb.db.loc[id_loc, ["o_is_uk"]].notnull().item())
+        o_is_usa = ("o_is_usa" not in triviadb.db.columns) or (triviadb.db.loc[id_loc, ["o_is_usa"]].notnull().item())
 
         if not o_is_category:    
             # Parse answer
@@ -240,16 +210,19 @@ def categorize(triviadb):
             triviadb.db.loc[id_loc, "o_is_usa"] = o_parse_link(text=response_usa["response"])       
 
         # Save update
-        # if (i%n_chunks) == 0:
-        #     triviadb.save()
+        if (i % n_chunks) == 0:
+            triviadb.save()
 
     # Clean wrong more than two cats
     n_cats = np.array([len(v) for v in triviadb.db["o_category"].fillna("").str.split("|").values])
     triviadb.db.loc[(n_cats > 2), "o_category"] = None
     
     # Clean language detections
-    triviadb.db.loc[triviadb.db["o_is_uk"] == -1, "o_is_uk"] = None
-    triviadb.db.loc[triviadb.db["o_is_usa"] == -1, "o_is_usa"] = None
+    if "o_is_uk" in triviadb.db.columns:
+        triviadb.db.loc[triviadb.db["o_is_uk"] == -1, "o_is_uk"] = None
+        
+    if "o_is_usa" in triviadb.db.columns:
+        triviadb.db.loc[triviadb.db["o_is_usa"] == -1, "o_is_usa"] = None
     
     # Save output
     triviadb.save()
@@ -259,13 +232,22 @@ def main(args):
 
     
     triviadb = UnifiedTSVDB()
+    wwtbam_us_db = WWTBAM(lang='us')
+    wwtbam_uk_db = WWTBAM(lang='uk')
     
     # Get categories from database 
-    categorize(triviadb=triviadb)
+    # categorize(triviadb=triviadb)
+    categorize(triviadb=wwtbam_us_db)
+    categorize(triviadb=wwtbam_uk_db)
     
     # Load existing
-    path_npz = os.path.join(args.cache, "embedding_trivia.npz")
-    z, y, uuid, domain = update_embed(triviadb=triviadb, path_npz=path_npz)
+    path_trivia_npz = os.path.join(args.cache, "embedding_trivia.npz")
+    path_us_npz = os.path.join(args.cache, "embedding_wwtbam_us.npz")
+    path_uk_npz = os.path.join(args.cache, "embedding_wwtbam_uk.npz")
+    # Embedd
+    z, y, uuid, domain = update_embed(triviadb=triviadb, path_npz=path_trivia_npz)
+    _, _, _, _ = update_embed(triviadb=wwtbam_us_db, path_npz=path_us_npz)
+    _, _, _, _ = update_embed(triviadb=wwtbam_uk_db, path_npz=path_uk_npz)
 
     # Normalize entires
     z = z / np.linalg.norm(z, axis=1, keepdims=True)
