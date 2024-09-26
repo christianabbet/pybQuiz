@@ -1,4 +1,4 @@
-from pybquiz.db.base import TriviaTSVDB, TriviaQ
+from pybquiz.db.base import TriviaTSVDB
 
 import os
 from typing import Optional, Literal
@@ -12,6 +12,7 @@ from tqdm import tqdm
 import numpy as np
 from pybquiz.db.utils import slow_get_request, to_uuid
 import html
+from pybquiz.const import TriviaConst as TC
 
 
 class OTDBKey:
@@ -70,14 +71,14 @@ class OpenTriviaDB(TriviaTSVDB):
         return pd.DataFrame(
             columns=[
                 # Mandatory keys
-                TriviaQ.KEY_UUID, 
-                TriviaQ.KEY_CATEGORY, 
-                TriviaQ.KEY_DIFFICULTY, 
-                TriviaQ.KEY_QUESTION, 
-                TriviaQ.KEY_CORRECT_ANSWER, 
-                TriviaQ.KEY_WRONG_ANSWER1, 
-                TriviaQ.KEY_WRONG_ANSWER2, 
-                TriviaQ.KEY_WRONG_ANSWER3, 
+                TC.KEY_UUID, 
+                TC.KEY_CATEGORY, 
+                TC.KEY_DIFFICULTY, 
+                TC.KEY_QUESTION, 
+                TC.KEY_CORRECT_ANSWER, 
+                TC.KEY_WRONG_ANSWER1, 
+                TC.KEY_WRONG_ANSWER2, 
+                TC.KEY_WRONG_ANSWER3, 
                 # Others
                 OTDBKey.KEY_TYPE,   
                 OTDBKey.KEY_CATEGORY_ID,
@@ -153,7 +154,7 @@ class OpenTriviaDB(TriviaTSVDB):
                 self.db = pd.concat([self.db, df_chunk], ignore_index=True)
 
         # Convert to dataframe and merge
-        self.db.drop_duplicates(subset=TriviaQ.KEY_UUID, keep="first", inplace=True)
+        self.db.drop_duplicates(subset=TC.KEY_UUID, keep="first", inplace=True)
         self.save()        
         
     @staticmethod
@@ -165,17 +166,17 @@ class OpenTriviaDB(TriviaTSVDB):
             question_type = q.get(OTDBKey.KEY_TYPE, "")
             data_row = {
                 OTDBKey.KEY_TYPE: question_type, 
-                TriviaQ.KEY_DIFFICULTY: q.get(TriviaQ.KEY_DIFFICULTY, ""),  
-                TriviaQ.KEY_CATEGORY: html.unescape(q.get(TriviaQ.KEY_CATEGORY, "")),
-                TriviaQ.KEY_QUESTION: question_str,
-                TriviaQ.KEY_CORRECT_ANSWER: html.unescape(q.get(OTDBKey.URL_KEY_CORRECT_ANSWER, "")),  
-                TriviaQ.KEY_WRONG_ANSWER1: html.unescape(q.get(OTDBKey.URL_KEY_INCORRECT, [None]*3)[0]),  
-                TriviaQ.KEY_UUID: to_uuid(question_str),                
+                TC.KEY_DIFFICULTY: q.get(TC.KEY_DIFFICULTY, ""),  
+                TC.KEY_CATEGORY: html.unescape(q.get(TC.KEY_CATEGORY, "")),
+                TC.KEY_QUESTION: question_str,
+                TC.KEY_CORRECT_ANSWER: html.unescape(q.get(OTDBKey.URL_KEY_CORRECT_ANSWER, "")),  
+                TC.KEY_WRONG_ANSWER1: html.unescape(q.get(OTDBKey.URL_KEY_INCORRECT, [None]*3)[0]),  
+                TC.KEY_UUID: to_uuid(question_str),                
             }
             # Check if muliple of true / false
             if question_type == OTDBKey.KEY_TYPE_MULIPLE:
-                data_row[TriviaQ.KEY_WRONG_ANSWER2] = html.unescape(q.get(OTDBKey.URL_KEY_INCORRECT, [None]*3)[1])
-                data_row[TriviaQ.KEY_WRONG_ANSWER3] = html.unescape(q.get(OTDBKey.URL_KEY_INCORRECT, [None]*3)[2])
+                data_row[TC.KEY_WRONG_ANSWER2] = html.unescape(q.get(OTDBKey.URL_KEY_INCORRECT, [None]*3)[1])
+                data_row[TC.KEY_WRONG_ANSWER3] = html.unescape(q.get(OTDBKey.URL_KEY_INCORRECT, [None]*3)[2])
             # APpend to row
             data.append(data_row)
         # Return parsed data

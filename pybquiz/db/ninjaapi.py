@@ -1,4 +1,4 @@
-from pybquiz.db.base import TriviaTSVDB, TriviaQ
+from pybquiz.db.base import TriviaTSVDB
 
 import os
 from typing import Optional, Literal
@@ -11,6 +11,7 @@ from tqdm import tqdm
 import numpy as np
 from pybquiz.db.utils import slow_get_request, to_uuid
 from rich.prompt import Prompt
+from pybquiz.const import TriviaConst as TC
 
 
 class NinjaDBKey:
@@ -92,14 +93,14 @@ class NinjaAPI(TriviaTSVDB):
         return pd.DataFrame(
             columns=[
                 # Mandatory keys
-                TriviaQ.KEY_UUID, 
-                TriviaQ.KEY_CATEGORY, 
-                TriviaQ.KEY_DIFFICULTY, 
-                TriviaQ.KEY_QUESTION, 
-                TriviaQ.KEY_CORRECT_ANSWER, 
-                TriviaQ.KEY_WRONG_ANSWER1, 
-                TriviaQ.KEY_WRONG_ANSWER2, 
-                TriviaQ.KEY_WRONG_ANSWER3, 
+                TC.KEY_UUID, 
+                TC.KEY_CATEGORY, 
+                TC.KEY_DIFFICULTY, 
+                TC.KEY_QUESTION, 
+                TC.KEY_CORRECT_ANSWER, 
+                TC.KEY_WRONG_ANSWER1, 
+                TC.KEY_WRONG_ANSWER2, 
+                TC.KEY_WRONG_ANSWER3, 
             ]
         )
         
@@ -137,15 +138,15 @@ class NinjaAPI(TriviaTSVDB):
                 question = result[0].get(NinjaDBKey.URL_KEY_QUESTION, None)
                 uuid = to_uuid(question)
                 
-                if uuid in self.db[TriviaQ.KEY_UUID].values:
+                if uuid in self.db[TC.KEY_UUID].values:
                     n_category_try += 1
                     continue
                 
                 data = pd.DataFrame([{
-                    TriviaQ.KEY_QUESTION: question,
-                    TriviaQ.KEY_CORRECT_ANSWER: result[0].get(NinjaDBKey.URL_KEY_ANSWER, None),
-                    TriviaQ.KEY_CATEGORY: result[0].get(NinjaDBKey.URL_KEY_CATEGORY, None),
-                    TriviaQ.KEY_UUID: uuid,
+                    TC.KEY_QUESTION: question,
+                    TC.KEY_CORRECT_ANSWER: result[0].get(NinjaDBKey.URL_KEY_ANSWER, None),
+                    TC.KEY_CATEGORY: result[0].get(NinjaDBKey.URL_KEY_CATEGORY, None),
+                    TC.KEY_UUID: uuid,
                 }])
                 
                 self.db = pd.concat([self.db, data], ignore_index=True)

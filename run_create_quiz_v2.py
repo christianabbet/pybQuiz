@@ -4,11 +4,14 @@ import json
 
 # from pybquiz import PybQuiz
 from pybquiz.export.pptx import PptxFactory
+from pybquiz.export.pptxexport import PPTXExport
+
 from pybquiz.background import BackgroundManager
 # from pybquiz.export.googleslide import GoogleSlideFactory, GoogleSheetFactory
 from pybquiz.generator.terminal import GeneratorTerminal
 from pybquiz.generator.base import QGeneratorTrivia, QGeneratorWWTBAM
 
+from pybquiz.export.base import Export
 from pybquiz.db.base import UnifiedTSVDB
 from pybquiz.db.wwtbam import WWTBAM
 
@@ -40,14 +43,20 @@ def main(args):
     if not os.path.exists(dump_file):
         print("File not found: {}".format(dump_file))
         raise FileNotFoundError
-    
-    # Create background handler                
-    background_gen = BackgroundManager()
-    
+
     # Reload from json
-    outfile_pptx = os.path.splitext(dump_file)[0] + ".pptx"
-    pptx = PptxFactory()
-    pptx.export(dump_path=dump_file, outfile=outfile_pptx, background_gen=background_gen)
+    PPTXExport(
+        dump_file,
+        dirout=args.dirout,
+    ).export()
+    
+    # outfile_pptx = os.path.splitext(dump_file)[0] + ".pptx"
+    # pptx = PptxFactory()
+    # pptx.export(
+    #     dump_path=dump_file, 
+    #     outfile=outfile_pptx, 
+    #     background_gen=background_gen
+    # )
 
     # # Check if google slide available
     # if os.path.exists(args.googlecreds):

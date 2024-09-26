@@ -245,37 +245,44 @@ def main(args):
     path_us_npz = os.path.join(args.cache, "embedding_wwtbam_us.npz")
     path_uk_npz = os.path.join(args.cache, "embedding_wwtbam_uk.npz")
     # Embedd
-    z, y, uuid, domain = update_embed(triviadb=triviadb, path_npz=path_trivia_npz)
-    _, _, _, _ = update_embed(triviadb=wwtbam_us_db, path_npz=path_us_npz)
-    _, _, _, _ = update_embed(triviadb=wwtbam_uk_db, path_npz=path_uk_npz)
+    z1, y1, uuid1, domain1 = update_embed(triviadb=triviadb, path_npz=path_trivia_npz)
+    z2, y2, uuid2, domain2 = update_embed(triviadb=wwtbam_us_db, path_npz=path_us_npz)
+    z3, y3, uuid3, domain3 = update_embed(triviadb=wwtbam_uk_db, path_npz=path_uk_npz)
 
-    # Normalize entires
-    z = z / np.linalg.norm(z, axis=1, keepdims=True)
+    # Merge all
+    z = np.concatenate([z1, z2, z3], axis=0)
+    y = np.concatenate([y1, y2, y3], axis=0)
+    uuid = np.concatenate([uuid1, uuid2, uuid3], axis=0)
+    domain = np.concatenate([domain1, domain2, domain3], axis=0)
     
+    # Normalize entires
     print("umap ...")
-    z_umap = embed_umap(z=z)
+    z = z / np.linalg.norm(z, axis=1, keepdims=True)
+    z_umap = embed_umap(z=z, M=10000)
     plot_umap(z=z_umap, y=y, domain=domain)
     
-#     # print("Plot Circle")
-#     # plot_chord(z=z, y=y, domain=domain)
-    y_hats = triviadb.db.set_index("uuid").loc[uuid]
-    y_hat_cat = y_hats["o_category"].fillna("error").str.split("|").str[0].values
-    y_hat_ukusa = y_hats["o_is_uk"].fillna(0.0) + 10*y_hats["o_is_usa"].fillna(0.0)
-    # Define ood cluster
-    # y_hat_label = np.array(["C{}".format(c) for c in y_hat])
-    plot_umap(
-        z=z_umap, 
-        y=y_hat_cat, 
-        domain=np.array(["Unique"]*len(domain)), 
-        path="viz_embedding_ollama.png"
-    )
+    # print("Plot Circle")
+    # plot_chord(z=z, y=y, domain=domain)
+    
+    # Plot other repartition
+    # y_hats = triviadb.db.set_index("uuid").loc[uuid]
+    # y_hat_cat = y_hats["o_category"].fillna("error").str.split("|").str[0].values
+    # y_hat_ukusa = y_hats["o_is_uk"].fillna(0.0) + 10*y_hats["o_is_usa"].fillna(0.0)
+    # # Define ood cluster
+    # # y_hat_label = np.array(["C{}".format(c) for c in y_hat])
+    # plot_umap(
+    #     z=z_umap, 
+    #     y=y_hat_cat, 
+    #     domain=np.array(["Unique"]*len(domain)), 
+    #     path="viz_embedding_ollama.png"
+    # )
 
-    plot_umap(
-        z=z_umap, 
-        y=y_hat_ukusa.replace({0: "None", 1: "UK", 10: "USA", 11: "Both"}), 
-        domain=np.array(["Unique"]*len(domain)), 
-        path="viz_embedding_ukusa.png"
-    )
+    # plot_umap(
+    #     z=z_umap, 
+    #     y=y_hat_ukusa.replace({0: "None", 1: "UK", 10: "USA", 11: "Both"}), 
+    #     domain=np.array(["Unique"]*len(domain)), 
+    #     path="viz_embedding_ukusa.png"
+    # )
     
 
         

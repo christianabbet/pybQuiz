@@ -1,4 +1,4 @@
-from pybquiz.db.base import TriviaTSVDB, TriviaQ
+from pybquiz.db.base import TriviaTSVDB
 
 import os
 from typing import Optional, Literal

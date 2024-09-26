@@ -1,35 +1,13 @@
-from pybquiz.db.base import UnifiedTSVDB, TriviaQ
+from pybquiz.db.base import UnifiedTSVDB
 from pybquiz.db.wwtbam import WWTBAM
 import pandas as pd
 import numpy as np
+from pybquiz.const import Const as C
+from pybquiz.const import TriviaConst as TC
 
-    
     
 class QGenerator:
-    
-        
-    # Define constant for variables dump
-    # # For rounds
 
-            
-    # # For question
-    # CATEGORY_ID = "category_id"
-    
-    KEY_DIFFICULTY = "difficulty"
-    KEY_ANSWERS = "answers"
-    KEY_AUTHOR = "author"
-    KEY_TYPE = "type"
-    KEY_ROUNDS = "rounds"
-    KEY_QUESTION = "question"
-    KEY_ORDER = "order"
-    KEY_ORDER_ID = "order_id"
-    KEY_INDEX = "index"
-    KEY_CATEGORY = "category"
-    KEY_NUMBER = "number"
-    KEY_TITLE = "title"
-    KEY_DESCRIPTION = "description"
-    KEY_CONTENT = "content"
-    KEY_OPTION = "option"
     
     def __init__(self) -> None:
         pass
@@ -66,7 +44,7 @@ class QGeneratorTrivia(QGenerator):
         self.trivia = trivia
         
         # Get categories
-        self.values = self.trivia.db[UnifiedTSVDB.KEY_O_CAT].value_counts()
+        self.values = self.trivia.db[TC.EXT_KEY_O_CAT].value_counts()
         self.values = self.values.sort_index()
 
         # Get values
@@ -82,16 +60,16 @@ class QGeneratorTrivia(QGenerator):
 
         # Build content
         content = [{
-                self.KEY_INDEX: i, 
-                self.KEY_CATEGORY: k.title(), 
-                self.KEY_NUMBER: v
+                C.KEY_INDEX: i, 
+                C.KEY_CATEGORY: k.title(), 
+                C.KEY_NUMBER: v
             } for i, (k, v) in enumerate(self.values.items())
         ]
         return {
-            self.KEY_TITLE: "Trivia", 
-            self.KEY_DESCRIPTION: self.TXT_DESCRIPTION, 
-            self.KEY_CONTENT: content,
-            self.KEY_OPTION: self.parse_options(self.TXT_OPTIONS)
+            C.KEY_TITLE: "Trivia", 
+            C.KEY_DESCRIPTION: self.TXT_DESCRIPTION, 
+            C.KEY_CONTENT: content,
+            C.KEY_OPTION: self.parse_options(self.TXT_OPTIONS)
         }
         
     #
@@ -106,19 +84,19 @@ class QGeneratorTrivia(QGenerator):
     ):
         
         # Filter difficulty
-        f_diff = pd.concat([self.trivia.db[TriviaQ.KEY_DIFFICULTY] == k for k in use_difficulty], axis=1)
+        f_diff = pd.concat([self.trivia.db[TC.KEY_DIFFICULTY] == k for k in use_difficulty], axis=1)
         f_diff = f_diff.any(axis=1)
         
         # Filter cat
         f_cat = f_diff.copy()
         if category != "any":
-            f_cat = self.trivia.db[UnifiedTSVDB.KEY_O_CAT] == category
+            f_cat = self.trivia.db[TC.EXT_KEY_O_CAT] == category
         
         # Filter T/F
-        f_tf = ~(self.trivia.db[TriviaQ.KEY_WRONG_ANSWER1].notnull() & self.trivia.db[TriviaQ.KEY_WRONG_ANSWER2].isna()) | use_tf
+        f_tf = ~(self.trivia.db[TC.KEY_WRONG_ANSWER1].notnull() & self.trivia.db[TC.KEY_WRONG_ANSWER2].isna()) | use_tf
         # Filter uk / us
-        f_us = (self.trivia.db[UnifiedTSVDB.KEY_O_USA] == 0) | ((self.trivia.db[UnifiedTSVDB.KEY_O_USA] == 1) & use_usa)
-        f_uk = (self.trivia.db[UnifiedTSVDB.KEY_O_UK] == 0) | ((self.trivia.db[UnifiedTSVDB.KEY_O_UK] == 1) & use_uk)
+        f_us = (self.trivia.db[TC.EXT_KEY_O_USA] == 0) | ((self.trivia.db[TC.EXT_KEY_O_USA] == 1) & use_usa)
+        f_uk = (self.trivia.db[TC.EXT_KEY_O_UK] == 0) | ((self.trivia.db[TC.EXT_KEY_O_UK] == 1) & use_uk)
 
         # f_us = (self.trivia.db[UnifiedTSVDB.KEY_O_USA] == use_usa) | (self.trivia.db[UnifiedTSVDB.KEY_O_UK] == use_uk)
         f = f_diff & f_cat & f_us & f_uk & f_tf
@@ -169,9 +147,9 @@ class QGeneratorTrivia(QGenerator):
         )
         
         data = {
-            QGenerator.KEY_TYPE: "trivia", 
-            QGenerator.KEY_CATEGORY: self.values.index[o_id], 
-            QGenerator.KEY_QUESTION: qs,
+            C.KEY_TYPE: "trivia", 
+            C.KEY_CATEGORY: self.values.index[o_id], 
+            C.KEY_QUESTION: qs,
         }
         return data
         
@@ -186,13 +164,13 @@ class QGeneratorWWTBAM(QGenerator):
     def get_codes(self):
         # Get classes
         content = [{
-                self.KEY_INDEX: i, 
-                self.KEY_CATEGORY: d.lang.upper(), 
-                self.KEY_NUMBER: len(d)
+                C.KEY_INDEX: i, 
+                C.KEY_CATEGORY: d.lang.upper(), 
+                C.KEY_NUMBER: len(d)
             } for i, d in enumerate(self.wwtbams)
         ]
 
         # Build content
-        return {self.KEY_TITLE: "Who Wants to Be a Millionaire?", self.KEY_CONTENT: content}
+        return {C.KEY_TITLE: "Who Wants to Be a Millionaire?", C.KEY_CONTENT: content}
     
     

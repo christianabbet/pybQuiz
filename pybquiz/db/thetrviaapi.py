@@ -1,4 +1,4 @@
-from pybquiz.db.base import TriviaTSVDB, TriviaQ
+from pybquiz.db.base import TriviaTSVDB
 
 import os
 from typing import Optional, Literal
@@ -11,19 +11,10 @@ import json
 from tqdm import tqdm
 import numpy as np
 from pybquiz.db.utils import slow_get_request, to_uuid
-import html
+from pybquiz.const import TriviaConst as TC
 
 
 class TTAPIKey:
-    
-    # KEY_DIFFICULTY = "difficulty"
-    # KEY_CATEGORY = "category"
-    # KEY_QUESTION = "question"
-    # KEY_CORRECT_ANSWER = "correct_answer"
-    # KEY_WRONG_ANSWER_1 = "wrong_answers_1"
-    # KEY_WRONG_ANSWER_2 = "wrong_answers_2"
-    # KEY_WRONG_ANSWER_3 = "wrong_answers_3"
-    # KEY_UUID = "uuid"
     
     KEY_TAGS = "tags"
     KEY_IS_NICHE = "isNiche"
@@ -77,14 +68,14 @@ class TheTriviaAPIDB(TriviaTSVDB):
         return pd.DataFrame(
             columns=[
                 # Mandatory keys
-                TriviaQ.KEY_UUID, 
-                TriviaQ.KEY_CATEGORY, 
-                TriviaQ.KEY_DIFFICULTY, 
-                TriviaQ.KEY_QUESTION, 
-                TriviaQ.KEY_CORRECT_ANSWER, 
-                TriviaQ.KEY_WRONG_ANSWER1, 
-                TriviaQ.KEY_WRONG_ANSWER2, 
-                TriviaQ.KEY_WRONG_ANSWER3, 
+                TC.KEY_UUID, 
+                TC.KEY_CATEGORY, 
+                TC.KEY_DIFFICULTY, 
+                TC.KEY_QUESTION, 
+                TC.KEY_CORRECT_ANSWER, 
+                TC.KEY_WRONG_ANSWER1, 
+                TC.KEY_WRONG_ANSWER2, 
+                TC.KEY_WRONG_ANSWER3, 
                 # Others
                 TTAPIKey.KEY_TAGS,
                 TTAPIKey.KEY_IS_NICHE, 
@@ -122,7 +113,7 @@ class TheTriviaAPIDB(TriviaTSVDB):
             self.db = pd.concat([self.db, df_chunk], ignore_index=True)
 
         # Convert to dataframe and merge
-        self.db.drop_duplicates(subset=TriviaQ.KEY_UUID, keep="first", inplace=True)
+        self.db.drop_duplicates(subset=TC.KEY_UUID, keep="first", inplace=True)
         self.save()        
         
     @staticmethod
@@ -131,16 +122,16 @@ class TheTriviaAPIDB(TriviaTSVDB):
         for q in api_result:
             # Get infos
             data_row = {
-                TriviaQ.KEY_CATEGORY: q.get(TTAPIKey.URL_KEY_CATEGORY, ""), 
-                TriviaQ.KEY_DIFFICULTY: q.get(TTAPIKey.URL_KEY_DIFFICULTY, ""), 
+                TC.KEY_CATEGORY: q.get(TTAPIKey.URL_KEY_CATEGORY, ""), 
+                TC.KEY_DIFFICULTY: q.get(TTAPIKey.URL_KEY_DIFFICULTY, ""), 
+                TC.KEY_QUESTION: q.get(TTAPIKey.URL_KEY_QUESTION, {}).get("text", ""), 
+                TC.KEY_CORRECT_ANSWER: q.get(TTAPIKey.URL_KEY_CORRECT_ANSWER, None), 
+                TC.KEY_WRONG_ANSWER1: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[0], 
+                TC.KEY_WRONG_ANSWER2: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[1],
+                TC.KEY_WRONG_ANSWER3: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[2],
+                TC.KEY_UUID: q.get(TTAPIKey.URL_KEY_ID, None),            
                 TTAPIKey.KEY_TAGS: q.get(TTAPIKey.URL_KEY_TAGS, ""),
                 TTAPIKey.KEY_IS_NICHE: q.get(TTAPIKey.URL_IS_NICHE, ""), 
-                TriviaQ.KEY_QUESTION: q.get(TTAPIKey.URL_KEY_QUESTION, {}).get("text", ""), 
-                TriviaQ.KEY_CORRECT_ANSWER: q.get(TTAPIKey.URL_KEY_CORRECT_ANSWER, None), 
-                TriviaQ.KEY_WRONG_ANSWER1: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[0], 
-                TriviaQ.KEY_WRONG_ANSWER2: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[1],
-                TriviaQ.KEY_WRONG_ANSWER3: q.get(TTAPIKey.URL_KEY_INCORRECT, [None]*3)[2],
-                TriviaQ.KEY_UUID: q.get(TTAPIKey.URL_KEY_ID, None),            
             }
 
             # APpend to row

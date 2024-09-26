@@ -7,24 +7,8 @@ from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
 import numpy as np
 
+from pybquiz.const import TriviaConst as TC
 
-class TriviaQ:
-    
-    # Define base keys that should exists in databases
-    KEY_UUID = "uuid"
-    KEY_CATEGORY = "category"
-    KEY_DIFFICULTY = "difficulty"
-    
-    KEY_QUESTION = "question"
-    KEY_CORRECT_ANSWER = "correct_answer"
-    KEY_WRONG_ANSWER1 = "wrong_answers_1"
-    KEY_WRONG_ANSWER2 = "wrong_answers_2"
-    KEY_WRONG_ANSWER3 = "wrong_answers_3"
-    
-    @staticmethod
-    def get_keys():
-        return [v for k, v in TriviaQ.__dict__.items() if "KEY" in k]
-            
 
 class TriviaDB:
     
@@ -82,7 +66,7 @@ class TriviaTSVDB(TriviaDB):
         
         # self.db = pd.concat([db, self.db], ignore_index=True)
         # Check columns
-        ref_keys = TriviaQ.get_keys()
+        ref_keys = TC.get_keys()
         assert all([k in self.db.columns for k in ref_keys])
         
     def save(self):
@@ -111,15 +95,15 @@ class TriviaTSVDB(TriviaDB):
     def pprint(self):
         
         name = self.__class__.__name__    
-        self.db[TriviaQ.KEY_DIFFICULTY] = self.db[TriviaQ.KEY_DIFFICULTY].fillna("none")
+        self.db[TC.KEY_DIFFICULTY] = self.db[TC.KEY_DIFFICULTY].fillna("none")
         df_print = pd.crosstab(
-            index=self.db[TriviaQ.KEY_CATEGORY], 
-            columns=self.db[TriviaQ.KEY_DIFFICULTY]
+            index=self.db[TC.KEY_CATEGORY], 
+            columns=self.db[TC.KEY_DIFFICULTY]
         )
         df_print.columns = [str(c) for c in df_print.columns]
 
         # Group by categories and create df
-        data_all = {TriviaQ.KEY_CATEGORY: "All"}
+        data_all = {TC.KEY_CATEGORY: "All"}
         data_all.update(df_print.sum().to_dict())
         # Add all other values
         data = [data_all]
@@ -140,19 +124,13 @@ class TriviaTSVDB(TriviaDB):
         
         # Get row and params
         serie = self.db.iloc[index]
-        ref_keys = TriviaQ.get_keys()
+        ref_keys = TC.get_keys()
     
         return serie[ref_keys].to_dict()
     
 
 
 class UnifiedTSVDB(TriviaTSVDB):
-    
-    
-    KEY_DOMAIN = "domain"
-    KEY_O_CAT = "o_category"
-    KEY_O_UK = "o_is_uk"
-    KEY_O_USA = "o_is_usa"
     
     def __init__(
         self, 
@@ -177,7 +155,7 @@ class UnifiedTSVDB(TriviaTSVDB):
             path_db=os.path.join(cache, filename_db + ".tsv"),
         )
         # Remove multiple cats
-        self.db[UnifiedTSVDB.KEY_O_CAT] = self.db[UnifiedTSVDB.KEY_O_CAT].str.split("|").str[0]
+        self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].str.split("|").str[0]
         
     @abstractmethod
     def initialize(self) -> pd.DataFrame:
@@ -185,18 +163,18 @@ class UnifiedTSVDB(TriviaTSVDB):
         return pd.DataFrame(
             columns=[
                 # Mandatory keys
-                TriviaQ.KEY_UUID, 
-                TriviaQ.KEY_CATEGORY, 
-                TriviaQ.KEY_DIFFICULTY, 
-                TriviaQ.KEY_QUESTION, 
-                TriviaQ.KEY_CORRECT_ANSWER, 
-                TriviaQ.KEY_WRONG_ANSWER1, 
-                TriviaQ.KEY_WRONG_ANSWER2, 
-                TriviaQ.KEY_WRONG_ANSWER3, 
-                UnifiedTSVDB.KEY_DOMAIN, 
-                UnifiedTSVDB.KEY_O_CAT, 
-                UnifiedTSVDB.KEY_O_UK, 
-                UnifiedTSVDB.KEY_O_USA, 
+                TC.KEY_UUID, 
+                TC.KEY_CATEGORY, 
+                TC.KEY_DIFFICULTY, 
+                TC.KEY_QUESTION, 
+                TC.KEY_CORRECT_ANSWER, 
+                TC.KEY_WRONG_ANSWER1, 
+                TC.KEY_WRONG_ANSWER2, 
+                TC.KEY_WRONG_ANSWER3, 
+                TC.EXT_KEY_DOMAIN, 
+                TC.EXT_KEY_O_CAT, 
+                TC.EXT_KEY_O_UK, 
+                TC.EXT_KEY_O_USA, 
             ]
         )
 
@@ -209,21 +187,21 @@ class UnifiedTSVDB(TriviaTSVDB):
         for db in dbs:
             # Get standardized columns
             df = db.db
-            df[self.KEY_DOMAIN] = db.__class__.__name__ 
-            df[self.KEY_O_CAT] = None        
-            df[self.KEY_O_UK] = None        
-            df[self.KEY_O_USA] = None              
+            df[TC.EXT_KEY_DOMAIN] = db.__class__.__name__ 
+            df[TC.EXT_KEY_O_CAT] = None        
+            df[TC.EXT_KEY_O_UK] = None        
+            df[TC.EXT_KEY_O_USA] = None              
             dbs_.append(df)
             
         # Merge columns
         dbs_ = pd.concat(dbs_, ignore_index=True)
         # Get trivia cols
         dbs_ = dbs_[self.db.columns]
-        dbs_ = dbs_.drop_duplicates(subset=TriviaQ.KEY_UUID, keep="first")
+        dbs_ = dbs_.drop_duplicates(subset=TC.KEY_UUID, keep="first")
         
         # Merge with existing database        
         self.db = pd.concat([self.db, dbs_], ignore_index=True)
-        self.db = self.db.drop_duplicates(subset=TriviaQ.KEY_UUID, keep="first")
+        self.db = self.db.drop_duplicates(subset=TC.KEY_UUID, keep="first")
         self.db = self.db.set_index("uuid").fillna(dbs_.set_index("uuid")).reset_index()
         # Nothing to do, just save version
         
@@ -233,17 +211,17 @@ class UnifiedTSVDB(TriviaTSVDB):
     def pprint(self):
         
         name = self.__class__.__name__    
-        self.db[UnifiedTSVDB.KEY_O_CAT] = self.db[UnifiedTSVDB.KEY_O_CAT].fillna("miscellaneous")
-        self.db[UnifiedTSVDB.KEY_O_CAT] = self.db[UnifiedTSVDB.KEY_O_CAT].str.split("|").str[0] 
+        self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].fillna("miscellaneous")
+        self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].str.split("|").str[0] 
         df_print = pd.crosstab(
-            index=self.db[UnifiedTSVDB.KEY_O_CAT], 
-            columns=self.db[TriviaQ.KEY_DIFFICULTY]
+            index=self.db[TC.EXT_KEY_O_CAT], 
+            columns=self.db[TC.EXT_KEY_DIFFICULTY]
         )
         
         df_print.columns = [str(c) for c in df_print.columns]
 
         # Group by categories and create df
-        data_all = {UnifiedTSVDB.KEY_O_CAT: "All"}
+        data_all = {TC.EXT_KEY_O_CAT: "All"}
         data_all.update(df_print.sum().to_dict())
         # Add all other values
         data = [data_all]
@@ -263,16 +241,16 @@ class UnifiedTSVDB(TriviaTSVDB):
         
         # Get row and params
         data = super().__getitem__(index)
-        data[self.KEY_DOMAIN] = self.db.loc[index, self.KEY_DOMAIN]
-        data[self.KEY_O_CAT] = self.db.loc[index, self.KEY_O_CAT]
-        data[self.KEY_O_USA] = self.db.loc[index, self.KEY_O_USA]
-        data[self.KEY_O_UK] = self.db.loc[index, self.KEY_O_UK]
+        data[TC.EXT_KEY_DOMAIN] = self.db.loc[index, TC.EXT_KEY_DOMAIN]
+        data[TC.EXT_KEY_O_CAT] = self.db.loc[index, TC.EXT_KEY_O_CAT]
+        data[TC.EXT_KEY_O_USA] = self.db.loc[index, TC.EXT_KEY_O_USA]
+        data[TC.EXT_KEY_O_UK] = self.db.loc[index, TC.EXT_KEY_O_UK]
         # Build answer to shuffle
-        answers = [TriviaQ.KEY_CORRECT_ANSWER, TriviaQ.KEY_WRONG_ANSWER1, TriviaQ.KEY_WRONG_ANSWER2, TriviaQ.KEY_WRONG_ANSWER3]
+        answers = [TC.KEY_CORRECT_ANSWER, TC.KEY_WRONG_ANSWER1, TC.KEY_WRONG_ANSWER2, TC.KEY_WRONG_ANSWER3]
         answers = [a for a in answers if not pd.isnull(data.get(a))]
         answers = np.random.permutation(answers)
-        data["order"] = answers.tolist()
-        data["order_id"] = int(np.argmax(answers == TriviaQ.KEY_CORRECT_ANSWER))
-        
+        data[TC.EXT_KEY_ORDER] = answers.tolist()
+        data[TC.EXT_KEY_ORDER_ID] = int(np.argmax(answers == TC.KEY_CORRECT_ANSWER))
+    
         return data
     

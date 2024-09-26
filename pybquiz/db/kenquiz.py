@@ -10,11 +10,12 @@ import os
 from rich.console import Console
 from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
-from pybquiz.db.base import TriviaTSVDB, TriviaQ
+from pybquiz.db.base import TriviaTSVDB
 from pybquiz.db.utils import check_code
 import re
 import time
 import requests
+from pybquiz.const import TriviaConst as TC
 
 
 class KenQuizKey:
@@ -245,14 +246,14 @@ class KenQuizDB(TriviaTSVDB):
         return pd.DataFrame(
             columns=[
                 # Mandatory keys
-                TriviaQ.KEY_UUID, 
-                TriviaQ.KEY_CATEGORY, 
-                TriviaQ.KEY_DIFFICULTY, 
-                TriviaQ.KEY_QUESTION, 
-                TriviaQ.KEY_CORRECT_ANSWER, 
-                TriviaQ.KEY_WRONG_ANSWER1, 
-                TriviaQ.KEY_WRONG_ANSWER2, 
-                TriviaQ.KEY_WRONG_ANSWER3, 
+                TC.KEY_UUID, 
+                TC.KEY_CATEGORY, 
+                TC.KEY_DIFFICULTY, 
+                TC.KEY_QUESTION, 
+                TC.KEY_CORRECT_ANSWER, 
+                TC.KEY_WRONG_ANSWER1, 
+                TC.KEY_WRONG_ANSWER2, 
+                TC.KEY_WRONG_ANSWER3, 
                 # Others
                 KenQuizKey.KEY_URL, 
                 KenQuizKey.KEY_CATEGORY_SUB,
@@ -300,14 +301,14 @@ class KenQuizDB(TriviaTSVDB):
                     
                     # Question
                     data = {
-                        KenQuizKey.KEY_URL: sub_url, 
-                        TriviaQ.KEY_CATEGORY: main_cat, 
+                        TC.KEY_CATEGORY: main_cat, 
+                        TC.KEY_QUESTION: text_questions[k], 
+                        TC.KEY_DIFFICULTY: None, 
+                        TC.KEY_CORRECT_ANSWER: text_answers[k],
+                        TC.KEY_UUID: to_uuid(text_questions[k]), 
                         KenQuizKey.KEY_CATEGORY_SUB: sub_cat,
-                        TriviaQ.KEY_QUESTION: text_questions[k], 
-                        TriviaQ.KEY_DIFFICULTY: None, 
                         KenQuizKey.KEY_DIFFICULTY_KEN: None, 
-                        TriviaQ.KEY_CORRECT_ANSWER: text_answers[k],
-                        TriviaQ.KEY_UUID: to_uuid(text_questions[k]), 
+                        KenQuizKey.KEY_URL: sub_url, 
                     }
                     
                     datas.append(data)
@@ -348,7 +349,7 @@ class KenQuizDB(TriviaTSVDB):
                 # Store questions
                 uuids = np.unique([to_uuid(t) for t in text_questions])
                 uuids = np.concatenate([uuids, ["2"]])
-                uuids = pd.DataFrame(uuids, columns=[TriviaQ.KEY_UUID])
+                uuids = pd.DataFrame(uuids, columns=[TC.KEY_UUID])
                 uuids[KenQuizKey.KEY_DIFFICULTY_KEN] = nd
 
                 # Check if value to append
@@ -356,7 +357,7 @@ class KenQuizDB(TriviaTSVDB):
                     continue
                 
                 #Merge with existing
-                df_merge = self.db[[TriviaQ.KEY_UUID]].merge(right=uuids, how="left", on=TriviaQ.KEY_UUID, indicator=True)
+                df_merge = self.db[[TC.KEY_UUID]].merge(right=uuids, how="left", on=TC.KEY_UUID, indicator=True)
                 is_new = df_merge[(df_merge['_merge'] == "both")].index
                 self.db.loc[is_new, KenQuizKey.KEY_DIFFICULTY_KEN] = nd
                 
@@ -375,5 +376,5 @@ class KenQuizDB(TriviaTSVDB):
             30.0: "hard",
         })       
         diff.fillna("none", inplace=True) 
-        self.db[TriviaQ.KEY_DIFFICULTY] = diff
+        self.db[TC.KEY_DIFFICULTY] = diff
         

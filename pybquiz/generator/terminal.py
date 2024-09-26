@@ -19,7 +19,8 @@ import numpy as np
 from typing import Optional
 from pybquiz.generator.base import QGenerator
 import json
-     
+
+from pybquiz.const import Const as C
      
 class GeneratorTerminal:
     
@@ -67,9 +68,9 @@ class GeneratorTerminal:
         input_rcount = 1
         
         dump_data = {
-            QGenerator.KEY_TITLE: input_qname,
-            QGenerator.KEY_AUTHOR: input_qauthor,
-            QGenerator.KEY_ROUNDS: []
+            C.KEY_TITLE: input_qname,
+            C.KEY_AUTHOR: input_qauthor,
+            C.KEY_ROUNDS: []
         }
         
         for r in range(input_rcount):
@@ -86,7 +87,7 @@ class GeneratorTerminal:
                 continue
             # Get round info
             qs = self.dbs[code].get_round(options=answer)
-            dump_data[QGenerator.KEY_ROUNDS].append(qs)
+            dump_data[C.KEY_ROUNDS].append(qs)
         
         # Dump data
         # # Export as config file

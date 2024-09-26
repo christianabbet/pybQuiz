@@ -111,7 +111,7 @@ class PptxFactory:
                 difficulty=difficulty,
                 img_bg=bgd_catblur,
                 pfont=pfont,
-            )                
+            )
 
 
         self._add_title_subtitle(title="Exchange paper sheets", subtitle=None, img_bg=bgd_paper, pfont=pfont)          

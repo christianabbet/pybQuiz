@@ -11,6 +11,9 @@ def standardize_text(text: str):
 
 class BackgroundManager():
     
+    KEY_MAIN = "Pub Quiz"
+    KEY_PAPER = "Quiz paper sheets"
+    
     URL_BACKGROUND = "https://github.com/christianabbet/pybQuiz/releases/download/v1.0/backgrounds.zip"
     FILE_ZIP = "backgrounds.zip"    
     FOLDER_NAME = "backgrounds"
@@ -19,12 +22,12 @@ class BackgroundManager():
         self, 
         # yaml_token: str, 
         # delay_api: int = 20, 
-        dirout: str = ".cache",
+        dircache: str = ".cache",
     ) -> None:
         
         # Define filenames
-        filename_zip = os.path.join(dirout, BackgroundManager.FILE_ZIP)
-        filename_out = os.path.join(dirout, BackgroundManager.FOLDER_NAME)
+        filename_zip = os.path.join(dircache, BackgroundManager.FILE_ZIP)
+        filename_out = os.path.join(dircache, BackgroundManager.FOLDER_NAME)
         
         # Check if download needed
         if not os.path.exists(filename_out):
@@ -32,7 +35,7 @@ class BackgroundManager():
             urllib.request.urlretrieve(self.URL_BACKGROUND, filename_zip)
             # Unzip
             with zipfile.ZipFile(filename_zip, 'r') as zip_ref:
-                zip_ref.extractall(dirout)
+                zip_ref.extractall(dircache)
             # Remove zip
             os.remove(filename_zip)
             

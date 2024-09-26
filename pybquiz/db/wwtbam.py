@@ -12,7 +12,8 @@ import hashlib
 from rich.console import Console
 from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
-from pybquiz.db.base import TriviaTSVDB, TriviaQ
+from pybquiz.db.base import TriviaTSVDB
+from pybquiz.const import TriviaConst as TC
 
 
 class WWTBAMKey:
@@ -231,12 +232,12 @@ class WWTBAMScrapper:
             # Hash text (unique question)
             data_row = {
                 # export to TSV (tab) + add hash for question
-                TriviaQ.KEY_UUID: to_uuid(qclean),
-                TriviaQ.KEY_QUESTION: qclean,
-                TriviaQ.KEY_CORRECT_ANSWER: WWTBAMScrapper._clean_text(text_answers[id_correct.item()]),
-                TriviaQ.KEY_WRONG_ANSWER1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
-                TriviaQ.KEY_WRONG_ANSWER2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
-                TriviaQ.KEY_WRONG_ANSWER3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
+                TC.KEY_UUID: to_uuid(qclean),
+                TC.KEY_QUESTION: qclean,
+                TC.KEY_CORRECT_ANSWER: WWTBAMScrapper._clean_text(text_answers[id_correct.item()]),
+                TC.KEY_WRONG_ANSWER1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
+                TC.KEY_WRONG_ANSWER2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
+                TC.KEY_WRONG_ANSWER3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
                 WWTBAMKey.KEY_AIR_DATE: WWTBAMScrapper._extract_year(infos_text),
                 WWTBAMKey.KEY_URL: url,
                 WWTBAMKey.KEY_VALUE: WWTBAMScrapper._extract_value(text_value),
@@ -328,11 +329,11 @@ class WWTBAM(TriviaTSVDB):
         return pd.DataFrame(
             columns=[
                 # Mandatory
-                TriviaQ.KEY_UUID,
-                TriviaQ.KEY_CATEGORY,
-                TriviaQ.KEY_DIFFICULTY,
-                TriviaQ.KEY_QUESTION, TriviaQ.KEY_CORRECT_ANSWER,
-                TriviaQ.KEY_WRONG_ANSWER1, TriviaQ.KEY_WRONG_ANSWER2, TriviaQ.KEY_WRONG_ANSWER3,
+                TC.KEY_UUID,
+                TC.KEY_CATEGORY,
+                TC.KEY_DIFFICULTY,
+                TC.KEY_QUESTION, TC.KEY_CORRECT_ANSWER,
+                TC.KEY_WRONG_ANSWER1, TC.KEY_WRONG_ANSWER2, TC.KEY_WRONG_ANSWER3,
                 # Local
                 WWTBAMKey.KEY_URL, 
                 WWTBAMKey.KEY_VALUE, 
@@ -392,7 +393,7 @@ class WWTBAM(TriviaTSVDB):
         """ Check for abnormality in database """
                 
         # Check duplicates in questions
-        self.db.drop_duplicates(subset=TriviaQ.KEY_UUID, keep=False, inplace=True)
+        self.db.drop_duplicates(subset=TC.KEY_UUID, keep=False, inplace=True)
         self.db.dropna(subset=WWTBAMKey.KEY_VALUE, inplace=True)
 
         # Convert to difficulty level (year based)
@@ -414,8 +415,8 @@ class WWTBAM(TriviaTSVDB):
         # Drop item if question of answer are empty
         self.db.dropna(
             subset=[
-                TriviaQ.KEY_QUESTION, TriviaQ.KEY_CORRECT_ANSWER, 
-                TriviaQ.KEY_WRONG_ANSWER1, TriviaQ.KEY_WRONG_ANSWER2, TriviaQ.KEY_WRONG_ANSWER3,
+                TC.KEY_QUESTION, TC.KEY_CORRECT_ANSWER, 
+                TC.KEY_WRONG_ANSWER1, TC.KEY_WRONG_ANSWER2, TC.KEY_WRONG_ANSWER3,
                 # WWTBAMKey.KEY_AIR_DATE, WWTBAMKey.KEY_DIFFICULTY,
             ],
             inplace=True,
