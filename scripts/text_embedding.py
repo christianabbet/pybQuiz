@@ -10,8 +10,9 @@ from sklearn.metrics import silhouette_score
 
 from pybquiz.db.base import UnifiedTSVDB
 from pybquiz.db.wwtbam import WWTBAM
-from pybquiz.db.base import TriviaTSVDB, TriviaQ
+from pybquiz.db.base import TriviaTSVDB
 from pybquiz.viz import plot_umap, plot_chord
+from pybquiz.const import TriviaConst as TC
 
 
 def embed_umap(
@@ -55,12 +56,12 @@ def embed(
         batch = dataset[id_subset[i]]
         result = ollama.embeddings(
             model=model_name,
-            prompt=batch.get(TriviaQ.KEY_QUESTION, "error"),
+            prompt=batch.get(TC.KEY_QUESTION, "error"),
         )
         # Append results
         z[i] = result.get("embedding", [])
-        y[i] = batch.get(TriviaQ.KEY_CATEGORY, None)
-        uuid[i] = batch.get(TriviaQ.KEY_UUID, None)
+        y[i] = batch.get(TC.KEY_CATEGORY, None)
+        uuid[i] = batch.get(TC.KEY_UUID, None)
         model[i] = batch.get("domain", None)
         
     # Return output
@@ -81,7 +82,7 @@ def update_embed(triviadb, path_npz: str):
 
     # Infer dummy
     print("Check existing data ...")
-    exists = [d in uuid for d in triviadb.db[TriviaQ.KEY_UUID].values]
+    exists = [d in uuid for d in triviadb.db[TC.KEY_UUID].values]
     id_subset = np.nonzero(np.logical_not(exists))[0]
 
     # Check if update is needed    
@@ -186,7 +187,7 @@ def categorize(triviadb, n_chunks: Optional[int] = 500):
         # Check existing infos
         id_loc = triviadb.db.index[i]
         # Get info
-        o_context = data.get(TriviaQ.KEY_QUESTION, "")
+        o_context = data.get(TC.KEY_QUESTION, "")
         
         # All values should be finite
         o_is_category = triviadb.db.loc[id_loc, ["o_category"]].notnull().item()
