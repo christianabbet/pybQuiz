@@ -123,10 +123,16 @@ class TriviaTSVDB(TriviaDB):
     def __getitem__(self, index: int):
         
         # Get row and params
-        serie = self.db.iloc[index]
-        ref_keys = TC.get_keys()
-    
-        return serie[ref_keys].to_dict()
+        data = self.db.iloc[index].to_dict()
+        
+        # Build answer to shuffle
+        answers = [TC.KEY_CORRECT_ANSWER, TC.KEY_WRONG_ANSWER1, TC.KEY_WRONG_ANSWER2, TC.KEY_WRONG_ANSWER3]
+        answers = [a for a in answers if not pd.isnull(data.get(a))]
+        answers = np.random.permutation(answers)
+        data[TC.EXT_KEY_ORDER] = answers.tolist()
+        data[TC.EXT_KEY_ORDER_ID] = int(np.argmax(answers == TC.KEY_CORRECT_ANSWER))
+        
+        return data
     
 
 
@@ -236,21 +242,3 @@ class UnifiedTSVDB(TriviaTSVDB):
         markdown.quote = False
         markdown = markdown.get_markdown()
         console.print(markdown)
-    
-    def __getitem__(self, index: int):
-        
-        # Get row and params
-        data = super().__getitem__(index)
-        data[TC.EXT_KEY_DOMAIN] = self.db.loc[index, TC.EXT_KEY_DOMAIN]
-        data[TC.EXT_KEY_O_CAT] = self.db.loc[index, TC.EXT_KEY_O_CAT]
-        data[TC.EXT_KEY_O_USA] = self.db.loc[index, TC.EXT_KEY_O_USA]
-        data[TC.EXT_KEY_O_UK] = self.db.loc[index, TC.EXT_KEY_O_UK]
-        # Build answer to shuffle
-        answers = [TC.KEY_CORRECT_ANSWER, TC.KEY_WRONG_ANSWER1, TC.KEY_WRONG_ANSWER2, TC.KEY_WRONG_ANSWER3]
-        answers = [a for a in answers if not pd.isnull(data.get(a))]
-        answers = np.random.permutation(answers)
-        data[TC.EXT_KEY_ORDER] = answers.tolist()
-        data[TC.EXT_KEY_ORDER_ID] = int(np.argmax(answers == TC.KEY_CORRECT_ANSWER))
-    
-        return data
-    
