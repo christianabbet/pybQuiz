@@ -3,7 +3,6 @@
 
 class Const:
 
-    KEY_DIFFICULTY = "difficulty"
     KEY_ANSWERS = "answers"
     KEY_AUTHOR = "author"
     KEY_TYPE = "type"

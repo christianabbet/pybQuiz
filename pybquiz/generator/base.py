@@ -28,7 +28,6 @@ class QGenerator:
 class QGeneratorTrivia(QGenerator):
     
     TXT_DESCRIPTION = "Trivia round that includes a wide range of topics. Select round by typing the category index, number of question and potential options (e.g.: [red]A-0-10-HK[/red]). "
-        
     TXT_OPTIONS = [
         ("Easy", "E"),
         ("Medium", "M"),
@@ -72,7 +71,6 @@ class QGeneratorTrivia(QGenerator):
             C.KEY_OPTION: self.parse_options(self.TXT_OPTIONS)
         }
         
-    #
     def _select_questions(
         self,
         category: str,
@@ -103,7 +101,7 @@ class QGeneratorTrivia(QGenerator):
         
         # Choose random questions
         index = self.trivia.db.loc[f].index
-        index = np.random.permutation(index)[:min(n, len(index))]
+        index = np.random.permutation(index)[:min(n+1, len(index))]
         
         # Return questions
         qs = []

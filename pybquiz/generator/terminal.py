@@ -38,7 +38,7 @@ class GeneratorTerminal:
         # Databases
         self.dbs = dbs
     
-    def run_terminal(self):
+    def run_terminal(self, prompts: Optional[list[str]] = None):
         
         # Get all categories
         # dfs = []
@@ -60,12 +60,12 @@ class GeneratorTerminal:
             print(self.build_table(content=content))
             
         # Question quiz
-        # input_qname = Prompt.ask("Enter quiz name", default="My Amazing quiz")
-        # input_qauthor = Prompt.ask("Enter author name", default="Your Quizmaster")
-        # input_rcount = int(Prompt.ask("Enter number of rounds", default="1"))
-        input_qname = "sdsdsd"
-        input_qauthor = "sdsdsdsdssd"
-        input_rcount = 1
+        if prompts is None:
+            input_qname = Prompt.ask("Enter quiz name", default="My Amazing quiz")
+            input_qauthor = Prompt.ask("Enter author name", default="Your Quizmaster")
+            input_rcount = int(Prompt.ask("Enter number of rounds", default="1"))
+        else:
+            input_qname, input_qauthor, input_rcount = prompts[0], prompts[1], int(prompts[2])
         
         dump_data = {
             C.KEY_TITLE: input_qname,
@@ -75,8 +75,11 @@ class GeneratorTerminal:
         
         for r in range(input_rcount):
             # Get answer
-            # answer = Prompt.ask("Round {}: Enter code".format(r+1))
-            answer = "A-2-10-HEK"
+            if prompts is None:
+                answer = Prompt.ask("Round {}: Enter code".format(r+1))
+            else:
+                answer = prompts[3 + r]
+                # answer = "A-2-10-HEK"
             # answer = "B-1"
             # Parse anser
             code = answer.split("-")[0]

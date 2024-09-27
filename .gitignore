@@ -5,8 +5,7 @@
 
 output/*
 config/*
-config/categories
-config/quiztest.yml
+*.json
 *.png
 
 ### Linux ###
