@@ -161,7 +161,7 @@ class UnifiedTSVDB(TriviaTSVDB):
             path_db=os.path.join(cache, filename_db + ".tsv"),
         )
         # Remove multiple cats
-        self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].fillna("").str.split("|").str[0]
+        self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].fillna("miscellaneous").str.split("|").str[0]
         
     @abstractmethod
     def initialize(self) -> pd.DataFrame:

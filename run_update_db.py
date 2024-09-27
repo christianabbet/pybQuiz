@@ -15,39 +15,39 @@ def main(args):
     
     # KenQuiz DB
     # https://www.kensquiz.co.uk/quizzes//
-    # print("####### KenQuizDB #######")
-    # kenquizdb = KenQuizDB()
+    print("####### KenQuizDB #######")
+    kenquizdb = KenQuizDB()
     # kenquizdb.update()
     # kenquizdb.update_brutforce()
-    # kenquizdb.pprint()
+    kenquizdb.pprint()
         
     # OpenTrivia DB
     # https://opentdb.com/
-    # print("####### OpenTriviaDB #######")
-    # opentdb = OpenTriviaDB()
+    print("####### OpenTriviaDB #######")
+    opentdb = OpenTriviaDB()
     # opentdb.update()
-    # opentdb.pprint()
+    opentdb.pprint()
     
     # The Trivia API
     # https://the-trivia-api.com/
-    # print("####### TheTriviaAPIDB #######")
-    # thetriviadb = TheTriviaAPIDB()
+    print("####### TheTriviaAPIDB #######")
+    thetriviadb = TheTriviaAPIDB()
     # thetriviadb.update()
-    # thetriviadb.pprint()
+    thetriviadb.pprint()
     
     # API ninja 
     # https://api-ninjas.com/api/trivia
-    # print("####### NinjaAPI #######")
-    # ninjaapi = NinjaAPI()
+    print("####### NinjaAPI #######")
+    ninjaapi = NinjaAPI()
     # ninjaapi.update()
-    # ninjaapi.pprint()
+    ninjaapi.pprint()
     
     # Merge Trivia DBs:
     # print("####### Unified Trivia #######")
-    # dbs = [kenquizdb, opentdb, ninjaapi, thetriviadb]
-    # triviadb = UnifiedTSVDB()
+    dbs = [kenquizdb, opentdb, ninjaapi, thetriviadb]
+    triviadb = UnifiedTSVDB()
     # triviadb.update(dbs)
-    # triviadb.pprint()
+    triviadb.pprint()
     
     # WWTBAM US
     # print("####### WWTBAM US #######")
@@ -64,7 +64,7 @@ def main(args):
     print("####### Unified WWTBAM #######")
     dbs = [wwtbam_us_db, wwtbam_uk_db]
     triviadb = UnifiedTSVDB(filename_db="wwtbam")
-    triviadb.update(dbs)
+    # triviadb.update(dbs)
     triviadb.pprint()
     
     # Jeopardy

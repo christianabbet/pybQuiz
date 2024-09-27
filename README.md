@@ -80,20 +80,20 @@ https://quizbowlpackets.com/
 
 |      o_category      |easy| hard|medium| none|
 |----------------------|----|-----|------|-----|
-|          All         |5906|10316| 12432|13343|
-|  animals and nature  | 288| 457 |  525 | 790 |
-|authors and literature| 372| 931 |  781 | 858 |
-|  film and television | 928| 1419| 1865 | 1602|
-|    food and drink    | 364| 484 |  775 | 827 |
-|       geography      | 745| 1546| 1596 | 1800|
-|        history       | 468| 1211| 1400 | 1513|
-|     miscellaneous    | 71 |  64 |  121 | 145 |
-|    music and arts    | 786| 1560| 1766 | 2379|
-|science and technology| 472| 717 | 1128 | 952 |
-|  sports and leisure  | 592| 914 | 1138 | 1522|
-|traditions and culture| 435| 755 |  803 | 899 |
+|          All         |5925|10384| 12500|13376|
+|  animals and nature  | 289| 460 |  528 | 790 |
+|authors and literature| 372| 941 |  786 | 858 |
+|  film and television | 932| 1425| 1871 | 1606|
+|    food and drink    | 367| 490 |  780 | 829 |
+|       geography      | 746| 1557| 1608 | 1805|
+|        history       | 470| 1215| 1408 | 1517|
+|     miscellaneous    | 71 |  64 |  120 | 141 |
+|    music and arts    | 788| 1568| 1769 | 2382|
+|science and technology| 474| 723 | 1136 | 953 |
+|  sports and leisure  | 596| 923 | 1148 | 1537|
+|traditions and culture| 435| 760 |  812 | 902 |
 |      video games     | 385| 258 |  534 |  56 |
-<!-- 
+
 
 
 ### B. Who wants to be Millionaire
@@ -115,6 +115,7 @@ https://quizbowlpackets.com/
 |traditions and culture| 2419| 206| 1027 | 25 |
 |      video games     |  99 |  7 |  82  |  1 |
 
+<!-- 
 ### 2. Jeopardy!
 
 Difficulty is graded from to 0 (lowest) to 11 (highest). This correspond to the clue values from $100 to $2000

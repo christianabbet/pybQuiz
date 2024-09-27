@@ -1,19 +1,14 @@
 import argparse
 import os
-import json
 
-# from pybquiz import PybQuiz
-from pybquiz.export.pptxexport import PPTXExport
-from pybquiz.export.googleexport import GoogleExport
 
-from pybquiz.background import BackgroundManager
-# from pybquiz.export.googleslide import GoogleSlideFactory, GoogleSheetFactory
-from pybquiz.generator.terminal import GeneratorTerminal
-from pybquiz.generator.base import QGeneratorTrivia, QGeneratorWWTBAM
-
-from pybquiz.export.base import Export
 from pybquiz.db.base import UnifiedTSVDB
 from pybquiz.db.wwtbam import WWTBAM
+from pybquiz.generator.terminal import GeneratorTerminal
+from pybquiz.generator.trivia import QGeneratorTrivia
+from pybquiz.generator.wwtbam import QGeneratorWWTBAM
+from pybquiz.export.pptxexport import PPTXExport
+from pybquiz.export.googleexport import GoogleExport
 
 def main(args):
 
@@ -57,11 +52,11 @@ def main(args):
         dirout=args.dirout,
     ).export()
     
-    GoogleExport(
-        dump_file,
-        crendential_file=args.googlecreds,
-        dirout=args.dirout,
-    ).export()
+    # GoogleExport(
+    #     dump_file,
+    #     crendential_file=args.googlecreds,
+    #     dirout=args.dirout,
+    # ).export()
         
     # Create spread sheet
     # gxls = GoogleSheetFactory(name=name, crendential_file=args.googlecreds)
@@ -78,7 +73,9 @@ if __name__ == '__main__':
     )
     parser.add_argument('--dump', default=None,
                         help='path to dump file (default is None)')
-    parser.add_argument('--prompts', default="sdsdsd|sdsdsdsdssd|1|A-2-10-HEK", #default=None,
+    parser.add_argument('--prompts', 
+                        # default="sdsdsd|sdsdsdsdssd|1|A-2-10-HEK", 
+                        default=None,
                         help='Manual prompts (default is None)')
     parser.add_argument('--dirout', default="output", 
                         help='path to output directory for data generation (default is "output")')
