@@ -254,10 +254,10 @@ def main(args):
     z3, y3, uuid3, domain3 = update_embed(triviadb=wwtbam_uk_db, path_npz=path_uk_npz)
 
     # Merge all
-    z = np.concatenate([z1, z2, z3], axis=1)
-    y = np.concatenate([y1, y2, y3], axis=1)
-    uuid = np.concatenate([uuid1, uuid2, uuid3], axis=1)
-    domain = np.concatenate([domain1, domain2, domain3], axis=1)
+    z = np.concatenate([z1, z2, z3], axis=0)
+    y = np.concatenate([y1, y2, y3], axis=0)
+    uuid = np.concatenate([uuid1, uuid2, uuid3], axis=0)
+    domain = np.concatenate([domain1, domain2, domain3], axis=0)
     
     # Normalize entires
     print("umap ...")
