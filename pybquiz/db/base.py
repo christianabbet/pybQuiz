@@ -161,7 +161,7 @@ class UnifiedTSVDB(TriviaTSVDB):
             path_db=os.path.join(cache, filename_db + ".tsv"),
         )
         # Remove multiple cats
-        self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].str.split("|").str[0]
+        self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].fillna("").str.split("|").str[0]
         
     @abstractmethod
     def initialize(self) -> pd.DataFrame:
@@ -193,10 +193,14 @@ class UnifiedTSVDB(TriviaTSVDB):
         for db in dbs:
             # Get standardized columns
             df = db.db
-            df[TC.EXT_KEY_DOMAIN] = db.__class__.__name__ 
-            df[TC.EXT_KEY_O_CAT] = None        
-            df[TC.EXT_KEY_O_UK] = None        
-            df[TC.EXT_KEY_O_USA] = None              
+            if TC.EXT_KEY_DOMAIN not in df.columns:
+                df[TC.EXT_KEY_DOMAIN] = db.__class__.__name__ 
+            if TC.EXT_KEY_O_CAT not in df.columns:
+                df[TC.EXT_KEY_O_CAT] = None
+            if TC.EXT_KEY_O_UK not in df.columns:
+                df[TC.EXT_KEY_O_UK] = None 
+            if TC.EXT_KEY_O_USA not in df.columns:
+                df[TC.EXT_KEY_O_USA] = None
             dbs_.append(df)
             
         # Merge columns
@@ -221,7 +225,7 @@ class UnifiedTSVDB(TriviaTSVDB):
         self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].str.split("|").str[0] 
         df_print = pd.crosstab(
             index=self.db[TC.EXT_KEY_O_CAT], 
-            columns=self.db[TC.EXT_KEY_DIFFICULTY]
+            columns=self.db[TC.KEY_DIFFICULTY]
         )
         
         df_print.columns = [str(c) for c in df_print.columns]

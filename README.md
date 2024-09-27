@@ -94,14 +94,26 @@ https://quizbowlpackets.com/
 |traditions and culture| 435| 755 |  803 | 899 |
 |      video games     | 385| 258 |  534 |  56 |
 <!-- 
-### 1. Who wants to be Millionaire
 
-https://millionaire.fandom.com
 
-|Lang|Candidates|Questions|   Values  | Air date|(0, 4]|(4, 9]|(9, 14]|
-|----|----------|---------|-----------|---------|------|------|-------|
-| us |   1948   |  17080  |100-2180000|1953-2024| 6503 | 7291 |  1508 |
-| uk |   1234   |  11296  |100-1000000|1998-2024| 4833 | 4656 |  783  |
+### B. Who wants to be Millionaire
+
+
+|      o_category      | easy|hard|medium|none|
+|----------------------|-----|----|------|----|
+|          All         |14051|2307| 12031| 215|
+|  animals and nature  | 986 | 122|  651 | 11 |
+|authors and literature| 429 | 226|  719 | 13 |
+|  film and television | 1532| 315| 2184 | 23 |
+|    food and drink    | 1221| 70 |  774 |  9 |
+|       geography      | 822 | 308| 1357 | 23 |
+|        history       | 636 | 358| 1111 | 20 |
+|     miscellaneous    | 1738| 80 |  580 | 22 |
+|    music and arts    | 1171| 271| 1451 | 30 |
+|science and technology| 1416| 205| 1023 | 23 |
+|  sports and leisure  | 1582| 139| 1072 | 15 |
+|traditions and culture| 2419| 206| 1027 | 25 |
+|      video games     |  99 |  7 |  82  |  1 |
 
 ### 2. Jeopardy!
 

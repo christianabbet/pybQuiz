@@ -397,7 +397,8 @@ class WWTBAM(TriviaTSVDB):
         self.db.dropna(subset=WWTBAMKey.KEY_VALUE, inplace=True)
 
         # Convert to difficulty level (year based)
-        self.db[WWTBAMKey.KEY_DIFFICULTY] = np.nan
+        cut = pd.cut(self.db[WWTBAMKey.KEY_DIFFICULTY], bins=[-1, 4, 9, 14])
+        self.db[TC.KEY_DIFFICULTY] = cut.cat.codes.replace({0: "easy", 1: "medium", 2: "hard", -1: "none"})
         
         for _, df_cand in self.db.groupby(WWTBAMKey.KEY_URL):
             # Check year
