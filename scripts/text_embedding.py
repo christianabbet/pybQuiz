@@ -86,23 +86,26 @@ def update_embed(triviadb, path_npz: str):
     id_subset = np.nonzero(np.logical_not(exists))[0]
 
     # Check if update is needed    
-    if len(id_subset) != 0:
-        # Get new embedding
-        z_new, y_new, uuid_new, domain_new = embed(dataset=triviadb, model_name=args.model, id_subset=id_subset)
-        # Append embedding
-        z = np.concatenate([z, z_new], axis=0)
-        y = np.concatenate([y, y_new], axis=0)
-        uuid = np.concatenate([uuid, uuid_new], axis=0)
-        domain = np.concatenate([domain, domain_new], axis=0)
-        
-        # Sanity check
-        assert len(z) == len(y) and len(z) == len(uuid) and len(z) == len(domain)
-                
-        # Save output
-        print("Saving ...")
-        np.savez_compressed(path_npz, data={"z": z, "y": y, "uuid": uuid, "domain": domain})
+    if len(id_subset) == 0:
+        return z, y, uuid, domain
+
+    # Get new embedding
+    z_new, y_new, uuid_new, domain_new = embed(dataset=triviadb, model_name=args.model, id_subset=id_subset)
+    # Append embedding
+    if len(z) != 0:
+        z_new = np.concatenate([z, z_new], axis=0)
+        y_new = np.concatenate([y, y_new], axis=0)
+        uuid_new = np.concatenate([uuid, uuid_new], axis=0)
+        domain_new = np.concatenate([domain, domain_new], axis=0)
+
+    # Sanity check
+    assert len(z_new) == len(y_new) and len(z_new) == len(uuid_new) and len(z_new) == len(domain_new)
+            
+    # Save output
+    print("Saving ...")
+    np.savez_compressed(path_npz, data={"z": z_new, "y": y_new, "uuid": uuid_new, "domain": domain_new})
     
-    return z, y, uuid, domain
+    return z_new, y_new, uuid_new, domain_new
     
 def o_ask_category(o_context: str, o_cats: str):
 
@@ -238,8 +241,8 @@ def main(args):
     
     # Get categories from database 
     # categorize(triviadb=triviadb)
-    categorize(triviadb=wwtbam_us_db)
-    categorize(triviadb=wwtbam_uk_db)
+    # categorize(triviadb=wwtbam_us_db)
+    # categorize(triviadb=wwtbam_uk_db)
     
     # Load existing
     path_trivia_npz = os.path.join(args.cache, "embedding_trivia.npz")
