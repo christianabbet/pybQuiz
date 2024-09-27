@@ -60,7 +60,7 @@ def embed(
         )
         # Append results
         z[i] = result.get("embedding", [])
-        y[i] = batch.get(TC.EXT_KEY_O_CAT, "").split("|")[0]
+        y[i] = batch.get(TC.EXT_KEY_O_CAT, "").fillna("miscellaneous").split("|")[0]
         uuid[i] = batch.get(TC.KEY_UUID, None)
         model[i] = batch.get("domain", None)
         
