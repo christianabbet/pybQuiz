@@ -15,6 +15,8 @@ class BackgroundManager():
     KEY_PAPER = "Quiz paper sheets"
     
     URL_BACKGROUND = "https://github.com/christianabbet/pybQuiz/releases/download/v1.0/backgrounds.zip"
+    GITHUB_RELEASE = "https://github.com/christianabbet/pybQuiz/releases/download/googleslide/"
+    
     FILE_ZIP = "backgrounds.zip"    
     FOLDER_NAME = "backgrounds"
     
@@ -22,10 +24,12 @@ class BackgroundManager():
         self, 
         # yaml_token: str, 
         # delay_api: int = 20, 
+        return_url: str = False,
         dircache: str = ".cache",
     ) -> None:
         
         # Define filenames
+        self.return_url = return_url
         filename_zip = os.path.join(dircache, BackgroundManager.FILE_ZIP)
         filename_out = os.path.join(dircache, BackgroundManager.FOLDER_NAME)
         
@@ -41,14 +45,7 @@ class BackgroundManager():
             
         # Get local list
         self.bgs = {os.path.splitext(f)[0]: os.path.join(filename_out, f) for f in os.listdir(filename_out)}
-        
-        # # Set openai api
-        # if os.path.exists(yaml_token):
-        #     # Get from file
-        #     with open(yaml_token) as stream:
-        #         data_token = yaml.safe_load(stream)
-        #     # Get key
-        #     self.openai = OpenAIAPI(api_key=data_token.get("openai", ""), delay_api=delay_api)
+    
                 
     def get_background(self, name: str, blurred: bool = False, default: str = "random"):
         # Get image
@@ -67,8 +64,13 @@ class BackgroundManager():
             if not os.path.exists(path_blur):
                 img = Image.open(path_img)
                 img.filter(ImageFilter.GaussianBlur(radius=10)).save(path_blur)
-            return path_blur
-        else:
-            return path_img
+            path_img = path_blur
         
+        # Check if url wanted
+        if self.return_url:        
+            path_img = self.GITHUB_RELEASE + os.path.basename(path_img)
+        
+        return path_img
+
+
         

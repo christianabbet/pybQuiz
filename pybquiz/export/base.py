@@ -14,13 +14,14 @@ class Export():
     def __init__(
         self, 
         dump_path: str,
+        return_url: bool = False,
         dircache: Optional[str] = ".cache",
     ) -> None:
         
         # Load data
         self.dump_path = dump_path
         self.data = None
-        self.bg_manager = BackgroundManager(dircache=dircache)
+        self.bg_manager = BackgroundManager(dircache=dircache, return_url=return_url)
         
         # Reload data
         with open(self.dump_path, "r") as f:
@@ -57,46 +58,61 @@ class Export():
             img_bg = self.bg_manager.get_background(category, blurred=False)
             img_bg_blur = self.bg_manager.get_background(category, blurred=True)
             title = "Round {}: {}".format(i+1, category.title())
+            n_questions = len(questions)
+
+            # Title
+            self.make_title(title=title, subtitle=None, img_bg=img_bg)
             
             # Add rules
-            # TODO
+            # TODO            
+            
+            # Example
+            self.make_question(
+                data=questions[0], 
+                prefix="Ex",
+                show_answer=False,
+                type=type, 
+                img_bg=img_bg, 
+                img_bg_blur=img_bg_blur
+            )
+            
+            self.make_question(
+                data=questions[0], 
+                prefix="Ex",
+                show_answer=True,
+                type=type, 
+                img_bg=img_bg, 
+                img_bg_blur=img_bg_blur
+            )
             
             # Add questions
-            self.make_title(title=title, subtitle=None, img_bg=img_bg)
-            # for j, data in enumerate(tqdm(questions, desc="Questions ...")):
-            #     self.make_question(
-            #         data=data, 
-            #         index=j,
-            #         show_answer=False,
-            #         type=type, 
-            #         img_bg=img_bg, 
-            #         img_bg_blur=img_bg_blur
-            #     )
+            for j in tqdm(range(1, n_questions), desc="Questions ..."):
+                self.make_question(
+                    data=questions[j], 
+                    prefix="Q{}".format(j),
+                    show_answer=False,
+                    type=type, 
+                    img_bg=img_bg, 
+                    img_bg_blur=img_bg_blur
+                )
 
             # Add swap
             self.make_title(title=Export.TXT_SWAP, subtitle=None, img_bg=img_paper_bg)
             
             # Add answers
             self.make_title(title=title, subtitle="Answers", img_bg=img_bg)
-            # for j, data in enumerate(tqdm(questions, desc="Answers ...")):
-            #     self.make_question(
-            #         data=data, 
-            #         index=j,
-            #         show_answer=True,
-            #         type=type, 
-            #         img_bg=img_bg, 
-            #         img_bg_blur=img_bg_blur
-            #     )
-            
+            for j in tqdm(range(1, n_questions), desc="Answers ..."):
+                self.make_question(
+                    data=questions[j], 
+                    prefix="A{}".format(j),
+                    show_answer=True,
+                    type=type, 
+                    img_bg=img_bg, 
+                    img_bg_blur=img_bg_blur
+                )
+
             # Add bring back
             self.make_title(title=Export.TXT_HANDIN, subtitle=None, img_bg=img_paper_bg)
-            
-            # if type == "trivia":
-            #     self.make_trivia_round()
-            # elif type == "wwtbam":
-            #     self.make_wwtbam_round()
-            # else:
-            #     raise NotImplementedError
         
         self.save()
         
@@ -104,7 +120,7 @@ class Export():
     def make_title(self, title: str, subtitle: str, img_bg: str):
         raise NotImplementedError
     
-    def make_question(self, data: dict, index: int, show_answer: bool, type: str, img_bg: str, img_bg_blur: str):
+    def make_question(self, data: dict, prefix: str, show_answer: bool, type: str, img_bg: str, img_bg_blur: str):
         raise NotImplementedError
     
     def save(self):

@@ -9,10 +9,13 @@ from pptx.enum.text import PP_ALIGN
 from pathlib import Path
 from sys import platform
 import pptx
+import numpy as np
 
 from pybquiz.export.base import Export
 from pybquiz.background import BackgroundManager
 from pybquiz.const import Const as C
+from pybquiz.const import TriviaConst as TC
+
 from pybquiz.export.slidetemplate import SlideTemplate
 
 
@@ -68,20 +71,25 @@ class PPTXExport(Export):
             pfont=self.pfont
         )
         
-    def make_question(self, data: dict, index: int, show_answer: bool, type: str, img_bg: str, img_bg_blur: str):
+    def make_question(self, data: dict, prefix: str, show_answer: bool, type: str, img_bg: str, img_bg_blur: str):
 
         if type == "trivia":
-            self._add_trivia_question(data=data, index=index, show_answer=show_answer, img_bg=img_bg_blur)
+            self._add_trivia_question(data=data, prefix=prefix, show_answer=show_answer, img_bg=img_bg_blur)
+        else:
+            raise NotImplementedError
         
     def save(self):
         # Saving file 
         self.root.save(self.fileout)  
     
-    def _add_trivia_question(self, data: dict, index: int, show_answer: bool, img_bg: str):
-            
+    def _add_trivia_question(self, data: dict, prefix: str, show_answer: bool, img_bg: str):
             
         # Extract infos
-        difficulty = ""
+        question = data.get(TC.KEY_QUESTION, C.KEY_ERROR)
+        difficulty = data.get(TC.KEY_DIFFICULTY, C.KEY_ERROR)
+        answers_order = data.get(TC.EXT_KEY_ORDER, [])
+        answers = [data.get(a, None) for a in answers_order]
+        answers_id = data.get(TC.EXT_KEY_ORDER_ID, [])
         
         # Add slide and question            
         question_slide = self.root.slides.add_slide(self.root.slide_layouts[PPTXExport.BLANK]) 
@@ -104,16 +112,14 @@ class PPTXExport(Export):
             color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
         )
         
-        # def _add_question(self, i: int = 1, question: str = "", difficulty: int = None, answers: list[str] = [], answers_id: int = None, img_bg: str = None, pfont: str = None):
-
         if difficulty is not None:
             # Add difficulty
             (x, y, w, h) = self.st.get_difficulty_bbox()
-            PptxFactory._add_frame(
+            PPTXExport._add_frame(
                 shapes=shapes,
                 bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
                 text=None,
-                font_file=pfont,
+                font_file=self.pfont,
                 shapeid=MSO_SHAPE.OVAL,         
                 color_bg=RGBColor.from_string(self.st.COLOR_DIFFICULTY[difficulty]), 
                 color_line=RGBColor.from_string(self.st.COLOR_DIFFICULTY[difficulty]), 
@@ -121,18 +127,18 @@ class PPTXExport(Export):
                     
         (x, y, w, h) = self.st.get_question_bbox()
         m_in = self.st.get_inner_margin()
-        PptxFactory._add_frame(
+        PPTXExport._add_frame(
             shapes=shapes,
             bbox=[Mm(x + m_in), Mm(y + m_in), Mm(w - 2*m_in), Mm(h - 2*m_in)],
-            text = "Q{}: {}".format(i, question),
+            text = "{}: {}".format(prefix, question),
             color_bg=None,
             color_line=None,                    
-            font=PptxFactory.FONT_QUESTION,
+            font=PPTXExport.FONT_QUESTION,
             alignement=PP_ALIGN.LEFT,
-            font_file=pfont,
+            font_file=self.pfont,
         )
-
-        self._add_answers(question_slide, answers, answers_id, pfont=pfont)       
+        
+        self._add_trivia_answers(question_slide, answers, answers_id, show_answer)       
             
              
     def _get_system_fonts(self, template: str = "Amiri-Regular"):
@@ -152,6 +158,78 @@ class PPTXExport(Export):
         else:
             return None
             
+    def _add_trivia_answers(self, slide, answers: list[str], answers_id: int = None, show_answer: bool = False):
+                           
+            nQ = len(answers)
+            nRows = np.ceil(nQ/2).astype(int)
+                                    
+            # Check if only one proposition and no answer
+            if nQ <= 1 and not show_answer:
+                return
+            
+            # Get total heigh based on the number of entries
+            answer_height, answer_inter_height = self.st.get_answer_heights()
+            im = self.st.get_iinner_margin()
+            col, col1, col2 = self.st.get_answer_cols()
+            htot = nRows * answer_height + (nRows-1) * answer_inter_height
+            (_, ay, _, ah) = self.st.get_answer_bbox()
+            hoffset = (ah - htot) / 2
+            
+            # Add propositions
+            for j in range(nQ):
+                # Define col
+                id_col = j % 2
+                id_row = j // 2
+                
+                # Fix width
+                if id_col == 0:
+                    left = col1
+                else:
+                    left = col2
+            
+                # Add background
+                local_offset = id_row * (answer_height + answer_inter_height)
+                shapes =  slide.shapes
+                
+                # Check if one or more answers
+                a = answers[j]
+    
+                if show_answer and j == answers_id:
+                    color_bg = RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND_CORRECT)
+                else:
+                    color_bg = RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND)
+                    
+                self._add_frame(
+                    shapes=shapes,
+                    bbox=[                
+                        Mm(left), 
+                        Mm(local_offset + ay + hoffset), 
+                        Mm(col), 
+                        Mm(answer_height)
+                    ],
+                    text = None,
+                    color_bg=color_bg,
+                    color_line=color_bg,
+                    font_file=self.pfont,
+                )
+                            
+                self._add_frame(
+                    shapes=shapes,
+                    bbox=[                
+                        Mm(left + im), 
+                        Mm(local_offset + ay + hoffset + im), 
+                        Mm(col - 2*im), 
+                        Mm(answer_height - 2*im)                        
+                    ],
+                    text=a,
+                    color_bg=None,
+                    color_line=None,
+                    font=PPTXExport.FONT_ANSWER,
+                    alignement=PP_ALIGN.LEFT,
+                    font_file=self.pfont,
+                )
+                                
+                                            
     def _add_title_subtitle(self, title: str = "", subtitle: str = None, img_bg: str = None, pfont: str = None):
         
         # Add slide

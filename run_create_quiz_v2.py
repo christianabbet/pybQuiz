@@ -3,8 +3,8 @@ import os
 import json
 
 # from pybquiz import PybQuiz
-from pybquiz.export.pptx import PptxFactory
 from pybquiz.export.pptxexport import PPTXExport
+from pybquiz.export.googleexport import GoogleExport
 
 from pybquiz.background import BackgroundManager
 # from pybquiz.export.googleslide import GoogleSlideFactory, GoogleSheetFactory
@@ -33,12 +33,19 @@ def main(args):
         gen_triviadb = QGeneratorTrivia(trivia=trivia)
         gen_wwtbam = QGeneratorWWTBAM(wwtbams=[wwtbam_us_db, wwtbam_uk_db])
     
+        # Check prompt
+        prompts = args.prompts
+        if prompts is not None:
+            prompts = prompts.split("|")
+        
         # Generate terminal
         dump_file = GeneratorTerminal(
             dirout = dirout,
             dbs = [gen_triviadb, gen_wwtbam]
-        ).run_terminal()
-
+        ).run_terminal(
+            prompts=prompts
+        )
+        
     # Check file
     if not os.path.exists(dump_file):
         print("File not found: {}".format(dump_file))
@@ -50,26 +57,16 @@ def main(args):
         dirout=args.dirout,
     ).export()
     
-    # outfile_pptx = os.path.splitext(dump_file)[0] + ".pptx"
-    # pptx = PptxFactory()
-    # pptx.export(
-    #     dump_path=dump_file, 
-    #     outfile=outfile_pptx, 
-    #     background_gen=background_gen
-    # )
-
-    # # Check if google slide available
-    # if os.path.exists(args.googlecreds):
+    GoogleExport(
+        dump_file,
+        crendential_file=args.googlecreds,
+        dirout=args.dirout,
+    ).export()
         
-    #     # Create spread sheet
-    #     gxls = GoogleSheetFactory(name=name, crendential_file=args.googlecreds)
-    #     url_sheet, spreadsheet_id, chart_id = gxls.export(dump_path=outfile_json)
-
-    #     gpptx = GoogleSlideFactory(name=name, crendential_file=args.googlecreds)
-    #     url_slide = gpptx.export(dump_path=outfile_json, background_gen=background_gen, spreadsheet_id=spreadsheet_id, sheet_chart_id=chart_id)
-        
-    #     print("Spreadsheet availble: {}".format(url_sheet))
-    #     print("Presentation availble: {}".format(url_slide))
+    # Create spread sheet
+    # gxls = GoogleSheetFactory(name=name, crendential_file=args.googlecreds)
+    # url_sheet, spreadsheet_id, chart_id = gxls.export(dump_path=outfile_json)
+    # print("Spreadsheet availble: {}".format(url_sheet))
 
         
 if __name__ == '__main__':
@@ -80,11 +77,13 @@ if __name__ == '__main__':
         description='PybQuiz is a Python package designed to help you create and manage pub quizzes effortlessly',
     )
     parser.add_argument('--dump', default=None,
-                        help='path to dump file (default if None)')
+                        help='path to dump file (default is None)')
+    parser.add_argument('--prompts', default="sdsdsd|sdsdsdsdssd|1|A-2-10-HEK", #default=None,
+                        help='Manual prompts (default is None)')
     parser.add_argument('--dirout', default="output", 
                         help='path to output directory for data generation (default is "output")')
-    parser.add_argument('--googlecreds', default='config/credentials.json', 
-                        help='path to stored Google credentials (default is "config/credentials.json")')
+    parser.add_argument('--googlecreds', default='credentials.json', 
+                        help='path to stored Google credentials (default is "credentials.json")')
     args = parser.parse_args()
     
     main(args=args)
