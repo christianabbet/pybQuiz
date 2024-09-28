@@ -293,7 +293,7 @@ class WWTBAM(TriviaTSVDB):
     
     def __init__(
         self, 
-        lang: Literal['us', 'uk'] = 'us',
+        lang: Literal['us', 'uk', ''] = '',
         filename_db: Optional[str] = "wwtbam",
         cache: Optional[str] = '.cache', 
         chunks: Optional[int] = 10,
@@ -302,8 +302,8 @@ class WWTBAM(TriviaTSVDB):
 
         Parameters
         ----------
-        lang : Literal['us', 'uk'], optional
-            Lang of the show. Either 'uk' or 'us', by default 'us'
+        lang : Literal['us', 'uk', ''], optional
+            Lang of the show. Either 'uk' or 'us', by default ''
         filename_db : Optional[str], optional
             Name of the database, by default "wwtbam"
         cache : Optional[str], optional
@@ -315,7 +315,7 @@ class WWTBAM(TriviaTSVDB):
         # Other variables
         self.lang = lang
         self.chunks = chunks
-        self.scapper = WWTBAMScrapper()    
+        self.scapper = WWTBAMScrapper() 
         self.KEY_LANG =  WWTBAMKey.KEY_O_USA if lang == "us" else WWTBAMKey.KEY_O_UK
         
         # Call super method
@@ -323,6 +323,8 @@ class WWTBAM(TriviaTSVDB):
             cache=cache, 
             path_db=os.path.join(cache, filename_db + lang + ".tsv"),
         )
+        self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].fillna("miscellaneous").str.split("|").str[0]
+
 
     def initialize(self):
         

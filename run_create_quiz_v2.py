@@ -21,12 +21,11 @@ def main(args):
         
         # Build DB
         trivia = UnifiedTSVDB()
-        wwtbam_us_db = WWTBAM(lang='us')
-        wwtbam_uk_db = WWTBAM(lang='uk')
+        wwtbam = WWTBAM()
         
         # Build databases generators
         gen_triviadb = QGeneratorTrivia(trivia=trivia)
-        gen_wwtbam = QGeneratorWWTBAM(wwtbams=[wwtbam_us_db, wwtbam_uk_db])
+        gen_wwtbam = QGeneratorWWTBAM(wwtbam=wwtbam)
     
         # Check prompt
         prompts = args.prompts
@@ -75,7 +74,8 @@ if __name__ == '__main__':
                         help='path to dump file (default is None)')
     parser.add_argument('--prompts', 
                         # default="sdsdsd|sdsdsdsdssd|1|A-2-10-HEK", 
-                        default=None,
+                        default="sdsdsd|sdsdsdsdssd|1|B-0-10-EMHK", 
+                        # default=None,
                         help='Manual prompts (default is None)')
     parser.add_argument('--dirout', default="output", 
                         help='path to output directory for data generation (default is "output")')
