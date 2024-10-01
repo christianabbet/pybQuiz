@@ -93,7 +93,7 @@ class GoogleExport(Export):
         # Check first slide status
         self.is_first_slide = True
     
-    def make_title(self, title: str, subtitle: str, img_bg: str):
+    def make_title(self, title: str, subtitle: str, img_bg: str, type: Optional[str] = None):
         
         # Create new slide
         page_id = None
@@ -159,8 +159,8 @@ class GoogleExport(Export):
             bbox=[x, y, w, h], 
             page_id=page_id, 
             element_id="{}_title".format(page_id), 
-            colorbg=self.st.COLOR_BBOX_BACKGROUND,
-            colortext=self.st.COLOR_TEXT,
+            colorbg=self.st.TRIVIA_COLOR_BBOX_BACKGROUND,
+            colortext=self.st.TRIVIA_COLOR_TEXT,
             fontsize=self.FONT_TITLE
         )
         request.extend(r_title)
@@ -172,8 +172,8 @@ class GoogleExport(Export):
                 bbox=[x, y, w, h], 
                 page_id=page_id, 
                 element_id="{}_subtitle".format(page_id), 
-                colorbg=self.st.COLOR_BBOX_BACKGROUND,
-                colortext=self.st.COLOR_TEXT,
+                colorbg=self.st.TRIVIA_COLOR_BBOX_BACKGROUND,
+                colortext=self.st.TRIVIA_COLOR_TEXT,
                 fontsize=self.FONT_SUBTITLE
             )
             request.extend(r_subtitle)
@@ -364,14 +364,14 @@ class GoogleExport(Export):
             request.extend(r_im)
         
         # Add question title
-        x, y, w, h = self.st.get_question_bbox()
+        x, y, w, h = self.st.get_trivia_question_bbox()
         r_q = self._add_shape(
             text = "{}: {}".format(prefix, question),            
             bbox=[x, y, w, h], 
             page_id=page_id, 
             element_id="{}_title".format(page_id), 
-            colorbg=self.st.COLOR_BBOX_BACKGROUND,
-            colortext=self.st.COLOR_TEXT,
+            colorbg=self.st.TRIVIA_COLOR_BBOX_BACKGROUND,
+            colortext=self.st.TRIVIA_COLOR_TEXT,
             fontsize=self.FONT_QUESTION
         )
         request.extend(r_q)
@@ -418,10 +418,10 @@ class GoogleExport(Export):
                 local_offset = id_row * (answer_height + answer_inter_height)
                 
                 # Check if one or more answers
-                color_bg = self.st.COLOR_BBOX_BACKGROUND
+                color_bg = self.st.TRIVIA_COLOR_BBOX_BACKGROUND
                 
                 if show_answer and j == answers_id:
-                    color_bg = self.st.COLOR_BBOX_BACKGROUND_CORRECT
+                    color_bg = self.st.TRIVIA_COLOR_BBOX_BACKGROUND_CORRECT
                     
                 r_a = self._add_shape(
                     text=answers[j], 
@@ -429,7 +429,7 @@ class GoogleExport(Export):
                     page_id=page_id, 
                     element_id="{}_answer{}".format(page_id, j), 
                     colorbg=color_bg,
-                    colortext=self.st.COLOR_TEXT,
+                    colortext=self.st.TRIVIA_COLOR_TEXT,
                     fontsize=self.FONT_ANSWER
                 )   
                 request.extend(r_a)  

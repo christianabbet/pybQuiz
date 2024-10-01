@@ -12,11 +12,31 @@ class SlideTemplate:
     _ANSWER_HEIGHT = 0.1
     _ANSWER_INTER_HEIGHT = 0.025
 
-    # COLORS
-    COLOR_BBOX_BACKGROUND = "2881a1"
-    COLOR_BBOX_BACKGROUND_CORRECT = "f3a600"
-    COLOR_BBOX_LINE = "2881a1"
-    COLOR_TEXT = "ffffff"
+    # COLORS - TRIVIA
+    TRIVIA_COLOR_BBOX_BACKGROUND = "2881a1"
+    TRIVIA_COLOR_BBOX_BACKGROUND_CORRECT = "f3a600"
+    TRIVIA_COLOR_BBOX_LINE = "2881a1"
+    TRIVIA_COLOR_TEXT = "ffffff"
+    
+    # COLORS - WWTBAM
+    WWTBAM_COLOR_BBOX_BACKGROUND = "080e1a"
+    WWTBAM_COLOR_BBOX_LINE = "ffffff"
+    WWTBAM_COLOR_TEXT = "ffffff"
+    WWTBAM_COLOR_QTEXT = "ffff00"
+    
+    WWTBAM_BBOX_QT = [ 28.754,  61.674, 196.495, 25.596]
+    WWTBAM_BBOX_QA = [ 23.612,  97.633,  13.317, 16.703]
+    WWTBAM_BBOX_QB = [137.873,  97.633,  13.317, 16.703]
+    WWTBAM_BBOX_QC = [ 23.612, 125.380,  13.317, 16.703]
+    WWTBAM_BBOX_QD = [137.873, 125.380,  13.317, 16.703]
+    
+    WWTBAM_BBOX_QAV = [ 36.482,  97.633,  79.564, 16.703]
+    WWTBAM_BBOX_QBV = [150.744,  97.633,  79.564, 16.703]
+    WWTBAM_BBOX_QCV = [ 36.482, 125.380,  79.564, 16.703]
+    WWTBAM_BBOX_QDV = [150.744, 125.380,  79.564, 16.703]
+    
+    WWTBAM_BBOX_VALUE = [180.414,  43.775,  44.097,  9.507]
+    
     
     COLOR_DIFFICULTY = {
         "easy": "6fbf72", # Easy
@@ -67,7 +87,7 @@ class SlideTemplate:
         bbox_h = diameter  
         return (bbox_x, bbox_y, bbox_w, bbox_h)
             
-    def get_question_bbox(self):
+    def get_trivia_question_bbox(self):
         # Get margin to frame
         margin = self.get_frame_margin()
         # Set bbox values
@@ -99,7 +119,7 @@ class SlideTemplate:
     
     def get_answer_bbox(self):
         # Get margin to frame
-        _, hy, _, hq = self.get_question_bbox()
+        _, hy, _, hq = self.get_trivia_question_bbox()
         margin = self.get_frame_margin()
         # Set bbox values
         bbox_x = margin

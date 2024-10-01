@@ -10,11 +10,13 @@ from pathlib import Path
 from sys import platform
 import pptx
 import numpy as np
+import string
 
 from pybquiz.export.base import Export
 from pybquiz.background import BackgroundManager
 from pybquiz.const import Const as C
 from pybquiz.const import TriviaConst as TC
+from pybquiz.const import WWTBAMConst as WC
 
 from pybquiz.export.slidetemplate import SlideTemplate
 
@@ -63,24 +65,131 @@ class PPTXExport(Export):
         self.st = SlideTemplate(width=width, height=height)
         self.pfont = self._get_system_fonts()
     
-    def make_title(self, title: str, subtitle: str, img_bg: str):
+    def make_title(self, title: str, subtitle: str, img_bg: str, type: Optional[str] = None):
+        
+        color_bg=RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_BACKGROUND)
+        color_text=RGBColor.from_string(self.st.TRIVIA_COLOR_TEXT)
+        color_line=RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_LINE)
+        
+        if type is not None and type == "wwtbam":
+            color_bg=RGBColor.from_string(self.st.WWTBAM_COLOR_BBOX_BACKGROUND)
+            color_text=RGBColor.from_string(self.st.WWTBAM_COLOR_TEXT)
+            color_line=RGBColor.from_string(self.st.WWTBAM_COLOR_BBOX_LINE)
+
         self._add_title_subtitle(
             title=title,
             subtitle=subtitle,
             img_bg=img_bg,
-            pfont=self.pfont
+            pfont=self.pfont,
+            color_bg=color_bg,
+            color_text=color_text,
+            color_line=color_line,
         )
-        
+                    
     def make_question(self, data: dict, prefix: str, show_answer: bool, type: str, img_bg: str, img_bg_blur: str):
 
         if type == "trivia":
             self._add_trivia_question(data=data, prefix=prefix, show_answer=show_answer, img_bg=img_bg_blur)
+        elif type == "wwtbam":
+            self._add_wwtbam_question(data=data, prefix=prefix, show_answer=show_answer, img_bg=img_bg)
         else:
             raise NotImplementedError
         
     def save(self):
         # Saving file 
         self.root.save(self.fileout)  
+        
+    def _add_wwtbam_question(self, data: dict, prefix: str, show_answer: bool, img_bg: str):
+        
+        # Extract infos
+        question = data.get(TC.KEY_QUESTION, C.KEY_ERROR)
+        question_value = "{}: ₿ {:,.0f}".format(prefix, data.get(WC.KEY_VALUE, "0"))
+        answers_order = data.get(TC.EXT_KEY_ORDER, [])
+        answers = [data.get(a, None) for a in answers_order]
+        answers_id = data.get(TC.EXT_KEY_ORDER_ID, [])
+
+        # Add slide and question            
+        question_slide = self.root.slides.add_slide(self.root.slide_layouts[PPTXExport.BLANK]) 
+        
+        # Add text shape
+        shapes =  question_slide.shapes
+
+        # Add background
+        if img_bg is not None:
+            # Get new base name
+            img_base, img_ext = os.path.splitext(img_bg)
+            if not show_answer:
+                img_bg = "{}_q{}".format(img_base, img_ext)
+            else:
+                img_bg = "{}_q{}{}".format(img_base, answers_id, img_ext)
+            shapes.add_picture(img_bg, Mm(0), Mm(0), height=Mm(self.height))
+    
+        PPTXExport._add_frame(
+            shapes=shapes,
+            bbox=[Mm(v) for v in self.st.WWTBAM_BBOX_QT],
+            text = question,
+            color_bg=None,
+            color_line=None,                 
+            color_text=RGBColor.from_string(self.st.WWTBAM_COLOR_TEXT),                     
+            font=PPTXExport.FONT_QUESTION,
+            alignement=PP_ALIGN.LEFT,
+            font_file=self.pfont,
+        )
+        
+                    
+        # Question
+        PPTXExport._add_frame(
+            shapes=shapes,
+            bbox=[Mm(v) for v in self.st.WWTBAM_BBOX_VALUE],
+            text = question_value,
+            color_bg=None,
+            color_line=None,  
+            color_text=RGBColor.from_string(self.st.WWTBAM_COLOR_TEXT),                  
+            font=PPTXExport.FONT_ANSWER,
+            alignement=PP_ALIGN.CENTER,
+            font_file=self.pfont,
+        )
+        
+        # Set hard coded poistions
+        positions_key = [
+            self.st.WWTBAM_BBOX_QA, self.st.WWTBAM_BBOX_QB, 
+            self.st.WWTBAM_BBOX_QC, self.st.WWTBAM_BBOX_QD,
+        ]
+        
+        positions_value = [
+            self.st.WWTBAM_BBOX_QAV, self.st.WWTBAM_BBOX_QBV, 
+            self.st.WWTBAM_BBOX_QCV, self.st.WWTBAM_BBOX_QDV,
+        ]
+        # iterate over letter for questions
+        for i in range(4):
+            
+            # Letter
+            PPTXExport._add_frame(
+                shapes=shapes,
+                bbox=[Mm(v) for v in positions_key[i]],
+                text = string.ascii_uppercase[i],
+                color_bg=None,
+                color_line=None,  
+                color_text=RGBColor.from_string(self.st.WWTBAM_COLOR_QTEXT),                  
+                font=PPTXExport.FONT_QUESTION,
+                alignement=PP_ALIGN.LEFT,
+                font_file=self.pfont,
+            )
+            
+            # Question
+            PPTXExport._add_frame(
+                shapes=shapes,
+                bbox=[Mm(v) for v in positions_value[i]],
+                text = answers[i],
+                color_bg=None,
+                color_line=None,  
+                color_text=RGBColor.from_string(self.st.WWTBAM_COLOR_TEXT),                  
+                font=PPTXExport.FONT_QUESTION,
+                alignement=PP_ALIGN.LEFT,
+                font_file=self.pfont,
+            )
+        
+        
     
     def _add_trivia_question(self, data: dict, prefix: str, show_answer: bool, img_bg: str):
             
@@ -101,15 +210,15 @@ class PPTXExport(Export):
             shapes.add_picture(img_bg, Mm(0), Mm(0), height=Mm(self.height))
             
         # Add question
-        (x, y, w, h) = self.st.get_question_bbox()
+        (x, y, w, h) = self.st.get_trivia_question_bbox()
         PPTXExport._add_frame(
             shapes=shapes,
             bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
             text=None,
             font_file=self.pfont,
-            color_bg=RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND), 
-            color_text=RGBColor.from_string(self.st.COLOR_TEXT), 
-            color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
+            color_bg=RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_BACKGROUND), 
+            color_text=RGBColor.from_string(self.st.TRIVIA_COLOR_TEXT), 
+            color_line=RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_LINE), 
         )
         
         if difficulty is not None:
@@ -125,7 +234,7 @@ class PPTXExport(Export):
                 color_line=RGBColor.from_string(self.st.COLOR_DIFFICULTY[difficulty]), 
             )
                     
-        (x, y, w, h) = self.st.get_question_bbox()
+        (x, y, w, h) = self.st.get_trivia_question_bbox()
         m_in = self.st.get_inner_margin()
         PPTXExport._add_frame(
             shapes=shapes,
@@ -195,9 +304,9 @@ class PPTXExport(Export):
                 a = answers[j]
     
                 if show_answer and j == answers_id:
-                    color_bg = RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND_CORRECT)
+                    color_bg = RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_BACKGROUND_CORRECT)
                 else:
-                    color_bg = RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND)
+                    color_bg = RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_BACKGROUND)
                     
                 self._add_frame(
                     shapes=shapes,
@@ -230,7 +339,15 @@ class PPTXExport(Export):
                 )
                                 
                                             
-    def _add_title_subtitle(self, title: str = "", subtitle: str = None, img_bg: str = None, pfont: str = None):
+    def _add_title_subtitle(
+        self, title: str = "", 
+        subtitle: str = None, 
+        img_bg: str = None, 
+        pfont: str = None,
+        color_bg = None,
+        color_text = None,
+        color_line = None,
+    ):
         
         # Add slide
         title_slide = self.root.slides.add_slide(self.root.slide_layouts[PPTXExport.BLANK]) 
@@ -247,9 +364,9 @@ class PPTXExport(Export):
             text=title,
             font=PPTXExport.FONT_TITLE,
             font_file=pfont,
-            color_bg=RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND), 
-            color_text=RGBColor.from_string(self.st.COLOR_TEXT), 
-            color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
+            color_bg=color_bg, 
+            color_text=color_text, 
+            color_line=color_line, 
         )
         
         if subtitle is not None:
@@ -260,9 +377,9 @@ class PPTXExport(Export):
                 text=subtitle,
                 font= PPTXExport.FONT_SUBTITLE,
                 font_file=pfont,
-                color_bg=RGBColor.from_string(self.st.COLOR_BBOX_BACKGROUND), 
-                color_text=RGBColor.from_string(self.st.COLOR_TEXT), 
-                color_line=RGBColor.from_string(self.st.COLOR_BBOX_LINE), 
+                color_bg=color_bg, 
+                color_text=color_text, 
+                color_line=color_line, 
             )
             
     @staticmethod

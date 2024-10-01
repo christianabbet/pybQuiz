@@ -32,6 +32,23 @@ class TriviaDB:
         """ Return length of database """
         raise NotImplementedError
 
+    def load(self):
+        raise NotImplementedError
+
+    def save(self):
+        raise NotImplementedError
+
+    def initialize(self):
+        raise NotImplementedError
+            
+    def update(self):
+        raise NotImplementedError
+
+    def pprint(self):
+        raise NotImplementedError
+   
+    def __getitem__(self, index: int):
+        raise NotImplementedError
 
 class TriviaTSVDB(TriviaDB):  
     
@@ -94,16 +111,21 @@ class TriviaTSVDB(TriviaDB):
 
     def pprint(self):
         
-        name = self.__class__.__name__    
+        name = self.__class__.__name__  
+        # Check if categor exists
+        col_cat = TC.KEY_CATEGORY
+        if TC.EXT_KEY_O_CAT in self.db:
+            col_cat = TC.EXT_KEY_O_CAT
+          
         self.db[TC.KEY_DIFFICULTY] = self.db[TC.KEY_DIFFICULTY].fillna("none")
         df_print = pd.crosstab(
-            index=self.db[TC.KEY_CATEGORY], 
+            index=self.db[col_cat], 
             columns=self.db[TC.KEY_DIFFICULTY]
         )
         df_print.columns = [str(c) for c in df_print.columns]
 
         # Group by categories and create df
-        data_all = {TC.KEY_CATEGORY: "All"}
+        data_all = {col_cat: "All"}
         data_all.update(df_print.sum().to_dict())
         # Add all other values
         data = [data_all]

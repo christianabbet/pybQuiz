@@ -14,19 +14,14 @@ from rich.panel import Panel
 from py_markdown_table.markdown_table import markdown_table
 from pybquiz.db.base import TriviaTSVDB
 from pybquiz.const import TriviaConst as TC
+from pybquiz.const import WWTBAMConst as WC
 
 
 class WWTBAMKey:
     
     # Dataframe columns
-    KEY_URL = "url"
-    KEY_VALUE = "value"
-    KEY_DIFFICULTY = "difficulty_code"
-    KEY_AIR_DATE = "air_date"
+
     PPRINT_BINS = [0, 4, 9, 14]
-    KEY_O_CAT = "o_category"
-    KEY_O_UK = "o_is_uk"
-    KEY_O_USA = "o_is_usa"
     
     # Base website
     WEB_BASE = "https://millionaire.fandom.com"
@@ -98,6 +93,12 @@ class WWTBAMKey:
         499, 500, 1000, 2000, 5000, 
         9999, 10000, 20000, 50000, 75000, 
         149999, 150000, 250000, 500000, 1000000
+    ]
+    
+    LUT_UNIFIED = [
+        100, 200, 300, 500, 1000, 
+        2000, 4000, 8000, 16000, 32000, 
+        64000, 125000, 250000, 500000, 1000000
     ]
     
 
@@ -238,9 +239,9 @@ class WWTBAMScrapper:
                 TC.KEY_WRONG_ANSWER1: WWTBAMScrapper._clean_text(text_answers[id_wrong[0]]),
                 TC.KEY_WRONG_ANSWER2: WWTBAMScrapper._clean_text(text_answers[id_wrong[1]]),
                 TC.KEY_WRONG_ANSWER3: WWTBAMScrapper._clean_text(text_answers[id_wrong[2]]),
-                WWTBAMKey.KEY_AIR_DATE: WWTBAMScrapper._extract_year(infos_text),
-                WWTBAMKey.KEY_URL: url,
-                WWTBAMKey.KEY_VALUE: WWTBAMScrapper._extract_value(text_value),
+                WC.KEY_AIR_DATE: WWTBAMScrapper._extract_year(infos_text),
+                WC.KEY_URL: url,
+                WC.KEY_VALUE: WWTBAMScrapper._extract_value(text_value),
             }
 
             data.append(data_row)
@@ -293,7 +294,7 @@ class WWTBAM(TriviaTSVDB):
     
     def __init__(
         self, 
-        lang: Literal['us', 'uk', ''] = '',
+        lang: Literal['us', 'uk'] = 'us',
         filename_db: Optional[str] = "wwtbam",
         cache: Optional[str] = '.cache', 
         chunks: Optional[int] = 10,
@@ -302,8 +303,8 @@ class WWTBAM(TriviaTSVDB):
 
         Parameters
         ----------
-        lang : Literal['us', 'uk', ''], optional
-            Lang of the show. Either 'uk' or 'us', by default ''
+        lang : Literal['us', 'uk'], optional
+            Lang of the show. Either 'uk' or 'us', by default 'us'
         filename_db : Optional[str], optional
             Name of the database, by default "wwtbam"
         cache : Optional[str], optional
@@ -316,7 +317,7 @@ class WWTBAM(TriviaTSVDB):
         self.lang = lang
         self.chunks = chunks
         self.scapper = WWTBAMScrapper() 
-        self.KEY_LANG =  WWTBAMKey.KEY_O_USA if lang == "us" else WWTBAMKey.KEY_O_UK
+        self.KEY_LANG =  TC.EXT_KEY_O_USA if lang == "us" else TC.EXT_KEY_O_UK
         
         # Call super method
         super().__init__(
@@ -337,14 +338,17 @@ class WWTBAM(TriviaTSVDB):
                 TC.KEY_QUESTION, TC.KEY_CORRECT_ANSWER,
                 TC.KEY_WRONG_ANSWER1, TC.KEY_WRONG_ANSWER2, TC.KEY_WRONG_ANSWER3,
                 # Local
-                WWTBAMKey.KEY_URL, 
-                WWTBAMKey.KEY_VALUE, 
-                WWTBAMKey.KEY_AIR_DATE, 
-                WWTBAMKey.KEY_DIFFICULTY,
-                WWTBAMKey.KEY_O_CAT,
-                self.KEY_LANG,
+                WC.KEY_URL, 
+                WC.KEY_VALUE, 
+                WC.KEY_AIR_DATE, 
+                WC.KEY_DIFFICULTY,
+                TC.EXT_KEY_DOMAIN,
+                TC.EXT_KEY_O_CAT,
+                TC.EXT_KEY_O_UK,
+                TC.EXT_KEY_O_USA,
             ]
         )
+        
     
     def update(self):
         """ Update database by looking up if new questions where added """
@@ -364,7 +368,7 @@ class WWTBAM(TriviaTSVDB):
         
         # Check only candidates that do not appear in db
         if self.db is not None:
-            url_candidates_exist = self.db[WWTBAMKey.KEY_URL].unique()
+            url_candidates_exist = self.db[WC.KEY_URL].unique()
             url_candidates = [u for u in url_candidates if u not in url_candidates_exist]
         
         # Parse candidates info
@@ -396,68 +400,35 @@ class WWTBAM(TriviaTSVDB):
                 
         # Check duplicates in questions
         self.db.drop_duplicates(subset=TC.KEY_UUID, keep=False, inplace=True)
-        self.db.dropna(subset=WWTBAMKey.KEY_VALUE, inplace=True)
+        self.db.dropna(subset=WC.KEY_VALUE, inplace=True)
 
         # Convert to difficulty level (year based)
-        cut = pd.cut(self.db[WWTBAMKey.KEY_DIFFICULTY], bins=[-1, 4, 9, 14])
+        cut = pd.cut(self.db[WC.KEY_DIFFICULTY], bins=[-1, 4, 9, 14])
         self.db[TC.KEY_DIFFICULTY] = cut.cat.codes.replace({0: "easy", 1: "medium", 2: "hard", -1: "none"})
         
-        for _, df_cand in self.db.groupby(WWTBAMKey.KEY_URL):
+        for _, df_cand in self.db.groupby(WC.KEY_URL):
             # Check year
-            year = df_cand.iloc[0][WWTBAMKey.KEY_AIR_DATE]
+            year = df_cand.iloc[0][WC.KEY_AIR_DATE]
             numbers = WWTBAM.convert_values_to_number(
-                values=df_cand[WWTBAMKey.KEY_VALUE].values.tolist(),
+                values=df_cand[WC.KEY_VALUE].values.tolist(),
                 year=year, 
                 lang=self.lang
             )
             
             # If exists, append value
             if numbers is not None:           
-                self.db.loc[df_cand.index, WWTBAMKey.KEY_DIFFICULTY] = numbers
+                self.db.loc[df_cand.index, WC.KEY_DIFFICULTY] = numbers
                 
         # Drop item if question of answer are empty
         self.db.dropna(
             subset=[
                 TC.KEY_QUESTION, TC.KEY_CORRECT_ANSWER, 
                 TC.KEY_WRONG_ANSWER1, TC.KEY_WRONG_ANSWER2, TC.KEY_WRONG_ANSWER3,
-                # WWTBAMKey.KEY_AIR_DATE, WWTBAMKey.KEY_DIFFICULTY,
+                # WC.KEY_AIR_DATE, WC.KEY_DIFFICULTY,
             ],
             inplace=True,
         )
-                
 
-    def pprint(self):
-        """ Display stats on database """
-        
-        name = self.__class__.__name__
-        n_candidates = len(self.db[WWTBAMKey.KEY_URL].unique())
-        n_questions = len(self)
-        v_min = self.db[WWTBAMKey.KEY_VALUE].min()
-        v_max = self.db[WWTBAMKey.KEY_VALUE].max()
-        d_min = self.db[WWTBAMKey.KEY_AIR_DATE].min()
-        d_max = self.db[WWTBAMKey.KEY_AIR_DATE].max()
-        
-        # Create a console
-        data = {
-            "Lang": self.lang,
-            "Candidates": n_candidates,
-            "Questions": n_questions,
-            "Values": "{}-{}".format(int(v_min), int(v_max)),
-            "Air date": "{}-{}".format(int(d_min), int(d_max)),
-        }
-        
-        # Add difficulty ranges
-        difficulties = pd.cut(self.db[WWTBAMKey.KEY_DIFFICULTY], bins=WWTBAMKey.PPRINT_BINS).value_counts(sort=False)
-        data.update({str(k): v for k, v in difficulties.items()})
-        
-        # Display final output
-        console = Console() 
-        console.print(Panel.fit("Database {} ({})".format(name, self.lang)))
-        
-        markdown = markdown_table([data]).set_params(row_sep = 'markdown')
-        markdown.quote = False
-        markdown = markdown.get_markdown()
-        console.print(markdown)
         
     @staticmethod
     def convert_values_to_number(values: list[float], year: int, lang: Literal['us', 'uk'] = 'us'):
@@ -511,5 +482,78 @@ class WWTBAM(TriviaTSVDB):
         replace = {int(k): i for i, k in enumerate(luts[id_match])}
         number = [replace[v] for v in values]
         return number
+
+
+class UnifiedWWTBAM(TriviaTSVDB):
     
+    def __init__(
+        self, 
+        filename_db: Optional[str] = "wwtbam",
+        cache: Optional[str] = '.cache', 
+    ) -> None:
+        """ Trivia TSV database
+
+        Parameters
+        ----------
+        cache : str
+            Location of the database folder
+        path_db : str
+            Path to database file
+        update : Optional[bool], optional
+            Update database, by default True
+        """        
+
+        # Call super method
+        super().__init__(
+            cache=cache, 
+            path_db=os.path.join(cache, filename_db + ".tsv"),
+        )
+        # Remove multiple cats
+        self.db[TC.EXT_KEY_O_CAT] = self.db[TC.EXT_KEY_O_CAT].fillna("miscellaneous").str.split("|").str[0]
+
+    def initialize(self):
+        
+        return pd.DataFrame(
+            columns=[
+                # Mandatory
+                TC.KEY_UUID,
+                TC.KEY_CATEGORY,
+                TC.KEY_DIFFICULTY,
+                TC.KEY_QUESTION, TC.KEY_CORRECT_ANSWER,
+                TC.KEY_WRONG_ANSWER1, TC.KEY_WRONG_ANSWER2, TC.KEY_WRONG_ANSWER3,
+                # Local
+                WC.KEY_URL, 
+                WC.KEY_VALUE, 
+                WC.KEY_AIR_DATE, 
+                WC.KEY_DIFFICULTY,
+                TC.EXT_KEY_O_CAT,
+                TC.EXT_KEY_O_UK,
+                TC.EXT_KEY_O_USA,
+            ]
+        )
     
+    def update(self, dbs: list[WWTBAM]):
+        
+        # Check for duplicates
+        dbs_ = []
+        for db in dbs:
+            # Get standardized columns
+            df = db.db
+            dbs_.append(df)
+            
+        # Merge columns
+        dbs_ = pd.concat(dbs_, ignore_index=True)
+        dbs_[TC.EXT_KEY_O_UK].fillna(0, inplace=True)
+        dbs_[TC.EXT_KEY_O_USA].fillna(0, inplace=True)
+        # Get trivia cols
+        dbs_ = dbs_[self.db.columns]
+        dbs_ = dbs_.drop_duplicates(subset=TC.KEY_UUID, keep="first")
+        
+        # Merge with existing database        
+        self.db = pd.concat([self.db, dbs_], ignore_index=True)
+        self.db = self.db.drop_duplicates(subset=TC.KEY_UUID, keep="first")
+        self.db = self.db.set_index("uuid").fillna(dbs_.set_index("uuid")).reset_index()
+        # Unified values
+        self.db[WC.KEY_VALUE] = self.db[WC.KEY_DIFFICULTY].replace({i:k for i, k in enumerate(WWTBAMKey.LUT_UNIFIED)})
+        
+        self.save()

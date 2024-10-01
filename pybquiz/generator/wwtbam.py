@@ -1,22 +1,20 @@
-from pybquiz.db.wwtbam import WWTBAM
+from pybquiz.db.wwtbam import UnifiedWWTBAM
 from pybquiz.const import Const as C
+from pybquiz.const import WWTBAMConst as WC
 from pybquiz.const import TriviaConst as TC
 from pybquiz.generator.base import QGenerator
 import pandas as pd
-
+import numpy as np
 
 class QGeneratorWWTBAM(QGenerator):
     
     TXT_OPTIONS = [
-        ("Easy", "E"),
-        ("Medium", "M"),
-        ("Hard", "H"),
         ("include UK", "K"),
         ("include USA", "A"),
     ]
     TXT_DESCRIPTION = "WWTBAM round that includes a wide range of topics. Select round by typing the category index, number of question and potential options (e.g.: [red]B-0-10-K[/red]). "
     
-    def __init__(self, wwtbam: WWTBAM) -> None:
+    def __init__(self, wwtbam: UnifiedWWTBAM) -> None:
         super().__init__()
         
         # Get categories
@@ -62,27 +60,60 @@ class QGeneratorWWTBAM(QGenerator):
         o_o = o[3]
         
         # Get difficulty
-        use_easy = "easy" if "E" in o_o.upper() else None
-        use_medium = "medium" if "M" in o_o.upper() else None
-        use_hard = "hard" if "H" in o_o.upper() else None
-        use_difficulty = [use_easy, use_medium, use_hard]
-        
         use_uk = True if "K" in o_o.upper() else False
         use_usa = True if "A" in o_o.upper() else False
         
         # Select questions based on criteria
-        raise NotImplementedError
         qs = self._select_questions(
             category=self.values.index[o_id],
             n=o_n,
-            use_difficulty=use_difficulty,
             use_uk=use_uk,
             use_usa=use_usa,
         )
         
         data = {
             C.KEY_TYPE: "wwtbam", 
-            C.KEY_CATEGORY: self.values.index[o_id], 
+            C.KEY_CATEGORY: "wwtbam", 
             C.KEY_QUESTION: qs,
         }
         return data
+    
+    def _select_questions(
+        self,
+        category: str,
+        n: int,
+        use_uk: bool,
+        use_usa: bool,
+    ):
+                
+        # Filter uk / us
+        f_us = (self.wwtbam.db[TC.EXT_KEY_O_USA].fillna(0) == 0) | ((self.wwtbam.db[TC.EXT_KEY_O_USA].fillna(0) == 1) & use_usa)
+        f_uk = (self.wwtbam.db[TC.EXT_KEY_O_UK].fillna(0) == 0) | ((self.wwtbam.db[TC.EXT_KEY_O_UK].fillna(0) == 1) & use_uk)
+        f_diff = self.wwtbam.db[WC.KEY_DIFFICULTY].notnull()
+
+        # Filter cat
+        f_cat = f_us.copy()
+        if category != "any":
+            f_cat = self.wwtbam.db[TC.EXT_KEY_O_CAT] == category
+        
+        # f_us = (self.trivia.db[UnifiedTSVDB.KEY_O_USA] == use_usa) | (self.trivia.db[UnifiedTSVDB.KEY_O_UK] == use_uk)
+        f = f_cat & f_us & f_uk & f_diff
+        
+        # Get difficulty range
+        codes = self.wwtbam.db.loc[f, WC.KEY_DIFFICULTY].unique()
+        codes = sorted(codes)
+        bins = np.concatenate([np.arange(min(n+1, np.max(codes) - 1)), [np.max(codes)+1]])
+        codes = pd.cut(self.wwtbam.db[WC.KEY_DIFFICULTY], bins=bins, right=False)
+        self.wwtbam.db[WC.KEY_DIFFICULTY] = codes.cat.codes
+        
+        # Choose random questions        
+        qs = []
+        for _, d in self.wwtbam.db[f].groupby(WC.KEY_DIFFICULTY):
+            # Pick random
+            i = np.random.permutation(d.index)[0]
+            data = self.wwtbam[i]
+            qs.append(data)
+            
+        # Return questions            
+        return qs
+        

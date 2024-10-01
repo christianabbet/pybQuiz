@@ -45,3 +45,30 @@ class TriviaConst:
     def get_keys():
         return [v for k, v in TriviaConst.__dict__.items() if k.startswith("KEY")]
             
+class WWTBAMConst:      
+    KEY_URL = "url"
+    KEY_VALUE = "value"
+    KEY_DIFFICULTY = "difficulty_code"
+    KEY_AIR_DATE = "air_date"
+    
+            
+class FamilyFeudConst:      
+    KEY_UUID = "uuid"
+    KEY_NAME = "name"
+    KEY_QUESTION = "question"
+    KEY_ANSWER1 = "answer1"
+    KEY_ANSWER1_VALUE = "#1"
+    KEY_ANSWER2 = "answer2"
+    KEY_ANSWER2_VALUE = "#2"
+    KEY_ANSWER3 = "answer3"
+    KEY_ANSWER3_VALUE = "#3"
+    KEY_ANSWER4 = "answer4"
+    KEY_ANSWER4_VALUE = "#4"
+    KEY_ANSWER5 = "answer5"
+    KEY_ANSWER5_VALUE = "#5"
+    KEY_ANSWER6 = "answer6"
+    KEY_ANSWER6_VALUE = "#6"
+    KEY_ANSWER7 = "answer7"
+    KEY_ANSWER7_VALUE = "#7"
+    KEY_N_ANSWER = "n_answers"    
+    

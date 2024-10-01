@@ -61,7 +61,7 @@ class Export():
             n_questions = len(questions)
 
             # Title
-            self.make_title(title=title, subtitle=None, img_bg=img_bg)
+            self.make_title(title=title, subtitle=None, img_bg=img_bg, type=type)
             
             # Add rules
             # TODO            
@@ -100,7 +100,7 @@ class Export():
             self.make_title(title=Export.TXT_SWAP, subtitle=None, img_bg=img_paper_bg)
             
             # Add answers
-            self.make_title(title=title, subtitle="Answers", img_bg=img_bg)
+            self.make_title(title=title, subtitle="Answers", img_bg=img_bg, type=type)
             for j in tqdm(range(1, n_questions), desc="Answers ..."):
                 self.make_question(
                     data=questions[j], 
@@ -117,7 +117,7 @@ class Export():
         self.save()
         
     
-    def make_title(self, title: str, subtitle: str, img_bg: str):
+    def make_title(self, title: str, subtitle: str, img_bg: str, type: Optional[str] = None):
         raise NotImplementedError
     
     def make_question(self, data: dict, prefix: str, show_answer: bool, type: str, img_bg: str, img_bg_blur: str):

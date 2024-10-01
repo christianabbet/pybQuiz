@@ -522,8 +522,8 @@ class GoogleSlideFactory:
             bbox=[x, y, w, h], 
             page_id=page_id, 
             element_id="{}_title".format(page_id), 
-            colorbg=self.st.COLOR_BBOX_BACKGROUND,
-            colortext=self.st.COLOR_TEXT,
+            colorbg=self.st.TRIVIA_COLOR_BBOX_BACKGROUND,
+            colortext=self.st.TRIVIA_COLOR_TEXT,
             fontsize=self.FONT_TITLE
         )
         request.extend(r_title)
@@ -535,8 +535,8 @@ class GoogleSlideFactory:
                 bbox=[x, y, w, h], 
                 page_id=page_id, 
                 element_id="{}_subtitle".format(page_id), 
-                colorbg=self.st.COLOR_BBOX_BACKGROUND,
-                colortext=self.st.COLOR_TEXT,
+                colorbg=self.st.TRIVIA_COLOR_BBOX_BACKGROUND,
+                colortext=self.st.TRIVIA_COLOR_TEXT,
                 fontsize=self.FONT_SUBTITLE
             )
             request.extend(r_subtitle)
@@ -600,14 +600,14 @@ class GoogleSlideFactory:
             request.extend(r_im)
         
         # Add question title
-        x, y, w, h = self.st.get_question_bbox()
+        x, y, w, h = self.st.get_trivia_question_bbox()
         r_q = self._add_shape(
             text = "Q{}: {}".format(i, question),
             bbox=[x, y, w, h], 
             page_id=page_id, 
             element_id="{}_title".format(page_id), 
-            colorbg=self.st.COLOR_BBOX_BACKGROUND,
-            colortext=self.st.COLOR_TEXT,
+            colorbg=self.st.TRIVIA_COLOR_BBOX_BACKGROUND,
+            colortext=self.st.TRIVIA_COLOR_TEXT,
             fontsize=self.FONT_QUESTION
         )
         request.extend(r_q)
@@ -655,10 +655,10 @@ class GoogleSlideFactory:
             local_offset = id_row * (answer_height + answer_inter_height)
             
             # Check if one or more answers
-            color_bg = self.st.COLOR_BBOX_BACKGROUND
+            color_bg = self.st.TRIVIA_COLOR_BBOX_BACKGROUND
             
             if answers_id is not None and j in answers_id:
-                color_bg = self.st.COLOR_BBOX_BACKGROUND_CORRECT
+                color_bg = self.st.TRIVIA_COLOR_BBOX_BACKGROUND_CORRECT
                 
             r_a = self._add_shape(
                 text=answers[j], 
@@ -666,7 +666,7 @@ class GoogleSlideFactory:
                 page_id=page_id, 
                 element_id="{}_answer{}".format(page_id, j), 
                 colorbg=color_bg,
-                colortext=self.st.COLOR_TEXT,
+                colortext=self.st.TRIVIA_COLOR_TEXT,
                 fontsize=self.FONT_ANSWER
             )   
             request.extend(r_a)  
