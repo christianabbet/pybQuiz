@@ -21,8 +21,6 @@ cd pybQuiz
 conda create -n pybquiz python=3.9
 conda activate pybquiz
 # Base packages
-conda install matplotlib seabornumap-learn
-conda install -c conda-forge pycirclize
 pip install pyyaml tqdm py-markdown-table python-pptx rich beautifulsoup4 tabulate requests
 
 # To export to Google Slides / Sheets
@@ -38,37 +36,21 @@ pip install --upgrade openai
 python run_create_quiz.py
 
 # To get additonal parameters infromation
-python run_create_quiz.py -h
+python run_create_quiz_v2.py -h
 ```
 
 ```bash
 options:
   -h, --help            show this help message and exit
-  --cfg CFG             path to config file (default if None)
+  --dump DUMP           path to dump file (default is None)
+  --prompts PROMPTS     Manual prompts (default is None)
   --dirout DIROUT       path to output directory for data generation (default is "output")
-  --apitoken APITOKEN   path to stored API tokens (default is "config/apitoken.yml")
   --googlecreds GOOGLECREDS
                         path to stored Google credentials (default is "config/credentials.json")
 ```
 
 Note that some APIs need a token to be accessed. Please refer to the API section to know how to setup tokens.  -->
 
-### Update databases (advanced)
-
-# Install LLM
-
-EMBEDDING + LDA (Multilevel)
-
-```bash
-# https://ollama.com/blog/embedding-models
-# Get installer
-curl -fsSL https://ollama.com/install.sh | sh
-# Get model embedding
-ollama pull mxbai-embed-large
-ollama pull llama3.1
-# Install python package
-pip install ollama
-```
 
 ![plot](creator.png)
 
@@ -115,6 +97,12 @@ https://quizbowlpackets.com/
 |traditions and culture| 2419| 206| 1027 | 25 |
 |      video games     |  99 |  7 |  82  |  1 |
 
+### C. Family Feud
+
+|    name    | 3| 4 |  5 |  6 | 7 |
+|------------|--|---|----|----|---|
+|FamilyFeudDB|90|979|1048|1063|739|
+
 <!-- 
 ### 2. Jeopardy!
 
@@ -158,7 +146,9 @@ The Google Slide API is not mandatory if only the pptx are wanted. To setup the 
   * https://quizbowlpackets.com/
   * Ding bats
   * N'oubliez pas les paroles
-  * Kensquiz
+  * Pointless (http://pointlessarchive.blogspot.com/)
+  * Crosswords
+  * Tout le monde a son mot à dire (Word grid anagrams)
   
 ## Thanks 
 

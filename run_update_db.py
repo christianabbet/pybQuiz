@@ -1,14 +1,24 @@
 import argparse
-from pybquiz.db.wwtbam import WWTBAM
+from pybquiz.db.wwtbam import WWTBAM, UnifiedWWTBAM
 from pybquiz.db.jeopardy import Jeopardy
 from pybquiz.db.opentdb import OpenTriviaDB
 from pybquiz.db.thetrviaapi import TheTriviaAPIDB
 from pybquiz.db.kenquiz import KenQuizDB
 from pybquiz.db.ninjaapi import NinjaAPI
+from pybquiz.db.familfeud import FamilyFeudDB
 from pybquiz.db.base import UnifiedTSVDB
 
 
 def main(args):
+    
+    # MasterMinds
+    # https://fikklefame.com/?s=master+minds
+    
+    # FamilyFeud
+    print("####### FamilyFeudDB #######")
+    familyfeuddb = FamilyFeudDB()
+    # familyfeuddb.update()
+    familyfeuddb.pprint()
     
     # MasterMinds
     # https://fikklefame.com/?s=master+minds
@@ -63,8 +73,8 @@ def main(args):
     
     print("####### Unified WWTBAM #######")
     dbs = [wwtbam_us_db, wwtbam_uk_db]
-    triviadb = UnifiedTSVDB(filename_db="wwtbam")
-    # triviadb.update(dbs)
+    triviadb = UnifiedWWTBAM()
+    triviadb.update(dbs)
     triviadb.pprint()
     
     # Jeopardy

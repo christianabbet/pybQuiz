@@ -4,6 +4,7 @@ The package provide trivia question scrapped from multiple sources . Here is the
 
 ## Setup
 
+
 The embedding and the categorization if performed using [ollama](https://ollama.com/). 
 
 ```bash
@@ -15,6 +16,8 @@ ollama pull mxbai-embed-large
 ollama pull llama3.1
 # Install python package
 pip install ollama
+conda install matplotlib seaborn umap-learn
+conda install -c conda-forge pycirclize
 ```
 
 ### 0. Unified

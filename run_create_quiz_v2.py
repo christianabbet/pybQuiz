@@ -3,7 +3,7 @@ import os
 
 
 from pybquiz.db.base import UnifiedTSVDB
-from pybquiz.db.wwtbam import WWTBAM
+from pybquiz.db.wwtbam import UnifiedWWTBAM
 from pybquiz.generator.terminal import GeneratorTerminal
 from pybquiz.generator.trivia import QGeneratorTrivia
 from pybquiz.generator.wwtbam import QGeneratorWWTBAM
@@ -21,7 +21,7 @@ def main(args):
         
         # Build DB
         trivia = UnifiedTSVDB()
-        wwtbam = WWTBAM()
+        wwtbam = UnifiedWWTBAM()
         
         # Build databases generators
         gen_triviadb = QGeneratorTrivia(trivia=trivia)
@@ -64,7 +64,7 @@ def main(args):
 
         
 if __name__ == '__main__':
-    
+
     # Create parser
     parser = argparse.ArgumentParser(
         prog='pybQuiz Creator',
@@ -74,7 +74,7 @@ if __name__ == '__main__':
                         help='path to dump file (default is None)')
     parser.add_argument('--prompts', 
                         # default="sdsdsd|sdsdsdsdssd|1|A-2-10-HEK", 
-                        default="sdsdsd|sdsdsdsdssd|1|B-0-10-EMHK", 
+                        default="sdsdsd|sdsdsdsdssd|1|B-5-10-", 
                         # default=None,
                         help='Manual prompts (default is None)')
     parser.add_argument('--dirout', default="output", 
