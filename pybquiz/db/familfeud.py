@@ -59,6 +59,7 @@ class FamilyFeudDB(TriviaDB):
                 # Mandatory keys
                 FC.KEY_UUID,
                 FC.KEY_QUESTION,
+                FC.KEY_CATEGORY,
                 FC.KEY_ANSWER1,
                 FC.KEY_ANSWER1_VALUE,
                 FC.KEY_ANSWER2,
@@ -93,21 +94,26 @@ class FamilyFeudDB(TriviaDB):
         # Concatenate dataframes
         dfs = pd.concat(dfs, ignore_index=True)
         dfs.columns = [c.lower().replace(" ", "") for c in dfs.columns]
-        self.db = dfs.loc[:, self.db.columns]
-        # Post processing - number of questions
-        col_answer = [c for c in self.db.columns if c.startswith("answer")]
-        self.db[FC.KEY_N_ANSWER] = self.db[col_answer].notnull().sum(axis=1)
-        self.db[FC.KEY_NAME] = self.__class__.__name__  
-        self.save()
 
+        # Post processing - number of questions
+        col_answer = [c for c in dfs.columns if c.startswith("answer")]
+        dfs[FC.KEY_N_ANSWER] = dfs[col_answer].notnull().sum(axis=1)
+        dfs[FC.KEY_CATEGORY] = "Top " + dfs[FC.KEY_N_ANSWER].astype(str)
+         
+
+        # Affect final result
+        self.db = dfs.loc[:, self.db.columns]
+        self.db[FC.KEY_NAME] = self.__class__.__name__
+        self.save()
+        
     def pprint(self):
         
         name = self.__class__.__name__  
         # Check if categor exists
 
         df_print = pd.crosstab(
-            index=self.db[FC.KEY_NAME], 
-            columns=self.db[FC.KEY_N_ANSWER]
+            index=self.db[FC.KEY_CATEGORY], 
+            columns=self.db[FC.KEY_NAME]
         )
         df_print.columns = [str(c) for c in df_print.columns]
 

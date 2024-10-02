@@ -24,6 +24,12 @@ class SlideTemplate:
     WWTBAM_COLOR_TEXT = "ffffff"
     WWTBAM_COLOR_QTEXT = "ffff00"
     
+    # COLORS - WWTBAM
+    FAMILYFEUD_COLOR_BBOX_BACKGROUND = "050912"
+    FAMILYFEUD_COLOR_BBOX_OBACKGROUND = "0C1629"
+    FAMILYFEUD_COLOR_BBOX_QBACKGROUND = "0E192E"    
+    FAMILYFEUD_COLOR_TEXT = "ffffff"
+    
     WWTBAM_BBOX_QT = [ 28.754,  61.674, 196.495, 25.596]
     WWTBAM_BBOX_QA = [ 23.612,  97.633,  13.317, 16.703]
     WWTBAM_BBOX_QB = [137.873,  97.633,  13.317, 16.703]
@@ -128,6 +134,36 @@ class SlideTemplate:
         bbox_h = self.height - (hy + hq)
         
         return (bbox_x, bbox_y, bbox_w, bbox_h)
+    
+    def get_answer_bbox_margin(self):
+        # Get margin to frame
+        _, hy, _, hq = self.get_trivia_question_bbox()
+        margin = self.get_frame_margin()
+        # Set bbox values
+        bbox_x = margin
+        bbox_y = hq + 1.5*margin
+        bbox_w = self.width - 2*(margin)
+        bbox_h = self.height - (hy + hq) - 1.5*margin
+        
+        return (bbox_x, bbox_y, bbox_w, bbox_h)
+    
+    def get_answer_rows_familyfeud(self, n: int = 7, h_ratio: float = 2):
+        # Get overall box
+        (x, y, w, h) = self.get_answer_bbox_margin()
+        # Split height
+        dt = h / ((h_ratio + 1) * n + 1)
+        # Set coordinates
+        bboxes_value = []
+        bboxes_score = []
+        for i in range(n):
+            yb = y + ((h_ratio+1)*i + 1)*dt
+            wb = w - 8*dt
+            bbox_value = [x + dt, yb, wb, h_ratio*dt]
+            bbox_score = [x + 2*dt + wb, yb, 5*dt, h_ratio*dt]
+            bboxes_value.append(bbox_value)
+            bboxes_score.append(bbox_score)
+            
+        return bboxes_value, bboxes_score
     
     def get_answer_cols(self):
         # Get margin to frame

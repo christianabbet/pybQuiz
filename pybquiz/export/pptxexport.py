@@ -11,12 +11,14 @@ from sys import platform
 import pptx
 import numpy as np
 import string
+import pandas as pd
 
 from pybquiz.export.base import Export
 from pybquiz.background import BackgroundManager
 from pybquiz.const import Const as C
 from pybquiz.const import TriviaConst as TC
 from pybquiz.const import WWTBAMConst as WC
+from pybquiz.const import FamilyFeudConst as FC
 
 from pybquiz.export.slidetemplate import SlideTemplate
 
@@ -67,18 +69,25 @@ class PPTXExport(Export):
     
     def make_title(self, title: str, subtitle: str, img_bg: str, type: Optional[str] = None):
         
-        color_bg=RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_BACKGROUND)
-        color_text=RGBColor.from_string(self.st.TRIVIA_COLOR_TEXT)
-        color_line=RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_LINE)
-        
-        if type is not None and type == "wwtbam":
-            color_bg=RGBColor.from_string(self.st.WWTBAM_COLOR_BBOX_BACKGROUND)
-            color_text=RGBColor.from_string(self.st.WWTBAM_COLOR_TEXT)
-            color_line=RGBColor.from_string(self.st.WWTBAM_COLOR_BBOX_LINE)
+        color_bg, color_text, color_line = self._get_theme(type=type)          
 
         self._add_title_subtitle(
             title=title,
             subtitle=subtitle,
+            img_bg=img_bg,
+            pfont=self.pfont,
+            color_bg=color_bg,
+            color_text=color_text,
+            color_line=color_line,
+        )
+        
+    def make_rules(self, title: str, rules: list[str], img_bg: str, type: Optional[str] = None):
+        
+        color_bg, color_text, color_line = self._get_theme(type=type)
+
+        self._add_rules(
+            title=title,
+            rules=rules,
             img_bg=img_bg,
             pfont=self.pfont,
             color_bg=color_bg,
@@ -92,12 +101,112 @@ class PPTXExport(Export):
             self._add_trivia_question(data=data, prefix=prefix, show_answer=show_answer, img_bg=img_bg_blur)
         elif type == "wwtbam":
             self._add_wwtbam_question(data=data, prefix=prefix, show_answer=show_answer, img_bg=img_bg)
+        elif type == "familyfeud":
+            self._add_familyfeud_question(data=data, prefix=prefix, show_answer=show_answer, img_bg=img_bg)
         else:
             raise NotImplementedError
-        
+
     def save(self):
         # Saving file 
         self.root.save(self.fileout)  
+        
+    def _get_theme(self, type: str):
+    
+        color_bg=RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_BACKGROUND)
+        color_text=RGBColor.from_string(self.st.TRIVIA_COLOR_TEXT)
+        color_line=RGBColor.from_string(self.st.TRIVIA_COLOR_BBOX_LINE)
+        
+        if type is not None and type == "wwtbam":
+            color_bg=RGBColor.from_string(self.st.WWTBAM_COLOR_BBOX_BACKGROUND)
+            color_text=RGBColor.from_string(self.st.WWTBAM_COLOR_TEXT)
+            color_line=RGBColor.from_string(self.st.WWTBAM_COLOR_BBOX_LINE)
+            
+        if type is not None and type == "familyfeud":
+            color_bg=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_BBOX_BACKGROUND)
+            color_text=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_TEXT)
+            color_line=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_BBOX_BACKGROUND)      
+            
+        return color_bg, color_text, color_line
+        
+    def _add_familyfeud_question(self, data: dict, prefix: str, show_answer: bool, img_bg: str):
+        
+        # Extract infos
+        question = data.get(FC.KEY_QUESTION, C.KEY_ERROR)
+
+        # Add slide and question            
+        question_slide = self.root.slides.add_slide(self.root.slide_layouts[PPTXExport.BLANK]) 
+        shapes =  question_slide.shapes
+
+        # Add background
+        if img_bg is not None:
+            shapes.add_picture(img_bg, Mm(0), Mm(0), height=Mm(self.height))
+    
+        # Add question
+        (x, y, w, h) = self.st.get_trivia_question_bbox()
+        PPTXExport._add_frame(
+            shapes=shapes,
+            bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
+            text = "{}: {}".format(prefix, question),
+            font_file=self.pfont,
+            color_bg=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_BBOX_BACKGROUND), 
+            color_text=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_TEXT), 
+            color_line=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_BBOX_BACKGROUND),                    
+            font=PPTXExport.FONT_TITLE, 
+        )
+        
+        (x, y, w, h) = self.st.get_answer_bbox_margin()
+        PPTXExport._add_frame(
+            shapes=shapes,
+            bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
+            shapeid=MSO_SHAPE.RECTANGLE,
+            text = "",
+            font_file=self.pfont,
+            color_bg=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_BBOX_QBACKGROUND), 
+            color_text=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_TEXT), 
+            color_line=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_BBOX_QBACKGROUND),                    
+            font=PPTXExport.FONT_TITLE, 
+        )
+        
+        bboxes, bboxes_score = self.st.get_answer_rows_familyfeud()
+        n_bboxes = len(bboxes)
+        
+        for i in range(n_bboxes):
+            x, y, w, h = bboxes[i]
+            answer = data.get("answer{}".format(i+1), "0")
+            answer_value = data.get("#{}".format(i+1), "0")
+            none_value = "?"
+            if pd.isnull(answer) or pd.isnull(answer_value):
+                answer = ""
+                answer_value = ""
+                none_value = ""
+                color = self.st.FAMILYFEUD_COLOR_BBOX_OBACKGROUND
+            else:
+                answer_value = str(int(float(answer_value)))
+                color = self.st.FAMILYFEUD_COLOR_BBOX_BACKGROUND
+            
+            PPTXExport._add_frame(
+                shapes=shapes,
+                bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
+                text = "{}".format(answer) if show_answer else none_value,
+                font_file=self.pfont,
+                color_bg=RGBColor.from_string(color), 
+                color_text=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_TEXT), 
+                color_line=RGBColor.from_string(color),                    
+                font=PPTXExport.FONT_TITLE, 
+                alignement=PP_ALIGN.LEFT if show_answer else PP_ALIGN.CENTER,
+            )
+            x, y, w, h = bboxes_score[i]
+            PPTXExport._add_frame(
+                shapes=shapes,
+                bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
+                text = "{}".format(answer_value) if show_answer else none_value,
+                font_file=self.pfont,
+                color_bg=RGBColor.from_string(color), 
+                color_text=RGBColor.from_string(self.st.FAMILYFEUD_COLOR_TEXT), 
+                color_line=RGBColor.from_string(color),                    
+                font=PPTXExport.FONT_TITLE, 
+                alignement=PP_ALIGN.LEFT if show_answer else PP_ALIGN.CENTER,
+            )
         
     def _add_wwtbam_question(self, data: dict, prefix: str, show_answer: bool, img_bg: str):
         
@@ -338,6 +447,52 @@ class PPTXExport(Export):
                     font_file=self.pfont,
                 )
                                 
+                                
+    def _add_rules(
+        self, 
+        title: str,
+        rules: list[str], 
+        img_bg: str = None, 
+        pfont: str = None,
+        color_bg = None,
+        color_text = None,
+        color_line = None,
+    ):
+        
+        # Add slide
+        rules_slide = self.root.slides.add_slide(self.root.slide_layouts[PPTXExport.BLANK]) 
+        shapes =  rules_slide.shapes            
+                    
+        # Add background
+        if img_bg is not None:
+            shapes.add_picture(img_bg, Mm(0), Mm(0), height=Mm(self.height))
+        
+        (x, y, w, h) = self.st.get_trivia_question_bbox()
+
+        PPTXExport._add_frame(
+            shapes=shapes,
+            bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
+            text=title,
+            font=PPTXExport.FONT_TITLE,
+            font_file=pfont,
+            color_bg=color_bg, 
+            color_text=color_text, 
+            color_line=color_line, 
+        )
+        
+        (x, y, w, h) = self.st.get_answer_bbox_margin()
+        PPTXExport._add_frame(
+            shapes=shapes,
+            bbox=[Mm(x), Mm(y), Mm(w), Mm(h)],
+            text=rules,
+            shapeid=MSO_SHAPE.ROUNDED_RECTANGLE,         
+            font=PPTXExport.FONT_TITLE,
+            font_file=pfont,
+            color_bg=color_bg, 
+            color_text=color_text, 
+            color_line=color_line, 
+        )
+    
                                             
     def _add_title_subtitle(
         self, title: str = "", 
@@ -415,11 +570,23 @@ class PPTXExport(Export):
         else:
             shape.line.fill.background()
 
-        if text is not None:
-            tf.text = text
-            tf.fit_text(max_size=font, font_file=font_file) 
-            tf.paragraphs[0].alignment = alignement
-        
-        if color_text is not None:
-            tf.paragraphs[0].font.color.rgb = color_text
+        if isinstance(text, list):
+            # Add paragraphs
+            n_lines = len(text)
+            tf.text = "• " + text[0]
+            # Add other lines
+            for i in range(1, n_lines):
+                p = tf.add_paragraph()
+                p = tf.add_paragraph()
+                p.text = "• " + text[i]
+
+        else:
+            # Single line
+            if text is not None:
+                tf.text = text
+                tf.fit_text(max_size=font, font_file=font_file) 
+                tf.paragraphs[0].alignment = alignement
+            
+            if color_text is not None:
+                tf.paragraphs[0].font.color.rgb = color_text
         

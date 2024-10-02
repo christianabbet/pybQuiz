@@ -54,6 +54,7 @@ class Export():
             # Check number of questions
             category = round.get(C.KEY_CATEGORY, None)
             questions = round.get(C.KEY_QUESTION, [])
+            rules = round.get(C.KEY_RULES, [])
             type = round.get(C.KEY_TYPE, None)
             img_bg = self.bg_manager.get_background(category, blurred=False)
             img_bg_blur = self.bg_manager.get_background(category, blurred=True)
@@ -64,7 +65,7 @@ class Export():
             self.make_title(title=title, subtitle=None, img_bg=img_bg, type=type)
             
             # Add rules
-            # TODO            
+            self.make_rules(title="Rules", rules=rules, img_bg=img_bg, type=type)
             
             # Example
             self.make_question(
@@ -120,6 +121,9 @@ class Export():
     def make_title(self, title: str, subtitle: str, img_bg: str, type: Optional[str] = None):
         raise NotImplementedError
     
+    def make_rules(self, title: str, rules: list[str], img_bg: str, type: Optional[str] = None):
+        raise NotImplementedError
+
     def make_question(self, data: dict, prefix: str, show_answer: bool, type: str, img_bg: str, img_bg_blur: str):
         raise NotImplementedError
     

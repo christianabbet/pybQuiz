@@ -13,7 +13,8 @@ class QGeneratorWWTBAM(QGenerator):
         ("include USA", "A"),
     ]
     TXT_DESCRIPTION = "WWTBAM round that includes a wide range of topics. Select round by typing the category index, number of question and potential options (e.g.: [red]B-0-10-K[/red]). "
-    
+    TEXT_RULES = ["'Who wants to be a millionaire?' round", "1 pt per correct answer", "1 wrong answer accepted (joker)", "After second wrong answer, no more points"]
+
     def __init__(self, wwtbam: UnifiedWWTBAM) -> None:
         super().__init__()
         
@@ -51,13 +52,15 @@ class QGeneratorWWTBAM(QGenerator):
         o = options.split("-")        
         
         # Check consistency
-        if len(o) != 4:
+        if len(o) < 3:
             return None
         
         # Get info
         o_id = int(o[1])
         o_n = int(o[2])
-        o_o = o[3]
+        o_o = ""
+        if len(o) == 4:
+            o_o = o[3]
         
         # Get difficulty
         use_uk = True if "K" in o_o.upper() else False
@@ -75,6 +78,7 @@ class QGeneratorWWTBAM(QGenerator):
             C.KEY_TYPE: "wwtbam", 
             C.KEY_CATEGORY: "wwtbam", 
             C.KEY_QUESTION: qs,
+            C.KEY_RULES: self.TEXT_RULES,
         }
         return data
     
@@ -92,7 +96,7 @@ class QGeneratorWWTBAM(QGenerator):
         f_diff = self.wwtbam.db[WC.KEY_DIFFICULTY].notnull()
 
         # Filter cat
-        f_cat = f_us.copy()
+        f_cat = f_diff.copy()
         if category != "any":
             f_cat = self.wwtbam.db[TC.EXT_KEY_O_CAT] == category
         
@@ -103,12 +107,13 @@ class QGeneratorWWTBAM(QGenerator):
         codes = self.wwtbam.db.loc[f, WC.KEY_DIFFICULTY].unique()
         codes = sorted(codes)
         bins = np.concatenate([np.arange(min(n+1, np.max(codes) - 1)), [np.max(codes)+1]])
+        
         codes = pd.cut(self.wwtbam.db[WC.KEY_DIFFICULTY], bins=bins, right=False)
-        self.wwtbam.db[WC.KEY_DIFFICULTY] = codes.cat.codes
+        self.wwtbam.db["temp"] = codes.cat.codes
         
         # Choose random questions        
         qs = []
-        for _, d in self.wwtbam.db[f].groupby(WC.KEY_DIFFICULTY):
+        for _, d in self.wwtbam.db[f].groupby("temp"):
             # Pick random
             i = np.random.permutation(d.index)[0]
             data = self.wwtbam[i]

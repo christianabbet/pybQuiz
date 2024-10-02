@@ -6,6 +6,7 @@ class Const:
     KEY_ANSWERS = "answers"
     KEY_AUTHOR = "author"
     KEY_TYPE = "type"
+    KEY_RULES = "rules"
     KEY_ROUNDS = "rounds"
     KEY_QUESTION = "question"
     KEY_ORDER = "order"
@@ -55,6 +56,7 @@ class WWTBAMConst:
 class FamilyFeudConst:      
     KEY_UUID = "uuid"
     KEY_NAME = "name"
+    KEY_CATEGORY = "category"
     KEY_QUESTION = "question"
     KEY_ANSWER1 = "answer1"
     KEY_ANSWER1_VALUE = "#1"

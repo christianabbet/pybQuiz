@@ -4,9 +4,11 @@ import os
 
 from pybquiz.db.base import UnifiedTSVDB
 from pybquiz.db.wwtbam import UnifiedWWTBAM
+from pybquiz.db.familfeud import FamilyFeudDB
 from pybquiz.generator.terminal import GeneratorTerminal
 from pybquiz.generator.trivia import QGeneratorTrivia
 from pybquiz.generator.wwtbam import QGeneratorWWTBAM
+from pybquiz.generator.familyfeud import QGeneratoFamilyFeud
 from pybquiz.export.pptxexport import PPTXExport
 from pybquiz.export.googleexport import GoogleExport
 
@@ -22,11 +24,13 @@ def main(args):
         # Build DB
         trivia = UnifiedTSVDB()
         wwtbam = UnifiedWWTBAM()
+        familyfeud = FamilyFeudDB()
         
         # Build databases generators
         gen_triviadb = QGeneratorTrivia(trivia=trivia)
         gen_wwtbam = QGeneratorWWTBAM(wwtbam=wwtbam)
-    
+        gen_familyfeud = QGeneratoFamilyFeud(familyfeud=familyfeud)
+        
         # Check prompt
         prompts = args.prompts
         if prompts is not None:
@@ -35,7 +39,7 @@ def main(args):
         # Generate terminal
         dump_file = GeneratorTerminal(
             dirout = dirout,
-            dbs = [gen_triviadb, gen_wwtbam]
+            dbs = [gen_triviadb, gen_wwtbam, gen_familyfeud]
         ).run_terminal(
             prompts=prompts
         )
@@ -74,7 +78,8 @@ if __name__ == '__main__':
                         help='path to dump file (default is None)')
     parser.add_argument('--prompts', 
                         # default="sdsdsd|sdsdsdsdssd|1|A-2-10-HEK", 
-                        default="sdsdsd|sdsdsdsdssd|1|B-5-10-", 
+                        # default="sdsdsd|sdsdsdsdssd|1|B-5-10-", 
+                        default="sdsdsd|sdsdsdsdssd|1|B-12-13-K", 
                         # default=None,
                         help='Manual prompts (default is None)')
     parser.add_argument('--dirout', default="output", 

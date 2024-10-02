@@ -9,6 +9,7 @@ from pybquiz.generator.base import QGenerator
 class QGeneratorTrivia(QGenerator):
     
     TXT_DESCRIPTION = "Trivia round that includes a wide range of topics. Select round by typing the category index, number of question and potential options (e.g.: [red]A-0-10-HK[/red]). "
+    TEXT_RULES = ["Trivia round", "1 pt per correct answer"]
     TXT_OPTIONS = [
         ("Easy", "E"),
         ("Medium", "M"),
@@ -127,6 +128,7 @@ class QGeneratorTrivia(QGenerator):
         
         data = {
             C.KEY_TYPE: "trivia", 
+            C.KEY_RULES: self.TEXT_RULES,
             C.KEY_CATEGORY: self.values.index[o_id], 
             C.KEY_QUESTION: qs,
         }
