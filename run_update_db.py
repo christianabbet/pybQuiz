@@ -7,12 +7,18 @@ from pybquiz.db.kenquiz import KenQuizDB
 from pybquiz.db.ninjaapi import NinjaAPI
 from pybquiz.db.familfeud import FamilyFeudDB
 from pybquiz.db.base import UnifiedTSVDB
+from pybquiz.db.wikinamesdb import WikiNamesDB
 
 
 def main(args):
     
     # MasterMinds
     # https://fikklefame.com/?s=master+minds
+    
+    print("####### WikiNamesDB #######")
+    wikinamesdb = WikiNamesDB()
+    wikinamesdb.update()
+    wikinamesdb.pprint()
     
     # FamilyFeud
     print("####### FamilyFeudDB #######")

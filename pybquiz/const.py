@@ -74,3 +74,27 @@ class FamilyFeudConst:
     KEY_ANSWER7_VALUE = "#7"
     KEY_N_ANSWER = "n_answers"    
     
+    
+class WikiConst:
+        
+    # Define base keys that should exists in databases
+    KEY_UUID = "uuid"
+    KEY_NAME = "name"
+    KEY_WIKIDATA = "wikidata_code"
+    KEY_FIRSTNAME = "firstname"
+    KEY_REGION = "un_subregion"
+    KEY_ERA = "bigperiod_birth"
+    KEY_GEOGRAPHY = "all_geography_groups"
+    KEY_CITIZEN = "citizenship_1_b"
+    KEY_RANK_TOT = "ranking_visib_5criteria"
+    KEY_SUBCAT = "level3_main_occ"
+    KEY_BIRTH_LONG = "bplo1"
+    KEY_BIRTH_LAT = "bpla1"
+    KEY_DEATH_LONG = "dplo1"
+    KEY_DEATH_LAT = "dpla1"
+    
+    KEY_FULLNAME = "fullname"
+    KEY_URL = "url"
+    KEY_FIRSTNAME = "firstname"
+    KEY_FAMILYNAME = "familyname"
+    KEY_DESCRIPTION = "description"
