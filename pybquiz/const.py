@@ -98,3 +98,4 @@ class WikiConst:
     KEY_FIRSTNAME = "firstname"
     KEY_FAMILYNAME = "familyname"
     KEY_DESCRIPTION = "description"
+    KEY_O_DESCRIPTION = "description"

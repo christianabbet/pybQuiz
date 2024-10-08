@@ -103,15 +103,6 @@ https://quizbowlpackets.com/
 |------------|--|---|----|----|---|
 |FamilyFeudDB|90|979|1048|1063|739|
 
-<!-- 
-### 2. Jeopardy!
-
-Difficulty is graded from to 0 (lowest) to 11 (highest). This correspond to the clue values from $100 to $2000
-
-|Lang|Questions| Values | Air date|(0, 3]|(3, 7]|(7, 11]|
-|----|---------|--------|---------|------|------|-------|
-| us |  482067 |100-2000|1984-2024|192881|187847| 79738 | -->
-
 
 ## API Tokens and Google support
 
@@ -134,10 +125,6 @@ The Google Slide API is not mandatory if only the pptx are wanted. To setup the 
   * https://cluebase.readthedocs.io/en/latest/
   * https://www.reddit.com/r/trivia/comments/3wzpvt/free_database_of_50000_trivia_questions/
     * https://drive.google.com/file/d/0Bzs-xvR-5hQ3SGdxNXpWVHFNWG8/view?resourcekey=0-5QvXBiHQPm_KmkhXP9RO8g
-  
-* Familly Feud
-  * https://docs.google.com/spreadsheets/d/1y5TtM4rXHfv_9BktCiJEW621939RzJucXxhJidJZbfQ/htmlview
-  * https://drive.google.com/file/d/0Bzs-xvR-5hQ3WktpWVA2RmROY1U/view?resourcekey=0-u03CutV7Ye9rxiuUE8c_UQ
 
 * MasterMinds
   * https://fikklefame.com/?s=master+minds
@@ -145,13 +132,15 @@ The Google Slide API is not mandatory if only the pptx are wanted. To setup the 
 * Others
   * https://quizbowlpackets.com/
   * Ding bats
+  * Pixel art quiz
+  * Famous first/last names
   * N'oubliez pas les paroles
   * Pointless (http://pointlessarchive.blogspot.com/)
   * Crosswords
   * Tout le monde a son mot à dire (Word grid anagrams)
   
+  
 ## Thanks 
-
 
 
 ```bash

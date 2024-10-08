@@ -18,6 +18,7 @@ from tqdm import tqdm
 from urllib.parse import urljoin
 from rich.prompt import Prompt
 import json
+import ollama
 
 
 class WikiScrapper:
@@ -37,6 +38,56 @@ class WikiScrapper:
 
         return text
     
+
+    @staticmethod
+    def get_wikipedia_infos(url: str, nmax: Optional[int] = 1500):
+        """Clean text to remove question letter (A to D) as well as new line
+
+        Parameters
+        ----------
+        text : str
+            Name of the base url
+
+        Returns
+        -------
+        urls: list[str]
+            Links to pages
+        """
+        # Remove question letter
+        page = slow_get_request(
+            url=url,
+            header={
+                "Content-Type": "application/json",
+            },
+            delay=0.5, 
+            delay_rnd=0.5,
+        )  
+        
+        # If code not valid return None
+        if page is None: 
+            return []
+        
+        soup = BeautifulSoup(page.content, features="lxml")     
+        sp_body = soup.find_all("div", {"id": "bodyContent"})
+        
+        if len(sp_body) == 0:
+            return None
+        
+        # Get heading
+        sp_h2 = sp_body[0].find_all("div", class_="mw-heading mw-heading2")
+        
+        if len(sp_h2) == 0:
+            return None
+        
+        # Get title of first text
+        sp_h2 = sp_h2[0].text
+        # Find header in text
+        intro = sp_body[0].text
+        intro = intro[:min(intro.find(sp_h2), nmax)]
+        # Replace 
+        intro = intro.replace("\n", ". ")
+        return intro
+        
     @staticmethod
     def get_wikidata_infos(code: str, token: str):
         """Clean text to remove question letter (A to D) as well as new line
@@ -145,10 +196,31 @@ class WikiNamesDB(TSVDB):
                 WC.KEY_GEOGRAPHY, WC.KEY_CITIZEN, 
                 WC.KEY_RANK_TOT, WC.KEY_SUBCAT, 
                 WC.KEY_BIRTH_LONG, WC.KEY_BIRTH_LAT, WC.KEY_DEATH_LONG, WC.KEY_DEATH_LAT,
-                WC.KEY_FULLNAME, WC.KEY_URL, WC.KEY_FIRSTNAME, WC.KEY_FAMILYNAME, WC.KEY_DESCRIPTION                
+                WC.KEY_FULLNAME, WC.KEY_URL, WC.KEY_FIRSTNAME, WC.KEY_FAMILYNAME, 
+                WC.KEY_DESCRIPTION, WC.KEY_O_DESCRIPTION,              
             ]
         )
             
+        
+    def update_bio(self):
+        
+        # Get addtional info from wikipedia
+        for i in tqdm(self.db.index, desc="Read from bio ..."):
+            
+            # Check entry in dataframe
+            url = self.db.loc[i, WC.KEY_URL]
+            # Get new data
+            context = self.scapper.get_wikipedia_infos(url=url)
+            o_context = self._o_ask_short(o_context=context)
+
+            print(o_context)
+            
+            # If update add 
+            
+            # if (i % self.chunks) == 0:
+            #     self.save()
+                
+                
     def update(self):
         
         # Set path to file base
@@ -178,7 +250,7 @@ class WikiNamesDB(TSVDB):
         for i in tqdm(df_raw.index, desc="Read from wikidata ..."):
                         
             # Get existing entries
-            data = df_raw.iloc[i].to_dict()
+            data = df_raw.loc[i].to_dict()
             
             # Check entry in dataframe
             if data[WC.KEY_UUID] in self.db[WC.KEY_UUID].values:
@@ -197,4 +269,20 @@ class WikiNamesDB(TSVDB):
         # Final save
         self.save()
         
-            
+    
+    @staticmethod   
+    def _o_ask_short(o_context: str):
+
+        # Get category
+        o_question = "Tell me in a single an very short sentence what is so special about this person for without telling his name"
+        # Ask main categorys
+        response = ollama.generate(
+            model='llama3.1', 
+            # prompt='Give me a general category title as well as a short description that mostly suits these questions: \n\n "{}"'.format(query)
+            prompt="""
+                Use the following pieces of context to answer the question at the end.
+                \n\nContext: {}
+                \n\nQuestion: {}
+            """.format(o_context, o_question),
+        )
+        return response
