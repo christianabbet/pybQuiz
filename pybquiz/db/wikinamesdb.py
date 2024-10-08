@@ -142,6 +142,7 @@ class WikiNamesDB(TSVDB):
 
     def __init__(
         self, 
+        path_csvgz: Optional[str] = "~/Downloads/cross-verified-database.csv.gz",
         filename_db: Optional[str] = "wikinames",
         cache: Optional[str] = '.cache', 
         chunks: Optional[int] = 50,
@@ -160,6 +161,7 @@ class WikiNamesDB(TSVDB):
         """        
         
         # Other variables
+        self.path_csvgz = path_csvgz
         self.chunks = chunks
         self.scapper = WikiScrapper()  
         self.topk = topk
@@ -188,48 +190,10 @@ class WikiNamesDB(TSVDB):
             f.close() 
 
     def initialize(self):
-        return pd.DataFrame(
-            columns=[
-                # Mandatory keys
-                WC.KEY_UUID,            
-                WC.KEY_NAME, WC.KEY_WIKIDATA, WC.KEY_REGION, WC.KEY_ERA, 
-                WC.KEY_GEOGRAPHY, WC.KEY_CITIZEN, 
-                WC.KEY_RANK_TOT, WC.KEY_SUBCAT, 
-                WC.KEY_BIRTH_LONG, WC.KEY_BIRTH_LAT, WC.KEY_DEATH_LONG, WC.KEY_DEATH_LAT,
-                WC.KEY_FULLNAME, WC.KEY_URL, WC.KEY_FIRSTNAME, WC.KEY_FAMILYNAME, 
-                WC.KEY_DESCRIPTION, WC.KEY_O_DESCRIPTION,              
-            ]
-        )
-            
         
-    def update_bio(self):
-        
-        # Get addtional info from wikipedia
-        for i in tqdm(self.db.index, desc="Read from bio ..."):
-            
-            # Check entry in dataframe
-            url = self.db.loc[i, WC.KEY_URL]
-            # Get new data
-            context = self.scapper.get_wikipedia_infos(url=url)
-            o_context = self._o_ask_short(o_context=context)
-
-            print(o_context)
-            
-            # If update add 
-            
-            # if (i % self.chunks) == 0:
-            #     self.save()
-                
-                
-    def update(self):
-        
-        # Set path to file base
-        path_csvgz = "~/Downloads/cross-verified-database.csv.gz"
-        
-        # Find hits per names
         print("Read reference dataset (might take a while) ...")
         df_raw = pd.read_csv(
-            path_csvgz, 
+            self.path_csvgz, 
             usecols=[
                 WC.KEY_NAME, WC.KEY_WIKIDATA, WC.KEY_REGION, WC.KEY_ERA, 
                 WC.KEY_GEOGRAPHY, WC.KEY_CITIZEN, 
@@ -246,25 +210,56 @@ class WikiNamesDB(TSVDB):
         # Get first names
         df_raw[WC.KEY_UUID] = [to_uuid(v) for v in df_raw[WC.KEY_NAME].values]
         
+        df_raw = df_raw[[
+            WC.KEY_UUID,            
+            WC.KEY_NAME, WC.KEY_WIKIDATA, WC.KEY_REGION, WC.KEY_ERA, 
+            WC.KEY_GEOGRAPHY, WC.KEY_CITIZEN, 
+            WC.KEY_RANK_TOT, WC.KEY_SUBCAT, 
+            WC.KEY_BIRTH_LONG, WC.KEY_BIRTH_LAT, WC.KEY_DEATH_LONG, WC.KEY_DEATH_LAT,
+        ]]
+        
+        # Put to zero new columns
+        df_raw.loc[:, [WC.KEY_FULLNAME, WC.KEY_URL, WC.KEY_FIRSTNAME, WC.KEY_FAMILYNAME, WC.KEY_DESCRIPTION, WC.KEY_O_DESCRIPTION]] = None
+        
+        # Merge with previous
+        # self.db = pd.read_csv(self.path_db, sep="\t")
+        # df_raw.loc[self.db.index, WC.KEY_FULLNAME] = self.db.loc[self.db.index, WC.KEY_FULLNAME]
+        # df_raw.loc[self.db.index, WC.KEY_URL] = self.db.loc[self.db.index, WC.KEY_URL]
+        # df_raw.loc[self.db.index, WC.KEY_FIRSTNAME] = self.db.loc[self.db.index, WC.KEY_FIRSTNAME]
+        # df_raw.loc[self.db.index, WC.KEY_FAMILYNAME] = self.db.loc[self.db.index, WC.KEY_FAMILYNAME]
+        # df_raw.loc[self.db.index, WC.KEY_DESCRIPTION] = self.db.loc[self.db.index, WC.KEY_DESCRIPTION]
+        return df_raw
+
+        
+                
+    def update(self):
+        
         # Get addtional info from wikipedia
-        for i in tqdm(df_raw.index, desc="Read from wikidata ..."):
+        need_saving = False
+        for i in tqdm(self.db.index, desc="Read from wikidata ..."):
                         
             # Get existing entries
-            data = df_raw.loc[i].to_dict()
-            
-            # Check entry in dataframe
-            if data[WC.KEY_UUID] in self.db[WC.KEY_UUID].values:
-                continue
-            
+            data = self.db.loc[i].to_dict()
+
             # Get new data
-            infos = self.scapper.get_wikidata_infos(code=data[WC.KEY_WIKIDATA], token=self.token)
-            data.update(infos)
+            if pd.isnull(data.get(WC.KEY_DESCRIPTION)):
+                infos = self.scapper.get_wikidata_infos(code=data[WC.KEY_WIKIDATA], token=self.token)
+                self.db.loc[i, infos.keys()] = infos.values()
+                need_saving = True
             
-            # If update add 
-            self.db = pd.concat([self.db, pd.DataFrame([data])], ignore_index=True)
+            if pd.isnull(data.get(WC.KEY_O_DESCRIPTION)):
+                # Check entry in dataframe
+                url = self.db.loc[i, WC.KEY_URL]
+                # Get new data
+                context = self.scapper.get_wikipedia_infos(url=url)
+                o_context = self._o_ask_short(o_context=context)
+                self.db.loc[i, WC.KEY_O_DESCRIPTION] = o_context.get("response", None)
+                # Notify change
+                need_saving = True
             
-            if (i % self.chunks) == 0:
+            if ((i % self.chunks) == 0) & need_saving:
                 self.save()
+                need_saving = False
                 
         # Final save
         self.save()
@@ -274,7 +269,7 @@ class WikiNamesDB(TSVDB):
     def _o_ask_short(o_context: str):
 
         # Get category
-        o_question = "Tell me in a single an very short sentence what is so special about this person for without telling his name"
+        o_question = "Tell me in a single an very short sentence what is so unique and peculiar about this person for without telling his name"
         # Ask main categorys
         response = ollama.generate(
             model='llama3.1', 

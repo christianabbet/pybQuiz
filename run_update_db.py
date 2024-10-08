@@ -17,8 +17,7 @@ def main(args):
     
     print("####### WikiNamesDB #######")
     wikinamesdb = WikiNamesDB()
-    # wikinamesdb.update()
-    wikinamesdb.update_bio()
+    wikinamesdb.update()
     wikinamesdb.pprint()
     
     # FamilyFeud
