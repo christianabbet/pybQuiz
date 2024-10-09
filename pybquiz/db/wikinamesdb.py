@@ -289,20 +289,32 @@ class WikiNamesDB(TSVDB):
             if ((i % self.chunks) == 0) & need_saving:
                 self.save()
                 need_saving = False
-                
-        # Update names
-        firstnames = [r for r in self.db[WC.KEY_FIRSTNAME].dropna() if len(re.findall(r"Q\d{1,20}", r)) != 0]
-        lastnames = [r for r in self.db[WC.KEY_FAMILYNAME].dropna() if len(re.findall(r"Q\d{1,20}", r)) != 0]
-        names = np.unique(np.concatenate([firstnames, lastnames]))
+
+        # Get actual names
+        firstname_codes = [self.findcode(r) for r in self.db[WC.KEY_FIRSTNAME].dropna() if len(self.findcode(r)) != 0]
+        lastname_codes = [self.findcode(r) for r in self.db[WC.KEY_FAMILYNAME].dropna() if len(self.findcode(r)) != 0]
+        codes = np.unique(np.concatenate([np.concatenate(firstname_codes), np.concatenate(lastname_codes)]))
         
-        for n in names:
+        for i, c in enumerate(tqdm(codes, desc="Read name codes from wikidata ...")):
             # Get name from db
-            self.scapper.get_wikipedia_name(code=n, token=self.token)
+            c_name = self.scapper.get_wikipedia_name(code=c, token=self.token)
+            # Replace occurence
+            self.db[WC.KEY_FIRSTNAME] = self.db[WC.KEY_FIRSTNAME].str.replace(c, c_name)
+            self.db[WC.KEY_FAMILYNAME] = self.db[WC.KEY_FAMILYNAME].str.replace(c, c_name)
+            
+            # Save update
+            if (i % self.chunks) == 0:
+                self.save()
         
         # Final save
         self.save()
         
     
+                
+    @staticmethod   
+    def findcode(s: str):
+        return re.findall(r"Q\d{1,20}", s)
+        
     @staticmethod   
     def _o_ask_short(o_context: str):
 
