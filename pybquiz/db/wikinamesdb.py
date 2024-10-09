@@ -38,7 +38,28 @@ class WikiScrapper:
 
         return text
     
-
+    @staticmethod
+    def get_wikipedia_name(code: str, token: str):
+        # Remove question letter
+        page = slow_get_request(
+            url=WikiScrapper.URL_WIKIDATA + code,
+            header={
+                "Content-Type": "application/json",
+                "Authorization": token,
+            },
+            delay=0.5, 
+            delay_rnd=0.5,
+        )  
+        
+        # If code not valid return None
+        if page is None: 
+            return []
+    
+        # Final name    
+        page = json.loads(page.text)
+        name = page.get("labels", {}).get("en", None)
+        return name
+          
     @staticmethod
     def get_wikipedia_infos(url: str, nmax: Optional[int] = 1500):
         """Clean text to remove question letter (A to D) as well as new line
@@ -121,16 +142,24 @@ class WikiScrapper:
         page = json.loads(page.text)
         full_name = page.get("labels", {}).get("en", None)
         url = page.get("sitelinks", {}).get("enwiki", {}).get("url", None)
-        first_name = page.get("statements", {}).get("P735", [dict()])[0].get("value", {}).get("content", "")
-        family_name = page.get("statements", {}).get("P734", [dict()])[0].get("value", {}).get("content", "")
+        
+        # Given names
+        first_names = page.get("statements", {}).get("P735", [dict()])
+        first_names = ",".join([n.get("value", {}).get("content", "") for n in first_names])
+        
+        # Given family
+        family_names = page.get("statements", {}).get("P734", [dict()])
+        family_names = ",".join([n.get("value", {}).get("content", "") for n in family_names])
+        
+        # Quick description        
         description = page.get("descriptions", {}).get("en", "")    
           
         # Description and infos
         data = {
             WC.KEY_FULLNAME: full_name,
             WC.KEY_URL: url,
-            WC.KEY_FIRSTNAME: first_name,
-            WC.KEY_FAMILYNAME: family_name,
+            WC.KEY_FIRSTNAME: first_names,
+            WC.KEY_FAMILYNAME: family_names,
             WC.KEY_DESCRIPTION: description,
         }
         
@@ -146,7 +175,7 @@ class WikiNamesDB(TSVDB):
         filename_db: Optional[str] = "wikinames",
         cache: Optional[str] = '.cache', 
         chunks: Optional[int] = 50,
-        topk: Optional[int] = 10e4,
+        topk: Optional[int] = 10e3,
     ) -> None:
         """ Who wnats to be a millionaire database
 
@@ -242,10 +271,10 @@ class WikiNamesDB(TSVDB):
             data = self.db.loc[i].to_dict()
 
             # Get new data
-            if pd.isnull(data.get(WC.KEY_DESCRIPTION)):
-                infos = self.scapper.get_wikidata_infos(code=data[WC.KEY_WIKIDATA], token=self.token)
-                self.db.loc[i, infos.keys()] = infos.values()
-                need_saving = True
+            # if pd.isnull(data.get(WC.KEY_DESCRIPTION)):
+            infos = self.scapper.get_wikidata_infos(code=data[WC.KEY_WIKIDATA], token=self.token)
+            self.db.loc[i, infos.keys()] = infos.values()
+            need_saving = True
             
             if pd.isnull(data.get(WC.KEY_O_DESCRIPTION)):
                 # Check entry in dataframe
@@ -261,6 +290,15 @@ class WikiNamesDB(TSVDB):
                 self.save()
                 need_saving = False
                 
+        # Update names
+        firstnames = [r for r in self.db[WC.KEY_FIRSTNAME].dropna() if len(re.findall(r"Q\d{1,20}", r)) != 0]
+        lastnames = [r for r in self.db[WC.KEY_FAMILYNAME].dropna() if len(re.findall(r"Q\d{1,20}", r)) != 0]
+        names = np.unique(np.concatenate([firstnames, lastnames]))
+        
+        for n in names:
+            # Get name from db
+            self.scapper.get_wikipedia_name(code=n, token=self.token)
+        
         # Final save
         self.save()
         
