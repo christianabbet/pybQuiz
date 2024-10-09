@@ -57,7 +57,11 @@ class WikiScrapper:
     
         # Final name    
         page = json.loads(page.text)
+        # Try english
         name = page.get("labels", {}).get("en", None)
+        # Try multiple languages
+        if name is None:
+            name = page.get("labels", {}).get("mul", None)
         return name
           
     @staticmethod
@@ -176,6 +180,8 @@ class WikiNamesDB(TSVDB):
         cache: Optional[str] = '.cache', 
         chunks: Optional[int] = 50,
         topk: Optional[int] = 10e3,
+        topocc: Optional[float] = 0.85, 
+        topcit: Optional[float] = 0.92, 
     ) -> None:
         """ Who wnats to be a millionaire database
 
@@ -195,7 +201,8 @@ class WikiNamesDB(TSVDB):
         self.scapper = WikiScrapper()  
         self.topk = topk
         self.token_path = os.path.join(cache, filename_db + ".key")
-
+        self.topocc = topocc
+        self.topcit = topcit
         # Call super method
         super().__init__(
             cache=cache, 
@@ -257,38 +264,78 @@ class WikiNamesDB(TSVDB):
         # df_raw.loc[self.db.index, WC.KEY_FIRSTNAME] = self.db.loc[self.db.index, WC.KEY_FIRSTNAME]
         # df_raw.loc[self.db.index, WC.KEY_FAMILYNAME] = self.db.loc[self.db.index, WC.KEY_FAMILYNAME]
         # df_raw.loc[self.db.index, WC.KEY_DESCRIPTION] = self.db.loc[self.db.index, WC.KEY_DESCRIPTION]
+        
+        # Simplify to locations
+        id_europe = df_raw[WC.KEY_REGION].fillna("").str.lower().str.contains("europe")
+        id_asia = df_raw[WC.KEY_REGION].fillna("").str.lower().str.contains("asia")
+        id_na = df_raw[WC.KEY_REGION].fillna("").str.lower().str.contains("northern america")
+
+        # Replace
+        df_raw.loc[id_europe, WC.KEY_REGION] = "europe"
+        df_raw.loc[id_asia, WC.KEY_REGION] = "asia"
+        df_raw.loc[id_na, WC.KEY_REGION] = "northern america"
+        cats = pd.Categorical(df_raw[WC.KEY_REGION], categories=["europe", "asia", "northern america", "others"])
+        df_raw[WC.KEY_REGION] = cats.fillna("others")
+        
+        # Only keep most occurying (40)
+        occs = df_raw[WC.KEY_SUBCAT].value_counts()
+        occs_cumsum = np.cumsum(occs) / occs.sum()
+        occs = occs_cumsum[occs_cumsum < self.topocc].index
+        df_raw[WC.KEY_SUBCAT] = pd.Categorical(df_raw[WC.KEY_SUBCAT], occs)
+
+    #    'all_geography_groups',
+        cits = df_raw[WC.KEY_CITIZEN].value_counts()
+        cits_cumsum = np.cumsum(cits) / cits.sum()
+        cits = cits_cumsum[cits_cumsum < self.topcit].index
+        df_raw[WC.KEY_CITIZEN] = pd.Categorical(df_raw[WC.KEY_CITIZEN], cits)
         return df_raw
 
         
                 
     def update(self):
         
-        # Get addtional info from wikipedia
-        need_saving = False
-        for i in tqdm(self.db.index, desc="Read from wikidata ..."):
-                        
-            # Get existing entries
-            data = self.db.loc[i].to_dict()
+        # # Clean Data
+        # def check_pseudo(row):
+        #     firstnames = row[WC.KEY_FIRSTNAME].split(",")
+        #     lastnames = row[WC.KEY_FAMILYNAME].split(",")
+        #     is_firstname = np.any([f in row[WC.KEY_FULLNAME] for f in firstnames])
+        #     is_lastname = np.any([f in row[WC.KEY_FULLNAME] for f in lastnames])
+        #     # Return sum of both
+        #     # 3: Same name, 2: Same firstname, 1: Same lastname, 0: None
+        #     return is_firstname << 1 + is_lastname << 0
+        
+        # # KEY_MODE_FIRST = "mode_firsname"
+        # # KEY_MODE_LAST = "mode_lastname"
+        # # KEY_MODE_PSEUDO = "mode_pseudo"
+        # self.db.apply(check_pseudo, axis=1)
+        # # Check nicknames and pseudo
 
-            # Get new data
-            if pd.isnull(data.get(WC.KEY_DESCRIPTION)):
-                infos = self.scapper.get_wikidata_infos(code=data[WC.KEY_WIKIDATA], token=self.token)
-                self.db.loc[i, infos.keys()] = infos.values()
-                need_saving = True
+        # # Get addtional info from wikipedia
+        # need_saving = False
+        # for i in tqdm(self.db.index, desc="Read from wikidata ..."):
+                        
+        #     # Get existing entries
+        #     data = self.db.loc[i].to_dict()
+
+        #     # Get new data
+        #     if pd.isnull(data.get(WC.KEY_DESCRIPTION)):
+        #         infos = self.scapper.get_wikidata_infos(code=data[WC.KEY_WIKIDATA], token=self.token)
+        #         self.db.loc[i, infos.keys()] = infos.values()
+        #         need_saving = True
             
-            if pd.isnull(data.get(WC.KEY_O_DESCRIPTION)):
-                # Check entry in dataframe
-                url = self.db.loc[i, WC.KEY_URL]
-                # Get new data
-                context = self.scapper.get_wikipedia_infos(url=url)
-                o_context = self._o_ask_short(o_context=context)
-                self.db.loc[i, WC.KEY_O_DESCRIPTION] = o_context.get("response", None)
-                # Notify change
-                need_saving = True
+        #     if pd.isnull(data.get(WC.KEY_O_DESCRIPTION)):
+        #         # Check entry in dataframe
+        #         url = self.db.loc[i, WC.KEY_URL]
+        #         # Get new data
+        #         context = self.scapper.get_wikipedia_infos(url=url)
+        #         o_context = self._o_ask_short(o_context=context)
+        #         self.db.loc[i, WC.KEY_O_DESCRIPTION] = o_context.get("response", None)
+        #         # Notify change
+        #         need_saving = True
             
-            if ((i % self.chunks) == 0) & need_saving:
-                self.save()
-                need_saving = False
+        #     if ((i % self.chunks) == 0) & need_saving:
+        #         self.save()
+        #         need_saving = False
 
         # Get actual names
         firstname_codes = [self.findcode(r) for r in self.db[WC.KEY_FIRSTNAME].dropna() if len(self.findcode(r)) != 0]
@@ -299,8 +346,9 @@ class WikiNamesDB(TSVDB):
             # Get name from db
             c_name = self.scapper.get_wikipedia_name(code=c, token=self.token)
             # Replace occurence
-            self.db[WC.KEY_FIRSTNAME] = self.db[WC.KEY_FIRSTNAME].str.replace(c, c_name)
-            self.db[WC.KEY_FAMILYNAME] = self.db[WC.KEY_FAMILYNAME].str.replace(c, c_name)
+            if c_name is not None:
+                self.db[WC.KEY_FIRSTNAME] = self.db[WC.KEY_FIRSTNAME].str.replace(c, c_name)
+                self.db[WC.KEY_FAMILYNAME] = self.db[WC.KEY_FAMILYNAME].str.replace(c, c_name)
             
             # Save update
             if (i % self.chunks) == 0:

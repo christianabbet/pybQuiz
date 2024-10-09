@@ -99,3 +99,7 @@ class WikiConst:
     KEY_FAMILYNAME = "familyname"
     KEY_DESCRIPTION = "description"
     KEY_O_DESCRIPTION = "o_description"
+    
+    KEY_MODE_FIRST = "mode_firsname"
+    KEY_MODE_LAST = "mode_lastname"
+    KEY_MODE_PSEUDO = "mode_pseudo"
