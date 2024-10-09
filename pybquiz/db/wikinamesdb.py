@@ -271,10 +271,10 @@ class WikiNamesDB(TSVDB):
             data = self.db.loc[i].to_dict()
 
             # Get new data
-            # if pd.isnull(data.get(WC.KEY_DESCRIPTION)):
-            infos = self.scapper.get_wikidata_infos(code=data[WC.KEY_WIKIDATA], token=self.token)
-            self.db.loc[i, infos.keys()] = infos.values()
-            need_saving = True
+            if pd.isnull(data.get(WC.KEY_DESCRIPTION)):
+                infos = self.scapper.get_wikidata_infos(code=data[WC.KEY_WIKIDATA], token=self.token)
+                self.db.loc[i, infos.keys()] = infos.values()
+                need_saving = True
             
             if pd.isnull(data.get(WC.KEY_O_DESCRIPTION)):
                 # Check entry in dataframe
